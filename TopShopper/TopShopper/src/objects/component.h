@@ -6,6 +6,64 @@
 
 
 // ~~~~~NOTE: each child class will implement very specialized behaviour if attached to an entity
+// ~~~~~NOTE: will have an enum here ComponentTypes that assigns a unique index/id to each component type (subclass)
+// ex. TRANSFORM = 0
+
+// THE MANAGERS WILL THEN UPDATE STATE BASED ON DATA STORED IN COMPONENTS THEY MANAGE
+
+/*
+SOME IDEAS OF COMPONENTS WE NEED (by category):
+
+AI:
+
+NavMeshAgent (movement properties, target, path finding weights)
+NavMesh (vertices/tris)
+
+
+AUDIO:
+
+AudioListener (simple, just flags we want audio to be relitive to this point)
+AudioSource (audioclip, isMute?, playOnAwake?, Loop?, Priority, volume)
+
+
+CORE:
+
+Transform (vec3 position, vec3 rotation)
+
+
+INPUT:
+
+
+LOADING:
+
+
+PHYSICS:
+
+Rigidbody (mass, affectedByGravity?, isKinematic?, axis-rotation-lock?)
+Collider (size properties, isTrigger?) (can have different shapes, depends what PhysX gives us)
+RayCaster?
+
+
+RENDERING:
+
+Mesh (vertices/tris)
+Mesh Renderer? (maybe this behaviour is just in the manager)
+Material/Texture (color properties)
+Camera (FOV, clipping planes (near and far), etc.)
+Light (type (point, directional, etc.), range?, color, intensity)
+<UIComonents including a way to render text?>
+
+
+
+*/
+
+
+enum ComponentTypes {
+	TRANSFORM, 
+	NUMBER_OF_COMPONENT_TYPES // NOTE: THIS MUST BE THE LAST ENUM ELEMENT AND ALL ENUM VALUES MUST GO FROM 0 TO NUMBER_OF_COMPONENT_TYPES-1 
+};
+
+
 
 class Component {
 public:
