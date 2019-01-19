@@ -4,6 +4,7 @@
 #ifndef COMPONENT_H_
 #define COMPONENT_H_
 
+// ~~~~NOTE: components could be changed to structs, if we want everything public by default
 
 // ~~~~~NOTE: each child class will implement very specialized behaviour if attached to an entity
 // ~~~~~NOTE: will have an enum here ComponentTypes that assigns a unique index/id to each component type (subclass)

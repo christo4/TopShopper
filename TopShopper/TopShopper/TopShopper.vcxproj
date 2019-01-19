@@ -136,6 +136,9 @@
   <ItemGroup>
     <ClCompile Include="src\core\broker.cpp" />
     <ClCompile Include="src\core\main.cpp" />
+    <ClCompile Include="src\core\transform.cpp" />
+    <ClCompile Include="src\objects\component.cpp" />
+    <ClCompile Include="src\objects\entity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ai\aimanager.h" />

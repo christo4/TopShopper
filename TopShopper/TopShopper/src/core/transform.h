@@ -4,8 +4,9 @@
 #ifndef TRANSFORM_H_
 #define TRANSFORM_H_
 
-/*
-#include "component.h"
+
+
+#include "objects/component.h"
 
 class Transform : public Component {
 public:
@@ -14,13 +15,8 @@ public:
 private:
 	// glm::vec3 (pos)
 	// glm::vec3 (rot)
+	// etc.
 };
-*/
-
-
-
-
-
 
 
 
