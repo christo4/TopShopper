@@ -10,7 +10,8 @@ class AIManager {
 public:
 	AIManager();
 	virtual ~AIManager();
-	void updateMilliseconds(float deltaTime);
+	void init();
+	void updateMilliseconds(double deltaTime);
 private:
 
 };

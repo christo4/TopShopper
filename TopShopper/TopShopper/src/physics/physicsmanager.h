@@ -10,7 +10,8 @@ class PhysicsManager {
 public:
 	PhysicsManager();
 	virtual ~PhysicsManager();
-	void updateMilliseconds(float deltaTime);
+	void init();
+	void updateMilliseconds(double deltaTime);
 private:
 
 };

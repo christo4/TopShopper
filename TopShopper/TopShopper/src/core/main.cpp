@@ -1,14 +1,17 @@
 
-#include "rendering/renderingmanager.h"
-class RenderingManager;
+
+
+#include "broker.h"
 
 int main() {
-	// load assets (init necessary data structures)
-
-	// ~~~~~~~~~~~maybe have Broker::getInstance()->initAll(); that would init all subsytems based on data in components attached to each entity
+	// ~~~~~load assets (init necessary data structures)???
 	
+	double prevTime = 0.0;
+
+	Broker::getInstance()->initAll(); // init all subsystems
+
 	// call main loop
-	while (true) { // ~~~~~will be changed to have a proper end condition later)~~~~~
+	while (true) { // ~~~~~will be changed to have a proper end condition later - while user hasnt closed window)~~~~~
 		// 1. get deltaTime (time last frame took to execute)
 		// 2. get device input
 		// 3. simulate (update game state)
@@ -19,7 +22,13 @@ int main() {
 		// 1. get deltaTime
 		// 2. call Broker::getInstance()->updateAllMilliseconds(deltaTime);
 
-		 RenderingManager* renderingmanager = new RenderingManager();
+
+		// ~~~~~NOTE: I think that the first deltaTime could screw up some stuff
+		double currentTime = glfwGetTime(); // get new
+		double deltaTime = currentTime - prevTime; // diff
+		prevTime = currentTime; // update
+
+		Broker::getInstance()->updateAllMilliseconds(deltaTime);
 
 	}
 

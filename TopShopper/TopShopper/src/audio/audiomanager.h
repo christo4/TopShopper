@@ -10,7 +10,8 @@ class AudioManager {
 public:
 	AudioManager();
 	virtual ~AudioManager();
-	void updateMilliseconds(float deltaTime);
+	void init();
+	void updateMilliseconds(double deltaTime);
 private:
 
 };
