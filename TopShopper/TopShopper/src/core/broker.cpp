@@ -22,6 +22,7 @@ void Broker::initAll() {
 	// ~~~~~TODO: figure out proper order to init each system
 	
 	_renderingManager.init();
+	// etc. ........
 }
 
 
@@ -36,5 +37,7 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 	// etc.
 
 	_renderingManager.updateMilliseconds(deltaTime);
+
+	// etc. .....
 }
 

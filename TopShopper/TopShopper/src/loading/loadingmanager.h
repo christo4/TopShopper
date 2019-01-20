@@ -6,18 +6,15 @@
 
 
 
+class LoadingManager {
+public:
+	LoadingManager();
+	virtual ~LoadingManager();
+	void init();
+	void updateMilliseconds(double deltaTime);
+private:
 
-
-
-
-
-
-
-
-
-
-
-
+};
 
 
 

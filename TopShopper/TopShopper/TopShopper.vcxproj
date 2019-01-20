@@ -161,6 +161,7 @@
     <ClInclude Include="src\ai\aimanager.h" />
     <ClInclude Include="src\audio\audiomanager.h" />
     <ClInclude Include="src\core\broker.h" />
+    <ClInclude Include="src\core\scene.h" />
     <ClInclude Include="src\core\transform.h" />
     <ClInclude Include="src\input\inputmanager.h" />
     <ClInclude Include="src\loading\loadingmanager.h" />

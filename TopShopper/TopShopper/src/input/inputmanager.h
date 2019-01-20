@@ -7,18 +7,15 @@
 
 
 
+class InputManager {
+public:
+	InputManager();
+	virtual ~InputManager();
+	void init();
+	void updateMilliseconds(double deltaTime);
+private:
 
-
-
-
-
-
-
-
-
-
-
-
+};
 
 
 
