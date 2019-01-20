@@ -10,7 +10,8 @@ class RenderingManager {
 public:
 	RenderingManager();
 	virtual ~RenderingManager();
-	void updateMilliseconds(float deltaTime);
+	//void updateMilliseconds(float deltaTime);
+	void openWindow();
 private:
 
 };

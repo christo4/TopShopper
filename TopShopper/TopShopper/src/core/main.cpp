@@ -1,5 +1,6 @@
 
-
+#include "rendering/renderingmanager.h"
+class RenderingManager;
 
 int main() {
 	// load assets (init necessary data structures)
@@ -17,6 +18,9 @@ int main() {
 		// new way:
 		// 1. get deltaTime
 		// 2. call Broker::getInstance()->updateAllMilliseconds(deltaTime);
+
+		 RenderingManager* renderingmanager = new RenderingManager();
+
 	}
 
 	// if main loop ends, call cleanup

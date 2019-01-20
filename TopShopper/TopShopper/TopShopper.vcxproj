@@ -155,6 +155,7 @@
     <ClCompile Include="src\core\transform.cpp" />
     <ClCompile Include="src\objects\component.cpp" />
     <ClCompile Include="src\objects\entity.cpp" />
+    <ClCompile Include="src\rendering\renderingmanager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ai\aimanager.h" />
