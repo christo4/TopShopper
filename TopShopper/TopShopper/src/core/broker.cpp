@@ -41,3 +41,9 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 	// etc. .....
 }
 
+
+
+GLFWwindow* Broker::get_RenderingManager_Window() {
+	return _renderingManager.getWindow();
+}
+
