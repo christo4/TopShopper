@@ -95,7 +95,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)middleware\glfw\include;$(SolutionDir)middleware\glad\include;$(SolutionDir)middleware\glm-0.9.8.2;$(SolutionDir)middleware\stb;$(SolutionDir)middleware;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)middleware\glfw\include;$(SolutionDir)middleware\glad\include;$(SolutionDir)middleware\glm-0.9.8.2;$(SolutionDir)middleware\stb;$(SolutionDir)middleware;$(SolutionDir)Physx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)middleware\glfw\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -155,6 +155,7 @@
     <ClCompile Include="src\core\transform.cpp" />
     <ClCompile Include="src\objects\component.cpp" />
     <ClCompile Include="src\objects\entity.cpp" />
+    <ClCompile Include="src\physics\physicsmanager.cpp" />
     <ClCompile Include="src\rendering\renderingmanager.cpp" />
   </ItemGroup>
   <ItemGroup>

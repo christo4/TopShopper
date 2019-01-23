@@ -20,11 +20,6 @@ public:
 	void initAll(); // calls each subsystem's init function
 	void updateAllMilliseconds(double deltaTime); // this update function will call each subsystem's update function in an appropriate order.
 	// have a bunch of functions that connect subsystems (e.g. physics system needs to know (read-only) audio info of an entity (expressed through sum of its components), and has to ask the broker to get that info from audioManager)
-
-	// ******NAMING SCHEME******
-	// get/set_ManagerName_dataSummary
-
-	GLFWwindow* get_RenderingManager_Window();
 private:
 	static Broker* _instance;
 	Broker();
