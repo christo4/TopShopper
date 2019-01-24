@@ -15,11 +15,15 @@ public:
 	virtual ~PhysicsManager();
 	void init();
 	void updateMilliseconds(double deltaTime);
-	void createObject();
+	void cleanup();
 private:
-	physx::PxDefaultAllocator defaultAlloc;
-	physx::PxDefaultErrorCallback defaultError;
-	physx::PxFoundation* test;
+	physx::PxDefaultAllocator _defaultAlloc;
+	physx::PxDefaultErrorCallback _defaultError;
+	physx::PxFoundation *_foundation = nullptr;
+	physx::PxPhysics *_factory = nullptr; // this is the factory we use to create new PhysX objects
+	physx::PxCooking *_cooker = nullptr;
+	physx::PxTolerancesScale _simulationScale;
+	//physx::PxPvd *_pvd;
 };
 
 
