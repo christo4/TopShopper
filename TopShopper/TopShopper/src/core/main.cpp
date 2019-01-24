@@ -5,13 +5,18 @@
 
 int main() {
 	// ~~~~~load assets (init necessary data structures)???
-	
-	double prevTime = 0.0;
 
-	Broker::getInstance()->initAll(); // init all subsystems
+	// fields...
+	double prevTime = 0.0;
+	Broker* broker = Broker::getInstance();
+
+	// work...
+	broker->initAll(); // init all subsystems
+
+	GLFWwindow* window = broker->get_RenderingManager_Window();
 
 	// call main loop
-	while (true) { // ~~~~~will be changed to have a proper end condition later - while user hasnt closed window)~~~~~
+	while (!glfwWindowShouldClose(window)) { // ~~~~~~~~~ also probably add || QUIT menu option was pressed.
 		// 1. get deltaTime (time last frame took to execute)
 		// 2. get device input
 		// 3. simulate (update game state)
@@ -28,7 +33,7 @@ int main() {
 		double deltaTime = currentTime - prevTime; // diff
 		prevTime = currentTime; // update
 
-		Broker::getInstance()->updateAllMilliseconds(deltaTime);
+		broker->updateAllMilliseconds(deltaTime);
 
 	}
 
