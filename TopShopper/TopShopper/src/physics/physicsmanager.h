@@ -6,11 +6,6 @@
 
 
 #include <PxPhysicsAPI.h>
-#include <extensions/PxDefaultAllocator.h>
-#include <extensions/PxDefaultErrorCallback.h>
-#include <PxSimulationEventCallback.h>
-#include <iostream>
-
 
 
 
@@ -26,21 +21,6 @@ private:
 	physx::PxDefaultErrorCallback defaultError;
 	physx::PxFoundation* test;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

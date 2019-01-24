@@ -1,6 +1,10 @@
 
 
+
 #include "physicsmanager.h"
+
+#include <iostream>
+
 
 using namespace physx;
 
@@ -24,6 +28,7 @@ void PhysicsManager::init() {
 
 
 void PhysicsManager::updateMilliseconds(double deltaTime) {
+
 }
 
 void PhysicsManager::createObject() {
@@ -36,8 +41,7 @@ void PhysicsManager::createObject() {
 	//mPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 
 
-	//PxPhysics* mPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *test,
-		//PxTolerancesScale(), recordMemoryAllocations, mPvd);
+	//PxPhysics* mPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *test, PxTolerancesScale(), recordMemoryAllocations, mPvd);
 	//if (!mPhysics) {
 	//	exit(1); //("PxCreatePhysics failed!");
 	//}

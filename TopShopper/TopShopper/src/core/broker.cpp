@@ -21,6 +21,7 @@ Broker::Broker() {
 void Broker::initAll() {
 	// ~~~~~TODO: figure out proper order to init each system
 	
+	_physicsManager.init();
 	_renderingManager.init();
 	// etc. ........
 }
@@ -36,6 +37,7 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 	// 4. _audioManager.updateAllMilliseconds(deltaTime);
 	// etc.
 
+	_physicsManager.updateMilliseconds(deltaTime);
 	_renderingManager.updateMilliseconds(deltaTime);
 
 	// etc. .....

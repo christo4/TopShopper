@@ -34,7 +34,7 @@ private:
 	//AudioManager _audioManager;
 	// input manager
 	// loading manager
-	//PhysicsManager _physicsManager;
+	PhysicsManager _physicsManager;
 	RenderingManager _renderingManager;
 
 };
