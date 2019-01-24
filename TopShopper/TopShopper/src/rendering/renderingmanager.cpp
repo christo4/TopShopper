@@ -14,11 +14,9 @@ RenderingManager::~RenderingManager() {
 
 }
 
-/*
 GLFWwindow* RenderingManager::getWindow() {
 	return _window;
 }
-*/
 
 
 
@@ -28,7 +26,6 @@ void RenderingManager::init() {
 
 
 void RenderingManager::updateMilliseconds(double deltaTime) {
-	/*
 	// render stuff...
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -37,20 +34,19 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 
 	// poll for events (probably move into inputManager later on)
 	glfwPollEvents();
-	*/
+
 	// any other stuff...
 }
 
 
 
 void RenderingManager::cleanup() {
-	//glfwTerminate();
+	glfwTerminate();
 }
 
 
 
 void RenderingManager::openWindow() {
-	/*
 	// init the library
 	if (glfwInit() == 0) {
 		exit(EXIT_FAILURE);
@@ -64,7 +60,7 @@ void RenderingManager::openWindow() {
 	}
 
 	glfwMakeContextCurrent(_window);
-	*/
+
 }
 
 

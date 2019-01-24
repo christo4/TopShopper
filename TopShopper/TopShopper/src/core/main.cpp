@@ -24,8 +24,7 @@ int main() {
 
 
 		// ~~~~~NOTE: I think that the first deltaTime could screw up some stuff
-		//double currentTime = glfwGetTime(); // get new
-		double currentTime = 0.03;
+		double currentTime = glfwGetTime(); // get new
 		double deltaTime = currentTime - prevTime; // diff
 		prevTime = currentTime; // update
 
