@@ -4,7 +4,7 @@
 #ifndef RENDERINGMANAGER_H_
 #define RENDERINGMANAGER_H_
 
-#include <GLFW/glfw3.h>
+//#include <GLFW/glfw3.h>
 
 class RenderingManager {
 public:
@@ -15,9 +15,9 @@ public:
 	void updateMilliseconds(double deltaTime);
 	void cleanup();
 
-	GLFWwindow* getWindow();
+	//GLFWwindow* getWindow();
 private:
-	GLFWwindow* _window = nullptr;
+	//GLFWwindow* _window = nullptr;
 
 	void openWindow();
 };

@@ -1,6 +1,7 @@
 
 
 #include "physicsmanager.h"
+#include <iostream>
 
 using namespace physx;
 
@@ -14,18 +15,22 @@ PhysicsManager::~PhysicsManager() {
 
 
 void PhysicsManager::init() {
+	
 	test = PxCreateFoundation(PX_PHYSICS_VERSION, defaultAlloc, defaultError);
 	if (!test) {
 		std::cout << "PxCreateFoundation failed!" << "\n";
 		exit(1);
 	}
+	
 }
 
 
 void PhysicsManager::updateMilliseconds(double deltaTime) {
+
 }
 
 void PhysicsManager::createObject() {
+	
 	bool recordMemoryAllocations = true;
 
 	//Not sure how to implement this
@@ -47,4 +52,5 @@ void PhysicsManager::createObject() {
 	//if (!mCooking) ("PxCreateCooking failed!");
 
 	//if (!PxInitExtensions(*mPhysics, mPvd))		fatalError("PxInitExtensions failed!");
+	
 }

@@ -1,13 +1,15 @@
 
 
-
 #ifndef PHYSICSMANAGER_H_
 #define PHYSICSMANAGER_H_
 
 
 #include <PxPhysicsAPI.h>
-#include <iostream>
+//#include <extensions/PxDefaultAllocator.h> 
+//#include <extensions/PxDefaultErrorCallback.h>
+//#include <PxFoundation.h>
 
+//class PxFoundation;
 
 class PhysicsManager {
 public:
@@ -19,23 +21,8 @@ public:
 private:
 	static physx::PxDefaultAllocator defaultAlloc;
 	static physx::PxDefaultErrorCallback defaultError;
-	PxFoundation* test;
+	physx::PxFoundation* test;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
