@@ -3,50 +3,6 @@
 
 #include "entity.h"
 
-#include "core/transform.h"
-
-
-/*
-Entity::Entity(bool isStatic, bool isSimulated, bool isKinematic = true) 
-	: _isStatic(isStatic), _isSimulated(isSimulated), _isKinematic(isKinematic)
-{
-	if (isStatic) {
-		if (isSimulated) {
-
-		}
-		else {
-
-		}
-	}
-	else { // dynamic...
-		if (isSimulated) {
-			if (isKinematic) {
-
-			}
-			else {
-
-			}
-		}
-		else {
-
-		}
-	}
-}
-*/
-
-
-Entity::Entity(physx::PxRigidStatic *staticActor)
-	: _staticActor(staticActor)
-{
-
-}
-
-Entity::Entity(physx::PxRigidDynamic *dynamicActor) 
-	: _dynamicActor(dynamicActor)
-{
-
-}
-
 
 Entity::Entity() {
 
@@ -55,11 +11,6 @@ Entity::Entity() {
 Entity::~Entity() {
 
 }
-
-
-
-
-
 
 
 
@@ -81,9 +32,12 @@ void Entity::addComponent(ComponentTypes componentType) {
 
 	// otherwise, just create a default version of the component type and store in the array
 	switch (componentType) {
+		/*
+		OUTDATED EXAMPLE
 		case ComponentTypes::TRANSFORM:
 			_components.at(index) = std::make_shared<Transform>();
 			break;
+		*/
 	}
 
 }

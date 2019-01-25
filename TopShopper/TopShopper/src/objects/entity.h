@@ -4,66 +4,32 @@
 #ifndef ENTITY_H_
 #define ENTITY_H_
 
-#include <string>
+#include <PxPhysicsAPI.h> // ~~~~~NOTE: change this to be more specific later
 #include <array>
-
-#include <PxPhysicsAPI.h> // ~~~~~~~~~change this later to only include what we need
-
-
 #include "component.h"
 
 
-// ANALOG OF UNITY'S GAMEOBJECT
-// This class will not be derivable (marked final) and thus instances will be distinct based on the components they possess
-// But, this class will have all the fields that every entity should logically have (e.g. a name, tag, list of attached components, ability to add/remove/retrieve components, etc.)
-// ~~~~~~~~In the current model, an entity can have 0 or 1 of each component type (maybe change this to allow more?, but this current way leads to easier management/lookup)
+// DEFINITION:
+// ENTITIES ARE ALL OBJECTS PLACED IN THE GAME WORLD (E.G. PHYSICAL ACTORS, LIGHT SOURCES, UI ELEMENTS, ETC.)
+// EACH ENTITY WILL BE POSITIONED BASED ON A BUILT-IN PXTRANSFORM
+// EACH ENTITY CAN HAVE ATTACHED DIFFERENT COMPONENTS TO CONFIGURE THE DATA STORED BY THE ENTITY
+// IF A COMPONENT NEEDS A POSITION, IT WILL USE THIS ENTITY'S TRANSFORM BY DEFAULT, BUT AN OFFSET COULD BE DEFINED
 
+// NOTE: ONLY 3 SUBCLASSES ARE MEANT TO BE INSTANTIATED:
+// NONPHYSICALENTITY
+// STATICPHYSICALENTITY
+// DYNAMICPHYSICALENTITY
+class Entity {
+	public:
+		Entity();
+		virtual ~Entity();
 
-
-
-// NEW DESIGN: each entity will be linked with the physics system, but by default be excluded from simulation and quieries and triggers. Thus leaving a useful transform component.
-class Entity final {
-public:
-	//Entity(bool isStatic, bool isSimulated, bool isKinematic = true);
-	Entity(physx::PxRigidStatic *staticActor);
-	Entity(physx::PxRigidDynamic *dynamicActor);
-	Entity();
-	virtual ~Entity();
-
-
-
-
-	void addComponent(ComponentTypes componentType); // only adds a component with default values to entity. These values can be overwritten afterwords through getComponent and public field changing or getters/setters
-	void removeComponent(ComponentTypes componentType);
-	std::shared_ptr<Component> getComponent(ComponentTypes componentType);
-
-
-private:
-	// NOTE: only 1 of these will be set non-null on creation
-	physx::PxRigidStatic* _staticActor = nullptr; 
-	physx::PxRigidDynamic* _dynamicActor = nullptr;
-
-	//bool _isStatic;
-	//bool _isSimulated;
-	//bool _isKinematic;
-
-
-
-
-	//bool _isActive; // if false, all systems ignore this entity (and it is disabled from simulation)
-	//std::string _name; // e.g. (PlayerCart, AICart1, AICart2, etc.)
-	//std::string _tag; // e.g. (player, enemies, pickups, etc.)
-
-	// have a vector of components (or maybe fixed size where each index coresponds to null or the component of a certain type, but in the latter case, that forces only 0/1 of each component attached to an entity)
-	// e.g. _component.at(0) returns the attached Transform component
-	// ~~~~~~~~~NOTE: each Entity must always have a Transform component
-	std::array<std::shared_ptr<Component>, ComponentTypes::NUMBER_OF_COMPONENT_TYPES> _components;
-
-	// ~~~~~probably also needs to have a vector of children Entities to search recursively)
+		void addComponent(ComponentTypes componentType); // only adds a component with default values to entity. These values can be overwritten afterwords through getComponent and public field changing or getters/setters
+		void removeComponent(ComponentTypes componentType);
+		std::shared_ptr<Component> getComponent(ComponentTypes componentType);
+	private:
+		std::array<std::shared_ptr<Component>, ComponentTypes::NUMBER_OF_COMPONENT_TYPES> _components;
 };
-
-
-
 
 
 

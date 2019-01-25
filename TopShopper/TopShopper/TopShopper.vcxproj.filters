@@ -80,5 +80,17 @@
     <ClInclude Include="src\core\scenemanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\objects\physicalentity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\nonphysicalentity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\staticphysicalentity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\dynamicphysicalentity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

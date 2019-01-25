@@ -60,7 +60,7 @@ Light (type (point, directional, etc.), range?, color, intensity)
 
 
 enum ComponentTypes {
-	TRANSFORM, 
+	// e.g. MESH, LIGHT SOURCE,
 	NUMBER_OF_COMPONENT_TYPES // NOTE: THIS MUST BE THE LAST ENUM ELEMENT AND ALL ENUM VALUES MUST GO FROM 0 TO NUMBER_OF_COMPONENT_TYPES-1 
 };
 
