@@ -4,7 +4,6 @@
 #ifndef PHYSICSMANAGER_H_
 #define PHYSICSMANAGER_H_
 
-
 #include <PxPhysicsAPI.h>
 
 
@@ -16,6 +15,28 @@ public:
 	void init();
 	void updateMilliseconds(double deltaTime);
 	void cleanup();
+
+	// MAYBE MOVE THESE INTO A SPECIAL PHYSICS COMPONENT
+	void disableShapeInContactTests(physx::PxShape *shape);
+	void enableShapeInContactTests(physx::PxShape *shape);
+	void disableShapeInSceneQueryTests(physx::PxShape *shape);
+	void enableShapeInSceneQueryTests(physx::PxShape *shape);
+	void setShapeTrigger(physx::PxShape *shape);
+	void setShapeSolid(physx::PxShape *shape);
+
+
+	physx::PxRigidStatic* createStaticSimmedActor();
+	physx::PxRigidStatic* createStaticNonSimmedActor();
+
+	physx::PxRigidDynamic* createDynamicSimmedKinematicActor();
+	physx::PxRigidDynamic* createDynamicSimmedNonKinematicActor();
+	physx::PxRigidDynamic* createDynamicNonSimmedActor();
+
+
+
+
+
+
 private:
 	physx::PxDefaultAllocator _defaultAlloc;
 	physx::PxDefaultErrorCallback _defaultError;

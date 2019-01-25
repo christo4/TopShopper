@@ -153,6 +153,8 @@
   <ItemGroup>
     <ClCompile Include="src\core\broker.cpp" />
     <ClCompile Include="src\core\main.cpp" />
+    <ClCompile Include="src\core\scene.cpp" />
+    <ClCompile Include="src\core\scenemanager.cpp" />
     <ClCompile Include="src\core\transform.cpp" />
     <ClCompile Include="src\objects\component.cpp" />
     <ClCompile Include="src\objects\entity.cpp" />
@@ -164,6 +166,7 @@
     <ClInclude Include="src\audio\audiomanager.h" />
     <ClInclude Include="src\core\broker.h" />
     <ClInclude Include="src\core\scene.h" />
+    <ClInclude Include="src\core\scenemanager.h" />
     <ClInclude Include="src\core\transform.h" />
     <ClInclude Include="src\input\inputmanager.h" />
     <ClInclude Include="src\loading\loadingmanager.h" />

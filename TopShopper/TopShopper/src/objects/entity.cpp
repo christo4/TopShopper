@@ -6,6 +6,48 @@
 #include "core/transform.h"
 
 
+/*
+Entity::Entity(bool isStatic, bool isSimulated, bool isKinematic = true) 
+	: _isStatic(isStatic), _isSimulated(isSimulated), _isKinematic(isKinematic)
+{
+	if (isStatic) {
+		if (isSimulated) {
+
+		}
+		else {
+
+		}
+	}
+	else { // dynamic...
+		if (isSimulated) {
+			if (isKinematic) {
+
+			}
+			else {
+
+			}
+		}
+		else {
+
+		}
+	}
+}
+*/
+
+
+Entity::Entity(physx::PxRigidStatic *staticActor)
+	: _staticActor(staticActor)
+{
+
+}
+
+Entity::Entity(physx::PxRigidDynamic *dynamicActor) 
+	: _dynamicActor(dynamicActor)
+{
+
+}
+
+
 Entity::Entity() {
 
 }
@@ -13,6 +55,11 @@ Entity::Entity() {
 Entity::~Entity() {
 
 }
+
+
+
+
+
 
 
 
