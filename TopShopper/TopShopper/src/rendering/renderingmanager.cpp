@@ -6,7 +6,9 @@
 
 
 
-RenderingManager::RenderingManager() {
+RenderingManager::RenderingManager(Broker* broker) 
+	: _broker(broker)
+{
 
 }
 

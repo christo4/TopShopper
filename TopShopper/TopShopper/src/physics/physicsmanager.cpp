@@ -9,7 +9,9 @@
 
 using namespace physx;
 
-PhysicsManager::PhysicsManager() {
+PhysicsManager::PhysicsManager(Broker* broker)
+	: _broker(broker)
+{
 
 }
 
@@ -78,46 +80,27 @@ void PhysicsManager::cleanup() {
 
 
 
+// ~~~~~~~~~NOTE: these will be changed in the future to take in params like location, rotation, shapes, colliders (trigger or not), etc.
 // ~~~~~~~~~~~NOTE: change this in the future to actually take in xpos, ypos, zpos and rot (quaternion) - to init actor at proper location in scene rather than by default at world origin 
-physx::PxRigidStatic* PhysicsManager::createStaticSimmedActor() {
-	PxRigidStatic* staticActor = _factory->createRigidStatic(PxTransform(0.0f, 0.0f, 0.0f));
+physx::PxRigidStatic* PhysicsManager::createStaticActor() {
+	PxRigidStatic* actor = _factory->createRigidStatic(PxTransform(0.0f, 0.0f, 0.0f));
 
 	// TODO: config stuff...
 
-	return staticActor;
+	return actor;
 }
 
-physx::PxRigidStatic* PhysicsManager::createStaticNonSimmedActor() {
-	PxRigidStatic* staticActor = _factory->createRigidStatic(PxTransform(0.0f, 0.0f, 0.0f));
+physx::PxRigidDynamic* PhysicsManager::createDynamicActor() {
+	PxRigidDynamic* actor = _factory->createRigidDynamic(PxTransform(0.0f, 0.0f, 0.0f));
 
 	// TODO: config stuff...
 
-	return staticActor;
+	return actor;
 }
 
-physx::PxRigidDynamic* PhysicsManager::createDynamicSimmedKinematicActor() {
-	PxRigidDynamic* dynamicActor = _factory->createRigidDynamic(PxTransform(0.0f, 0.0f, 0.0f));
 
-	// TODO: config stuff...
 
-	return dynamicActor;
-}
 
-physx::PxRigidDynamic* PhysicsManager::createDynamicSimmedNonKinematicActor() {
-	PxRigidDynamic* dynamicActor = _factory->createRigidDynamic(PxTransform(0.0f, 0.0f, 0.0f));
-
-	// TODO: config stuff...
-
-	return dynamicActor;
-}
-
-physx::PxRigidDynamic* PhysicsManager::createDynamicNonSimmedActor() {
-	PxRigidDynamic* dynamicActor = _factory->createRigidDynamic(PxTransform(0.0f, 0.0f, 0.0f));
-
-	// TODO: config stuff...
-
-	return dynamicActor;
-}
 
 
 
@@ -167,6 +150,13 @@ void PhysicsManager::setShapeSolid(physx::PxShape *shape) {
 
 
 
+
+
+
+
+physx::PxPhysics* PhysicsManager::getFactory() {
+	return _factory;
+}
 
 
 

@@ -4,16 +4,16 @@
 #ifndef LOADINGMANAGER_H_
 #define LOADINGMANAGER_H_
 
-
+class Broker;
 
 class LoadingManager {
 public:
-	LoadingManager();
+	LoadingManager(Broker* broker);
 	virtual ~LoadingManager();
 	void init();
 	void updateMilliseconds(double deltaTime);
 private:
-
+	Broker* _broker = nullptr;
 };
 
 

@@ -6,11 +6,12 @@
 
 #include <PxPhysicsAPI.h>
 
+class Broker;
 
 
 class PhysicsManager {
 public:
-	PhysicsManager();
+	PhysicsManager(Broker* broker);
 	virtual ~PhysicsManager();
 	void init();
 	void updateMilliseconds(double deltaTime);
@@ -25,19 +26,19 @@ public:
 	void setShapeSolid(physx::PxShape *shape);
 
 
-	physx::PxRigidStatic* createStaticSimmedActor();
-	physx::PxRigidStatic* createStaticNonSimmedActor();
 
-	physx::PxRigidDynamic* createDynamicSimmedKinematicActor();
-	physx::PxRigidDynamic* createDynamicSimmedNonKinematicActor();
-	physx::PxRigidDynamic* createDynamicNonSimmedActor();
+
+	physx::PxRigidStatic* createStaticActor();
+	physx::PxRigidDynamic* createDynamicActor();
 
 
 
 
-
+	physx::PxPhysics* getFactory();
 
 private:
+	Broker* _broker = nullptr;
+
 	physx::PxDefaultAllocator _defaultAlloc;
 	physx::PxDefaultErrorCallback _defaultError;
 	physx::PxFoundation *_foundation = nullptr;

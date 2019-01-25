@@ -11,6 +11,7 @@
 class NonPhysicalEntity;
 class StaticPhysicalEntity;
 class DynamicPhysicalEntity;
+class PxScene;
 
 // DEFINITION:
 // EACH SCENE IS A SUPERSET OF A PHYSX SCENE
@@ -23,6 +24,8 @@ class Scene {
 		std::vector<std::shared_ptr<NonPhysicalEntity>> _nonPhysicalEntities;
 		std::vector<std::shared_ptr<StaticPhysicalEntity>> _staticPhysicalEntities;
 		std::vector<std::shared_ptr<DynamicPhysicalEntity>> _dynamicPhysicalEntities;
+
+		PxScene* _physxScene = nullptr; // NOTE: if this remains null, then the physics engine will be inactive for this scene.
 };
 
 

@@ -4,16 +4,16 @@
 #ifndef AIMANAGER_H_
 #define AIMANAGER_H_
 
-
+class Broker;
 
 class AIManager {
 public:
-	AIManager();
+	AIManager(Broker* broker);
 	virtual ~AIManager();
 	void init();
 	void updateMilliseconds(double deltaTime);
 private:
-
+	Broker* _broker = nullptr;
 };
 
 

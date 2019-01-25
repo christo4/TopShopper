@@ -13,7 +13,8 @@ Broker* Broker::getInstance() {
 }
 
 Broker::Broker() {
-
+	_physicsManager = new PhysicsManager(this);
+	_renderingManager = new RenderingManager(this);
 }
 
 
@@ -21,8 +22,9 @@ Broker::Broker() {
 void Broker::initAll() {
 	// ~~~~~TODO: figure out proper order to init each system
 	
-	_physicsManager.init();
-	_renderingManager.init();
+	_physicsManager->init();
+	//_sceneManager->init();
+	_renderingManager->init();
 	// etc. ........
 }
 
@@ -37,8 +39,9 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 	// 4. _audioManager.updateAllMilliseconds(deltaTime);
 	// etc.
 
-	_physicsManager.updateMilliseconds(deltaTime);
-	_renderingManager.updateMilliseconds(deltaTime);
+	_physicsManager->updateMilliseconds(deltaTime);
+	//_sceneManager->updateMilliseconds(deltaTime);
+	_renderingManager->updateMilliseconds(deltaTime);
 
 	// etc. .....
 }
@@ -46,5 +49,9 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 
 
 GLFWwindow* Broker::get_RenderingManager_Window() {
-	return _renderingManager.getWindow();
+	return _renderingManager->getWindow();
+}
+
+physx::PxPhysics* Broker::get_PhysicsManager_Factory() {
+	return _physicsManager->getFactory();
 }
