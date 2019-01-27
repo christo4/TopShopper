@@ -23,7 +23,6 @@ void Broker::initAll() {
 	// ~~~~~TODO: figure out proper order to init each system
 	
 	_physicsManager->init();
-	//_sceneManager->init();
 	_renderingManager->init();
 	// etc. ........
 }
@@ -40,7 +39,6 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 	// etc.
 
 	_physicsManager->updateMilliseconds(deltaTime);
-	//_sceneManager->updateMilliseconds(deltaTime);
 	_renderingManager->updateMilliseconds(deltaTime);
 
 	// etc. .....
@@ -52,6 +50,3 @@ GLFWwindow* Broker::get_RenderingManager_Window() {
 	return _renderingManager->getWindow();
 }
 
-physx::PxPhysics* Broker::get_PhysicsManager_Factory() {
-	return _physicsManager->getFactory();
-}

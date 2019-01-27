@@ -2,7 +2,6 @@
 
 
 #include "physicsmanager.h"
-
 #include <iostream>
 
 
@@ -50,7 +49,11 @@ void PhysicsManager::init() {
 
 
 
-	_cooker = PxCreateCooking(PX_PHYSICS_VERSION, *_foundation, PxCookingParams(_simulationScale));
+	PxCookingParams params(_simulationScale);
+	params.meshWeldTolerance = 0.001f;
+	params.meshPreprocessParams = PxMeshPreprocessingFlags(PxMeshPreprocessingFlag::eWELD_VERTICES);
+
+	_cooker = PxCreateCooking(PX_PHYSICS_VERSION, *_foundation, params);
 	if (!_cooker) {
 		std::cout << "PxCreateCooking failed!" << std::endl;
 		exit(EXIT_FAILURE);
@@ -80,41 +83,7 @@ void PhysicsManager::cleanup() {
 
 
 
-// ~~~~~~~~~NOTE: these will be changed in the future to take in params like location, rotation, shapes, colliders (trigger or not), etc.
-// ~~~~~~~~~~~NOTE: change this in the future to actually take in xpos, ypos, zpos and rot (quaternion) - to init actor at proper location in scene rather than by default at world origin 
-physx::PxRigidStatic* PhysicsManager::createStaticActor() {
-	PxRigidStatic* actor = _factory->createRigidStatic(PxTransform(0.0f, 0.0f, 0.0f));
-
-	// TODO: config stuff...
-
-	return actor;
-}
-
-physx::PxRigidDynamic* PhysicsManager::createDynamicActor() {
-	PxRigidDynamic* actor = _factory->createRigidDynamic(PxTransform(0.0f, 0.0f, 0.0f));
-
-	// TODO: config stuff...
-
-	return actor;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/*
 // MAKE KINEMATIC?
 void PhysicsManager::disableShapeInContactTests(physx::PxShape *shape) {
 	shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
@@ -145,23 +114,13 @@ void PhysicsManager::setShapeSolid(physx::PxShape *shape) {
 	shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, false);
 	shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
 }
+*/
 
 
 
 
 
-
-
-
-
-physx::PxPhysics* PhysicsManager::getFactory() {
-	return _factory;
-}
-
-
-
-
-
+// RESEARCH NOTES BELOW
 
 /*
 NOTE: https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/guide/Manual/Startup.html

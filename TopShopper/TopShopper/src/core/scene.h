@@ -7,25 +7,24 @@
 #include <vector>
 #include <memory>
 
-
-class NonPhysicalEntity;
-class StaticPhysicalEntity;
-class DynamicPhysicalEntity;
+class Entity;
 class PxScene;
 
+
+
 // DEFINITION:
-// EACH SCENE IS A SUPERSET OF A PHYSX SCENE
-// A SCENE CONTAINS PHYSICAL ENTITIES (ALSO CONTAINED IN PHYSX SCENE) AND NONPHYSICAL ENTITIES (E.G. UI ELEMENTS)
+// EACH SCENE WRAPS AROUND A PHYSX SCENE
 class Scene {
 	public:
-		Scene();
+		Scene(std::shared_ptr<PxScene> physxScene);
 		virtual ~Scene();
-	private:
-		std::vector<std::shared_ptr<NonPhysicalEntity>> _nonPhysicalEntities;
-		std::vector<std::shared_ptr<StaticPhysicalEntity>> _staticPhysicalEntities;
-		std::vector<std::shared_ptr<DynamicPhysicalEntity>> _dynamicPhysicalEntities;
 
-		PxScene* _physxScene = nullptr; // NOTE: if this remains null, then the physics engine will be inactive for this scene.
+		std::shared_ptr<PxScene> _physxScene = nullptr;
+
+		void addEntity(std::shared_ptr<Entity> entity);
+		// ~~~~~~~~also have remove entity - by name? or maybe by pointer
+	private:
+		std::vector<std::shared_ptr<Entity>> _entities;
 };
 
 

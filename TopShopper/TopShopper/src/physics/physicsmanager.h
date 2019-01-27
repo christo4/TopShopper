@@ -5,8 +5,10 @@
 #define PHYSICSMANAGER_H_
 
 #include <PxPhysicsAPI.h>
+#include "core/scene.h"
 
 class Broker;
+
 
 
 class PhysicsManager {
@@ -17,6 +19,7 @@ public:
 	void updateMilliseconds(double deltaTime);
 	void cleanup();
 
+	/*
 	// MAYBE MOVE THESE INTO A SPECIAL PHYSICS COMPONENT
 	void disableShapeInContactTests(physx::PxShape *shape);
 	void enableShapeInContactTests(physx::PxShape *shape);
@@ -24,18 +27,7 @@ public:
 	void enableShapeInSceneQueryTests(physx::PxShape *shape);
 	void setShapeTrigger(physx::PxShape *shape);
 	void setShapeSolid(physx::PxShape *shape);
-
-
-
-
-	physx::PxRigidStatic* createStaticActor();
-	physx::PxRigidDynamic* createDynamicActor();
-
-
-
-
-	physx::PxPhysics* getFactory();
-
+	*/
 private:
 	Broker* _broker = nullptr;
 
@@ -46,6 +38,10 @@ private:
 	physx::PxCooking *_cooker = nullptr;
 	physx::PxTolerancesScale _simulationScale;
 	//physx::PxPvd *_pvd;
+
+
+	std::shared_ptr<Scene> _activeScene = nullptr;
+	//std::vector<std::shared_ptr<Scene>> _scenes;
 };
 
 

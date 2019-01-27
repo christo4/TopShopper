@@ -10,7 +10,7 @@
 #include "loading/loadingmanager.h"
 #include "physics/physicsmanager.h"
 #include "rendering/renderingmanager.h"
-#include "scenemanager.h"
+
 
 
 // SINGLETON...
@@ -26,7 +26,6 @@ public:
 	// get/set_ManagerName_dataSummary
 
 	GLFWwindow* get_RenderingManager_Window();
-	physx::PxPhysics* get_PhysicsManager_Factory();
 private:
 	static Broker* _instance;
 	Broker();
@@ -37,7 +36,6 @@ private:
 	// input manager
 	// loading manager
 	PhysicsManager *_physicsManager = nullptr;
-	SceneManager *_sceneManager = nullptr;
 	RenderingManager *_renderingManager = nullptr;
 
 };
