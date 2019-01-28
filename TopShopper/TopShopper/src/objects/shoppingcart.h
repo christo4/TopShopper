@@ -3,14 +3,16 @@
 #define SHOPPINGCART_H_
 
 #include "entity.h"
-
+class PhysicsManager;
 
 
 class ShoppingCart : public Entity {
 	public:
-	
-	private:
+		ShoppingCart(PhysicsManager* physicsManager);
+		virtual ~ShoppingCart();
 
+	private:
+		PhysicsManager* _physicsManager = nullptr;
 };
 
 

@@ -4,11 +4,10 @@
 #ifndef PHYSICSMANAGER_H_
 #define PHYSICSMANAGER_H_
 
-#include <PxPhysicsAPI.h>
-#include "core/scene.h"
-
 class Broker;
+class Scene;
 
+#include <memory>
 
 
 class PhysicsManager {
@@ -28,15 +27,17 @@ public:
 	void setShapeTrigger(physx::PxShape *shape);
 	void setShapeSolid(physx::PxShape *shape);
 	*/
+
+
 private:
 	Broker* _broker = nullptr;
 
-	physx::PxDefaultAllocator _defaultAlloc;
-	physx::PxDefaultErrorCallback _defaultError;
-	physx::PxFoundation *_foundation = nullptr;
-	physx::PxPhysics *_factory = nullptr; // this is the factory we use to create new PhysX objects
-	physx::PxCooking *_cooker = nullptr;
-	physx::PxTolerancesScale _simulationScale;
+	//physx::PxDefaultAllocator _defaultAlloc;
+	//physx::PxDefaultErrorCallback _defaultError;
+	//physx::PxFoundation *_foundation = nullptr;
+	//physx::PxPhysics *_factory = nullptr; // this is the factory we use to create new PhysX objects
+	//physx::PxCooking *_cooker = nullptr;
+	//physx::PxTolerancesScale _simulationScale;
 	//physx::PxPvd *_pvd;
 
 

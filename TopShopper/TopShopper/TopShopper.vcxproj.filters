@@ -36,6 +36,24 @@
     <ClCompile Include="src\core\scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\objects\shoppingcart.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicle4WCreate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleCreate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleFilterShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleSceneQuery.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleTireFriction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ai\aimanager.h">
@@ -69,6 +87,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\objects\shoppingcart.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleConcurrency.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleCreate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleFilterShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleSceneQuery.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleTireFriction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleWheelQueryResult.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
