@@ -186,11 +186,18 @@ VehicleDesc initVehicleDesc()
 	//Set up the chassis mass, dimensions, moment of inertia, and center of mass offset.
 	//The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
 	//Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
-	const PxF32 chassisMass = 1500.0f;
-	const PxVec3 chassisDims(2.5f, 2.0f, 5.0f);
+	const PxF32 chassisMass = 1500.0f; // ORIGINAL
+	//const PxF32 chassisMass = 100.0f; // WARNING: DONT SET IT TO A LOW VALUE WITHOUT CHANGING OTHER STUFF, cause it causes the cart to flip over and over
+	//const PxVec3 chassisDims(2.5f, 2.0f, 5.0f); // ORIGINAL
+	//const PxVec3 chassisDims(25.0f, 2.0f, 5.0f); // REALLY WIDE (X is widescreen axis)
+	//const PxVec3 chassisDims(2.5f, 20.0f, 5.0f); // REALLY TALL (Y is up)
+	//const PxVec3 chassisDims(2.5f, 2.0f, 50.0f); // REALLY LONG (Z is towards you)
+	const PxVec3 chassisDims(3.0f, 3.5f, 5.0f); // MORE SHOPPING CART SIZED
+
+
 	const PxVec3 chassisMOI
 	((chassisDims.y*chassisDims.y + chassisDims.z*chassisDims.z)*chassisMass / 12.0f,
-		(chassisDims.x*chassisDims.x + chassisDims.z*chassisDims.z)*0.8f*chassisMass / 12.0f,
+		(chassisDims.x*chassisDims.x + chassisDims.z*chassisDims.z)*0.8f*chassisMass / 12.0f, // EASIER TO ROTATE AROUND ITS Y-AXIS
 		(chassisDims.x*chassisDims.x + chassisDims.y*chassisDims.y)*chassisMass / 12.0f);
 	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y*0.5f + 0.65f, 0.25f);
 
@@ -200,7 +207,8 @@ VehicleDesc initVehicleDesc()
 	const PxF32 wheelRadius = 0.5f;
 	const PxF32 wheelWidth = 0.4f;
 	const PxF32 wheelMOI = 0.5f*wheelMass*wheelRadius*wheelRadius;
-	const PxU32 nbWheels = 6;
+	//const PxU32 nbWheels = 6; // ORIGINAL
+	const PxU32 nbWheels = 4;
 
 	VehicleDesc vehicleDesc;
 
