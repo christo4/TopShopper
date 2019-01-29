@@ -5,6 +5,8 @@
 #define LOADINGMANAGER_H_
 
 #include <vector>
+#include <glm/glm.hpp>
+
 
 class Broker;
 

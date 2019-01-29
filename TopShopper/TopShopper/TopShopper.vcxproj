@@ -97,6 +97,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)middleware\glfw\include;$(SolutionDir)middleware\glad\include;$(SolutionDir)middleware\glm-0.9.8.2;$(SolutionDir)middleware\stb;$(SolutionDir)middleware;$(SolutionDir)Physx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)middleware\glfw\lib;$(SolutionDir)Physx\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -154,6 +155,7 @@
     <ClCompile Include="src\core\broker.cpp" />
     <ClCompile Include="src\core\main.cpp" />
     <ClCompile Include="src\core\scene.cpp" />
+    <ClCompile Include="src\loading\loadingmanager.cpp" />
     <ClCompile Include="src\objects\component.cpp" />
     <ClCompile Include="src\objects\entity.cpp" />
     <ClCompile Include="src\objects\shoppingcart.cpp" />
