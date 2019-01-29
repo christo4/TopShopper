@@ -107,5 +107,8 @@
     <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleWheelQueryResult.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\vehicle\snippetcommon\SnippetPVD.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

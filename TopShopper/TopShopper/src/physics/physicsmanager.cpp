@@ -36,6 +36,11 @@
 // It is a good idea to record and playback with pvd (PhysX Visual Debugger).
 // ****************************************************************************
 
+
+//#define PVD_ENABLED // ~~~~~NOTE: comment this out if you dont have PVD installed or on release
+
+
+
 #include <ctype.h>
 
 #include "physicsmanager.h"
@@ -50,7 +55,11 @@
 #include "vehicle/snippetvehiclecommon/SnippetVehicleCreate.h"
 
 //#include "../snippetcommon/SnippetPrint.h"
-//#include "../snippetcommon/SnippetPVD.h"
+
+#ifdef PVD_ENABLED
+#include "vehicle/snippetcommon/SnippetPVD.h"
+#endif // PVD_ENABLED
+
 //#include "../snippetutils/SnippetUtils.h"
 
 
@@ -71,7 +80,9 @@ PxCooking*				gCooking = NULL;
 
 PxMaterial*				gMaterial = NULL;
 
-//PxPvd*                  gPvd = NULL;
+#ifdef PVD_ENABLED
+PxPvd*                  gPvd = NULL;
+#endif // PVD_ENABLED
 
 VehicleSceneQueryData*	gVehicleSceneQueryData = NULL;
 PxBatchQuery*			gBatchQuery = NULL;
@@ -574,9 +585,13 @@ void PhysicsManager::init() {
 		exit(EXIT_FAILURE);
 	}
 	
-	//gPvd = PxCreatePvd(*gFoundation);
-	//PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
-	//gPvd->connect(*transport,PxPvdInstrumentationFlag::eALL);
+	#ifdef PVD_ENABLED
+	gPvd = PxCreatePvd(*gFoundation);
+	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
+	gPvd->connect(*transport,PxPvdInstrumentationFlag::eALL);
+	#endif // PVD_ENABLED
+
+	
 
 	PxTolerancesScale simScale;
 	simScale.length = 1.0f; // 1 meter by default
@@ -584,8 +599,12 @@ void PhysicsManager::init() {
 
 	bool recordMemoryAllocations = true;
 	
-	//gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, simScale, recordMemoryAllocations, gPvd); // WITH PVD
+	#ifdef PVD_ENABLED
+	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, simScale, recordMemoryAllocations, gPvd); // WITH PVD
+	#else
 	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, simScale, recordMemoryAllocations); // W/O PVD
+	#endif // PVD_ENABLED
+
 	if (!gPhysics) {
 		std::cout << "PxCreatePhysics failed!" << std::endl;
 		exit(EXIT_FAILURE);
@@ -621,13 +640,20 @@ void PhysicsManager::init() {
 	sceneDesc.filterShader = VehicleFilterShader;
 
 	gScene = gPhysics->createScene(sceneDesc);
-	//PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
-	//if (pvdClient)
-	//{
-		//pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
-		//pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
-		//pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
-	//}
+
+
+	#ifdef PVD_ENABLED
+	PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
+	if (pvdClient)
+	{
+		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+	}
+	#endif // PVD_ENABLED
+
+
+	
 
 
 
@@ -716,9 +742,17 @@ void PhysicsManager::cleanup() {
 	gScene->release();
 	gDispatcher->release();
 	gPhysics->release();
-	//PxPvdTransport* transport = gPvd->getTransport();
-	//gPvd->release();
-	//transport->release();
+
+
+
+	#ifdef PVD_ENABLED
+	PxPvdTransport* transport = gPvd->getTransport();
+	gPvd->release();
+	transport->release();
+	#endif // PVD_ENABLED
+
+
+	
 	gFoundation->release();
 }
 
