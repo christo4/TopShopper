@@ -177,6 +177,7 @@
     <ClInclude Include="src\objects\shoppingcart.h" />
     <ClInclude Include="src\physics\physicsmanager.h" />
     <ClInclude Include="src\rendering\renderingmanager.h" />
+    <ClInclude Include="src\vehicle\snippetcommon\SnippetPVD.h" />
     <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleConcurrency.h" />
     <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleCreate.h" />
     <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleFilterShader.h" />
