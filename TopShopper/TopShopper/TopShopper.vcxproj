@@ -160,7 +160,11 @@
     <ClCompile Include="src\objects\entity.cpp" />
     <ClCompile Include="src\objects\shoppingcart.cpp" />
     <ClCompile Include="src\physics\physicsmanager.cpp" />
+    <ClCompile Include="src\rendering\renderingEngine.cpp" />
     <ClCompile Include="src\rendering\renderingmanager.cpp" />
+    <ClCompile Include="src\rendering\renderScene.cpp" />
+    <ClCompile Include="src\rendering\shaderTools.cpp" />
+    <ClCompile Include="src\rendering\texture.cpp" />
     <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicle4WCreate.cpp" />
     <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleCreate.cpp" />
     <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleFilterShader.cpp" />
@@ -178,7 +182,11 @@
     <ClInclude Include="src\objects\entity.h" />
     <ClInclude Include="src\objects\shoppingcart.h" />
     <ClInclude Include="src\physics\physicsmanager.h" />
+    <ClInclude Include="src\rendering\renderingEngine.h" />
     <ClInclude Include="src\rendering\renderingmanager.h" />
+    <ClInclude Include="src\rendering\renderScene.h" />
+    <ClInclude Include="src\rendering\shaderTools.h" />
+    <ClInclude Include="src\rendering\texture.h" />
     <ClInclude Include="src\vehicle\snippetcommon\SnippetPVD.h" />
     <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleConcurrency.h" />
     <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleCreate.h" />

@@ -4,9 +4,12 @@
 #ifndef ENTITY_H_
 #define ENTITY_H_
 
-#include <array>
 #include "component.h"
-#include <string>
+
+#include <array>
+#include <vector>
+#include <glm/glm.hpp>
+
 
 
 
@@ -19,12 +22,18 @@
 
 class Entity {
 	public:
-		Entity();
+		Entity(std::vector<glm::vec4> verts, std::vector<glm::vec3> normals, std::vector<glm::vec2> uvs);
 		virtual ~Entity();
 
 		void addComponent(ComponentTypes componentType); // only adds a component with default values to entity. These values can be overwritten afterwords through getComponent and public field changing or getters/setters
 		void removeComponent(ComponentTypes componentType);
 		std::shared_ptr<Component> getComponent(ComponentTypes componentType);
+
+		std::vector<glm::vec4> verts;
+		std::vector<glm::vec3> normals;
+		std::vector<glm::vec2> uvs;
+
+		
 	private:
 		std::string _name;
 		std::array<std::shared_ptr<Component>, ComponentTypes::NUMBER_OF_COMPONENT_TYPES> _components;
