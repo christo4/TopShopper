@@ -49,11 +49,4 @@ private:
 	Broker* _broker = nullptr;
 };
 
-
-
-
-
-
-
-
 #endif // INPUTMANAGER_H_

@@ -1,8 +1,8 @@
 
 
 
-#ifndef SCENE_H_
-#define SCENE_H_
+#ifndef GAMESCENE_H_
+#define GAMESCENE_H_
 
 #include <vector>
 #include <memory>
@@ -14,10 +14,10 @@ class PxScene;
 
 // DEFINITION:
 // EACH SCENE WRAPS AROUND A PHYSX SCENE
-class Scene {
+class GameScene {
 	public:
-		Scene(std::shared_ptr<PxScene> physxScene);
-		virtual ~Scene();
+		GameScene(std::shared_ptr<PxScene> physxScene);
+		virtual ~GameScene();
 
 		std::shared_ptr<PxScene> _physxScene = nullptr;
 

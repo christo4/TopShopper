@@ -57,15 +57,23 @@ Light (type (point, directional, etc.), range?, color, intensity)
 
 
 */
-
+#include <vector>
+#include <glm/glm.hpp>
 
 enum ComponentTypes {
-	// e.g. MESH, LIGHT SOURCE,
+	AUDIO_LISTENER,
+	AUDIO_SOURCE,
+	CAMERA,
+	INPUT_CONTROLLER,
+	MESH,
+	NAV_MESH,
+	NAV_MESH_AGENT,
+	UI_SPRITE,
 	NUMBER_OF_COMPONENT_TYPES // NOTE: THIS MUST BE THE LAST ENUM ELEMENT AND ALL ENUM VALUES MUST GO FROM 0 TO NUMBER_OF_COMPONENT_TYPES-1 
 };
 
 
-
+/*
 class Component {
 public:
 	Component();
@@ -73,23 +81,45 @@ public:
 private:
 	// 1. have a reference to the entity this component is attached to (so we can get high-lvl info about it (e.g. tag/name) or access sibling components)
 };
+*/
 
+struct Component {
 
+};
 
+struct AudioListener : Component {
 
+};
 
+struct AudioSource : Component {
 
+};
 
+struct Camera : Component {
 
+};
 
+struct InputController : Component {
 
+};
 
+struct Mesh : Component {
+	std::vector<glm::vec4> verts;
+	std::vector<glm::vec3> normals;
+	std::vector<glm::vec2> uvs;
+};
 
+struct NavMesh : Component {
 
+};
 
+struct NavMeshAgent : Component {
 
+};
 
+struct UISprite : Component {
 
+};
 
 
 
