@@ -4,6 +4,7 @@
 #ifndef RENDERINGMANAGER_H_
 #define RENDERINGMANAGER_H_
 
+
 class Broker; 
 struct GLFWwindow;
 class RenderingEngine;
