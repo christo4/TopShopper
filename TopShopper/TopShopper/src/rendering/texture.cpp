@@ -1,6 +1,6 @@
 #include "texture.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include "middleware/stb/stb_image.h"
+#include <../middleware/stb/stb_image.h>
 #include <iostream>
 #include <string>
 

@@ -26,14 +26,4 @@ private:
 	void openWindow();
 };
 
-
-
-
-
-
-
-
-
-
-
 #endif // RENDERINGMANAGER_H_
