@@ -1,5 +1,6 @@
 
 #include "broker.h"
+#include <iostream>
 
 // init statics:
 Broker* Broker::_instance = nullptr; // singleton instance starts out null
@@ -15,6 +16,7 @@ Broker* Broker::getInstance() {
 Broker::Broker() {
 	_physicsManager = new PhysicsManager(this);
 	_renderingManager = new RenderingManager(this);
+	_inputManager = new InputManager(this);
 }
 
 
@@ -24,7 +26,8 @@ void Broker::initAll() {
 	
 	_physicsManager->init();
 	_renderingManager->init();
-	// etc. ........
+	_inputManager->init();
+	// etc. ........;
 }
 
 
@@ -40,8 +43,34 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 
 	_physicsManager->updateMilliseconds(deltaTime);
 	_renderingManager->updateMilliseconds(deltaTime);
+	_inputManager->updateMilliseconds(deltaTime);
 
-	// etc. .....
+	Gamepad * meme = _inputManager->getGamePad(1);
+
+	
+	std::cout << "LeftX: " <<meme->leftStickX << std::endl;
+	std::cout << "LeftY: " <<meme->leftStickY << std::endl;
+	std::cout << "RightX: "<<meme->rightStickX << std::endl;
+	std::cout << "RigthY: "<<meme->rightStickY << std::endl;
+	std::cout << "LeftTrig: " <<meme->leftTrigger << std::endl;
+	std::cout << "RightTrig: " <<meme->rightTrigger << std::endl;
+	std::cout << "A: " <<meme->aButton << std::endl;
+	std::cout << "B: " <<meme->bButton << std::endl;
+	std::cout << "X: " <<meme->xButton << std::endl;
+	std::cout << "Y: " <<meme->yButton << std::endl;
+	std::cout << "LeftBump: " <<meme->leftBump << std::endl;
+	std::cout << "RightBump: " <<meme->rightBump << std::endl;
+	std::cout << "Back: " <<meme->backButton << std::endl;
+	std::cout <<"Start: " <<meme->startButton << std::endl;
+	std::cout << "LeftStick: " <<meme->leftStick << std::endl;
+	std::cout << "RightStick: " <<meme->rightStick << std::endl;
+	std::cout << "Up: " <<meme->upButton << std::endl;
+	std::cout << "Right: " <<meme->rightButton << std::endl;
+	std::cout << "Down: " <<meme->downButton << std::endl;
+	std::cout << "Left: " <<meme->leftButton << std::endl;
+	system("cls");
+
+	
 }
 
 
