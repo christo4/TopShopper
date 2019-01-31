@@ -1,22 +1,19 @@
-
-
-
 #include "broker.h"
+#include <iostream>
+#include <Windows.h>
 
 int main() {
-	// ~~~~~load assets (init necessary data structures)???
-
-	// fields...
+	//load assets here
 	double prevTime = 0.0;
 	Broker* broker = Broker::getInstance();
-
-	// work...
-	broker->initAll(); // init all subsystems
-
+	broker->initAll();
 	GLFWwindow* window = broker->get_RenderingManager_Window();
 
+
+
 	// call main loop
-	while (!glfwWindowShouldClose(window)) { // ~~~~~~~~~ also probably add || QUIT menu option was pressed.
+	while (!glfwWindowShouldClose(window)) {
+
 		// 1. get deltaTime (time last frame took to execute)
 		// 2. get device input
 		// 3. simulate (update game state)
@@ -26,8 +23,6 @@ int main() {
 		// new way:
 		// 1. get deltaTime
 		// 2. call Broker::getInstance()->updateAllMilliseconds(deltaTime);
-
-
 		// ~~~~~NOTE: I think that the first deltaTime could screw up some stuff
 		double currentTime = glfwGetTime(); // get new
 		double deltaTime = currentTime - prevTime; // diff
