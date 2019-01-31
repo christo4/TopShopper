@@ -6,7 +6,10 @@
 
 #include <GLFW/glfw3.h>
 
-class Broker;
+class Broker; 
+struct GLFWwindow;
+class RenderingEngine;
+class Scene;
 
 class RenderingManager {
 public:
@@ -18,10 +21,18 @@ public:
 	void cleanup();
 
 	GLFWwindow* getWindow();
+
+	void QueryGLVersion();
+
+	Scene* getScene() { return scene; }
+
 private:
 	Broker* _broker = nullptr;
 
 	GLFWwindow* _window = nullptr;
+
+	RenderingEngine* renderingEngine;
+	Scene* scene;
 
 	void openWindow();
 };
