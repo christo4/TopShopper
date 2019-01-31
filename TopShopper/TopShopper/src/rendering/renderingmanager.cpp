@@ -5,7 +5,6 @@
 #include <iostream>
 #include <string>
 
-
 //**Must include glad and GLFW in this order or it breaks**
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -93,7 +92,7 @@ void RenderingManager::openWindow() {
 
 	//Set the custom error callback function
 	//Errors will be printed to the console
-	glfwSetErrorCallback(ErrorCallback);
+	//glfwSetErrorCallback(ErrorCallback);
 
 	//Attempt to create a window with an OpenGL 4.1 core profile context
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);

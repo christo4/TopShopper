@@ -162,7 +162,6 @@
     <ClCompile Include="src\physics\physicsmanager.cpp" />
     <ClCompile Include="src\rendering\Geometry.cpp" />
     <ClCompile Include="src\rendering\glad.c" />
-    <ClCompile Include="src\rendering\Program.cpp" />
     <ClCompile Include="src\rendering\RenderingEngine.cpp" />
     <ClCompile Include="src\rendering\renderingmanager.cpp" />
     <ClCompile Include="src\rendering\Scene.cpp" />
@@ -186,7 +185,6 @@
     <ClInclude Include="src\objects\shoppingcart.h" />
     <ClInclude Include="src\physics\physicsmanager.h" />
     <ClInclude Include="src\rendering\Geometry.h" />
-    <ClInclude Include="src\rendering\Program.h" />
     <ClInclude Include="src\rendering\RenderingEngine.h" />
     <ClInclude Include="src\rendering\renderingmanager.h" />
     <ClInclude Include="src\rendering\Scene.h" />

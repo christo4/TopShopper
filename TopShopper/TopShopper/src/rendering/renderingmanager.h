@@ -4,8 +4,6 @@
 #ifndef RENDERINGMANAGER_H_
 #define RENDERINGMANAGER_H_
 
-#include <GLFW/glfw3.h>
-
 class Broker; 
 struct GLFWwindow;
 class RenderingEngine;
