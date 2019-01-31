@@ -1,9 +1,6 @@
 #include "broker.h"
 #include <iostream>
-
-//**Must include glad and GLFW in this order or it breaks**
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include <Windows.h>
 
 int main() {
 	//load assets here
@@ -16,50 +13,6 @@ int main() {
 
 	// call main loop
 	while (!glfwWindowShouldClose(window)) {
-
-		
-		int gamePadPresent = glfwJoystickPresent(GLFW_JOYSTICK_1);
-		//std::cout << "Gamepad Status: " << gamePadPresent << std::endl;
-
-		int numAxes;
-		int numButtons;
-		const float * axesArray = NULL;
-		const unsigned char * buttonArray = NULL;
-
-
-
-		if (gamePadPresent) {
-
-			axesArray = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &numAxes);
-			std::cout << std::endl;
-			std::cout << std::endl;
-
-			
-			std::cout << "Left Stick X: " << axesArray[0] << std::endl;
-			std::cout << "Left Stick Y: " << axesArray[1] << std::endl;
-			std::cout << "Right Stick X: " << axesArray[2] << std::endl;
-			std::cout << "Right Stick Y: " << axesArray[3] << std::endl;
-			std::cout << "Left Trigger: " << axesArray[4] << std::endl;
-			std::cout << "Right Trigger: " << axesArray[5] << std::endl;
-
-			
-
-
-			buttonArray = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &numButtons);
-
-			//button array: A B X Y LB RB LEFTSTICK RIGHTSTICK UP RIGHT LEFT DOWN
-
-			/*
-			for (int i = 0; i < numButtons; i++) {
-
-				if (buttonArray[i] == GLFW_PRESS) {
-					std::cout << i << " " << "press" << std::endl;
-				}
-			}
-
-			*/
-		}
-
 
 		// 1. get deltaTime (time last frame took to execute)
 		// 2. get device input
