@@ -12,7 +12,7 @@
 //cpp file purposely included here because it just contains some global functions
 #include "ShaderTools.h"
 
-RenderingEngine::RenderingEngine() {
+renderingEngine::renderingEngine() {
 	glEnable(GL_DEPTH_TEST);
 	shaderProgram = ShaderTools::InitializeShaders();
 	if (shaderProgram == 0) {
@@ -22,11 +22,11 @@ RenderingEngine::RenderingEngine() {
 
 }
 
-RenderingEngine::~RenderingEngine() {
+renderingEngine::~renderingEngine() {
 
 }
 
-void RenderingEngine::RenderScene(const std::vector<Geometry>& objects) {
+void renderingEngine::renderScene(const std::vector<Geometry>& objects) {
 	//Clears the screen to a dark grey background
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -47,7 +47,7 @@ void RenderingEngine::RenderScene(const std::vector<Geometry>& objects) {
 	CheckGLErrors();
 }
 
-void RenderingEngine::assignBuffers(Geometry& geometry) {
+void renderingEngine::assignBuffers(Geometry& geometry) {
 	//Generate vao for the object
 	//Constant 1 means 1 vao is being generated
 	glGenVertexArrays(1, &geometry.vao);
@@ -80,7 +80,7 @@ void RenderingEngine::assignBuffers(Geometry& geometry) {
 
 }
 
-void RenderingEngine::setBufferData(Geometry& geometry) {
+void renderingEngine::setBufferData(Geometry& geometry) {
 	//Send geometry to the GPU
 	//Must be called whenever anything is updated about the object
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
@@ -96,7 +96,7 @@ void RenderingEngine::setBufferData(Geometry& geometry) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * geometry.uvs.size(), geometry.uvs.data(), GL_STATIC_DRAW);
 }
 
-void RenderingEngine::deleteBufferData(Geometry& geometry) {
+void renderingEngine::deleteBufferData(Geometry& geometry) {
 	glDeleteBuffers(1, &geometry.vertexBuffer);
 	glDeleteBuffers(1, &geometry.normalBuffer);
 	glDeleteBuffers(1, &geometry.colorBuffer);
@@ -104,7 +104,7 @@ void RenderingEngine::deleteBufferData(Geometry& geometry) {
 	glDeleteVertexArrays(1, &geometry.vao);
 }
 
-bool RenderingEngine::CheckGLErrors() {
+bool renderingEngine::CheckGLErrors() {
 	bool error = false;
 	for (GLenum flag = glGetError(); flag != GL_NO_ERROR; flag = glGetError())
 	{

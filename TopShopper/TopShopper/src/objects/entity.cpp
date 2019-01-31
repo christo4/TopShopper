@@ -2,7 +2,9 @@
 
 
 #include "entity.h"
-Entity::Entity(std::vector<glm::vec4> verts, std::vector<glm::vec3> normals, std::vector<glm::vec2> uvs){
+
+
+Entity::Entity() {
 
 }
 

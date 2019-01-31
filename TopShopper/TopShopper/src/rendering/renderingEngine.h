@@ -12,19 +12,17 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "Geometry.h"
-
 //Forward declaration of classes
 //(note this is necessary because these are pointers and it allows the #include to appear in the .cpp file)
 class GLFWwindow;
 
-class RenderingEngine {
+class renderingEngine {
 public:
-	RenderingEngine();
-	virtual ~RenderingEngine();
+	renderingEngine();
+	virtual ~renderingEngine();
 
 	//Renders each object
-	void RenderScene(const std::vector<Geometry>& objects);
+	void renderScene(const std::vector<Geometry>& objects);
 
 	//Create vao and vbos for objects
 	static void assignBuffers(Geometry& geometry);
