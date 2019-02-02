@@ -27,6 +27,7 @@ void Broker::initAll() {
 	_physicsManager->init();
 	_renderingManager->init();
 	_inputManager->init();
+	_loadingManager->init();
 	// etc. ........;
 }
 
@@ -45,6 +46,7 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 	_renderingManager->updateMilliseconds(deltaTime);
 	_inputManager->updateMilliseconds(deltaTime);
 
+	/*
 	Gamepad * meme = _inputManager->getGamePad(1);
 
 	
@@ -69,10 +71,20 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 	std::cout << "Down: " <<meme->downButton << std::endl;
 	std::cout << "Left: " <<meme->leftButton << std::endl;
 	system("cls");
+	*/
 
 	
 }
-
+void Broker::loadObj(const char* imageName, std::vector<glm::vec3>&returnVertex, std::vector<glm::vec2>&returnUV, std::vector<glm::vec3>&returnNormal) {
+	std::vector<glm::vec3> returnVertex1;
+	std::vector<glm::vec2> returnUV1;
+	std::vector<glm::vec3> returnNormal1;
+	//broker->loadObj("../TopShopper/Objects/rectangle.obj", returnVertex, returnUV, returnNormal);
+	bool check = _loadingManager->loadObject("../Objects/rectangle.obj", returnVertex1, returnUV1, returnNormal1);
+	if (check == false) {
+		std::exit(1);
+	}
+}
 
 
 GLFWwindow* Broker::get_RenderingManager_Window() {

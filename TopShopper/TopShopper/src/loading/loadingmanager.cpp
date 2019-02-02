@@ -36,7 +36,6 @@ bool LoadingManager::loadObject(const char* imageName, std::vector<glm::vec3>&re
 	FILE * inputFile;
 	errno_t error = fopen_s(&inputFile, imageName, "r");
 
-
 	if (inputFile == NULL) {
 		return false;
 		std::exit(0);
