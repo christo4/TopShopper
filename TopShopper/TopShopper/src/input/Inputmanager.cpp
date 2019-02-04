@@ -1,5 +1,5 @@
 //TODO: can maybe include a callback of some kind which detects the connecting and disconnecting of controllers in real time.
-#include "Inputmanager.h"
+#include "inputmanager.h"
 
 InputManager::InputManager(Broker * broker): _broker(broker) {
 

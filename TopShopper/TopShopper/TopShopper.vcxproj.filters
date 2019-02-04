@@ -33,9 +33,6 @@
     <ClCompile Include="src\rendering\renderingmanager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicle4WCreate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -135,6 +132,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\gamescene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vehicle\snippetcommon\SnippetPVD.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleConcurrency.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

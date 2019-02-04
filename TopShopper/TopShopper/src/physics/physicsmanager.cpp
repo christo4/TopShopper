@@ -246,7 +246,7 @@ void PhysicsManager::switchToScene1() {
 
 	// TODO: change this to a ground entity later...
 
-	PxFilterData groundPlaneSimFilterData(COLLISION_FLAG_GROUND, COLLISION_FLAG_GROUND_AGAINST, 0, 0);
+	PxFilterData groundPlaneSimFilterData(CollisionFlags::COLLISION_FLAG_GROUND, CollisionFlags::COLLISION_FLAG_GROUND_AGAINST, 0, 0);
 	PxMaterial *groundMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 	PxRigidStatic *groundPlane = createDrivablePlane(groundPlaneSimFilterData, groundMaterial, gPhysics);
 	physxScene->addActor(*groundPlane);
@@ -265,7 +265,7 @@ void PhysicsManager::switchToScene1() {
 
 
 
-	_activeScene = std::make_shared<Scene>(physxScene);
+	_activeScene = std::make_shared<GameScene>(physxScene);
 	_activeScene->addEntity(vehicle1);
 
 }

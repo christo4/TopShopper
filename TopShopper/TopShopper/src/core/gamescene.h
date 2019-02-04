@@ -1,6 +1,4 @@
 
-
-
 #ifndef GAMESCENE_H_
 #define GAMESCENE_H_
 
@@ -9,7 +7,7 @@
 
 class Entity;
 class ShoppingCartPlayer;
-//#include "objects/shoppingcartplayer.h"
+
 
 namespace physx {
 	class PxScene;
@@ -18,13 +16,11 @@ namespace physx {
 
 
 // DEFINITION:
-// EACH SCENE WRAPS AROUND A PHYSX SCENE
+// EACH GAMESCENE WRAPS AROUND A PHYSX SCENE
 class GameScene {
 	public:
-		GameScene(std::shared_ptr<PxScene> physxScene);
+		GameScene(physx::PxScene *physxScene);
 		virtual ~GameScene();
-		Scene(physx::PxScene *physxScene);
-		virtual ~Scene();
 
 		physx::PxScene *_physxScene = nullptr;
 
@@ -43,4 +39,4 @@ class GameScene {
 
 
 
-#endif // SCENE_H_
+#endif // GAMESCENE_H_

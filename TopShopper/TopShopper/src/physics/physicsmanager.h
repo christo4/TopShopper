@@ -7,7 +7,7 @@
 #include "PxPhysicsAPI.h"
 #include <memory>
 #include "objects/shoppingcartplayer.h"
-#include "core/scene.h"
+#include "core/gamescene.h"
 
 class Broker;
 
@@ -94,7 +94,7 @@ public:
 private:
 	Broker* _broker = nullptr;
 
-	std::shared_ptr<Scene> _activeScene = nullptr;
+	std::shared_ptr<GameScene> _activeScene = nullptr;
 	//std::vector<std::shared_ptr<Scene>> _scenes;
 };
 

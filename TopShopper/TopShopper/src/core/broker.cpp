@@ -45,6 +45,8 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 	_renderingManager->updateMilliseconds(deltaTime);
 	_inputManager->updateMilliseconds(deltaTime);
 
+	// ~~~~~~~~~WARNING: this should be commented out when no controller is connected...
+	/*
 	Gamepad * meme = _inputManager->getGamePad(1);
 
 	
@@ -69,7 +71,7 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 	std::cout << "Down: " <<meme->downButton << std::endl;
 	std::cout << "Left: " <<meme->leftButton << std::endl;
 	system("cls");
-
+	*/
 	
 }
 

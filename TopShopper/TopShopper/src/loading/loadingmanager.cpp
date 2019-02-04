@@ -3,7 +3,7 @@
 
 #include "loadingmanager.h"
 #include <iostream>
-#define _CRT_SECURE_NO_WARNINGS
+//#define _CRT_SECURE_NO_WARNINGS // this shouldnt be necessary since I already defined it in properties>c++>preprocessor
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
