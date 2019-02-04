@@ -14,9 +14,22 @@ Entity::~Entity() {
 
 
 
+/*
+std::string Entity::getName() {
+	return _name;
+}
+*/
+
+EntityTypes Entity::getTag() {
+	return _tag;
+}
+
+
+
 // RULES:
 // if an entity already has a component of type A, then it can't add a new component of type A, unless it first removes it
 // if an existing component type tries to get added, nothing will happen
+// adds in a component with default values
 void Entity::addComponent(ComponentTypes componentType) {
 	// input safety check...
 	if (componentType == ComponentTypes::NUMBER_OF_COMPONENT_TYPES) { // this is a nonsense call
@@ -32,12 +45,31 @@ void Entity::addComponent(ComponentTypes componentType) {
 
 	// otherwise, just create a default version of the component type and store in the array
 	switch (componentType) {
-		/*
-		OUTDATED EXAMPLE
-		case ComponentTypes::TRANSFORM:
-			_components.at(index) = std::make_shared<Transform>();
+		case ComponentTypes::AUDIO_LISTENER:
+			_components.at(index) == std::make_shared<AudioListener>();
 			break;
-		*/
+		case ComponentTypes::AUDIO_SOURCE:
+			_components.at(index) == std::make_shared<AudioSource>();
+			break;
+		case ComponentTypes::CAMERA:
+			_components.at(index) == std::make_shared<Camera>();
+			break;
+		case ComponentTypes::INPUT_CONTROLLER:
+			_components.at(index) == std::make_shared<InputController>();
+			break;
+		case ComponentTypes::MESH:
+			_components.at(index) == std::make_shared<Mesh>();
+			break;
+		case ComponentTypes::NAV_MESH:
+			_components.at(index) == std::make_shared<NavMesh>();
+			break;
+		case ComponentTypes::NAV_MESH_AGENT:
+			_components.at(index) == std::make_shared<NavMeshAgent>();
+			break;
+		case ComponentTypes::UI_SPRITE:
+			_components.at(index) == std::make_shared<UISprite>();
+			break;
+
 	}
 
 }

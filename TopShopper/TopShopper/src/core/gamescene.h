@@ -8,7 +8,12 @@
 #include <memory>
 
 class Entity;
-class PxScene;
+class ShoppingCartPlayer;
+//#include "objects/shoppingcartplayer.h"
+
+namespace physx {
+	class PxScene;
+};
 
 
 
@@ -18,13 +23,20 @@ class GameScene {
 	public:
 		GameScene(std::shared_ptr<PxScene> physxScene);
 		virtual ~GameScene();
+		Scene(physx::PxScene *physxScene);
+		virtual ~Scene();
 
-		std::shared_ptr<PxScene> _physxScene = nullptr;
+		physx::PxScene *_physxScene = nullptr;
 
 		void addEntity(std::shared_ptr<Entity> entity);
 		// ~~~~~~~~also have remove entity - by name? or maybe by pointer
-	private:
+
+		std::vector<std::shared_ptr<ShoppingCartPlayer>> getAllShoppingCartPlayers();
+
+
 		std::vector<std::shared_ptr<Entity>> _entities;
+
+	private:
 };
 
 

@@ -28,9 +28,9 @@
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
 #include "SnippetVehicleCreate.h"
-#include "SnippetVehicleTireFriction.h"
+//#include "SnippetVehicleTireFriction.h"
 #include "SnippetVehicleSceneQuery.h"
-
+#include "physics/physicsmanager.h"
 
 namespace snippetvehicle
 {
@@ -95,7 +95,8 @@ void setupWheelsSimulationData
 		//Set up the tires.
 		for(PxU32 i = 0; i < numWheels; i++)
 		{
-			tires[i].mType = TIRE_TYPE_NORMAL;
+			//tires[i].mType = TIRE_TYPE_NORMAL;
+			tires[i].mType = TireTypes::NORMAL;
 		}
 	}
 

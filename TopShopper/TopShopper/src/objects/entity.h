@@ -8,6 +8,12 @@
 #include <glm/glm.hpp>
 
 
+namespace physx {
+	class PxRigidDynamic;
+	class PxRigidStatic;
+};
+
+
 
 // DEFINITION:
 // ENTITIES ARE ALL OBJECTS PLACED IN THE GAME WORLD (E.G. TYPICAL PHYSICAL ACTORS, LIGHT SOURCES, UI ELEMENTS, ETC.)
@@ -15,6 +21,14 @@
 // EACH ENTITY CAN HAVE ATTACHED DIFFERENT COMPONENTS TO CONFIGURE THE DATA STORED BY THE ENTITY
 // IF A COMPONENT NEEDS A POSITION, IT WILL USE THIS ENTITY'S TRANSFORM BY DEFAULT, BUT AN OFFSET COULD BE DEFINED (E.G. CAMERA COMPONENT HAS A RELATIVE POSITION TO ITS PARENT ENTITY)
 // ***THIS CLASS SHOULN NOT BE INSTANTIATED ON ITS OWN AND WILL BE SUBCLASSES INTO PREFABS (E.G. SHOPPINGCART, BANANA, HOT POTATO, ETC.)
+
+
+
+
+/*
+	EVERY ENTITY  WILL BE 1-1 LINKED WITH A PXRIGIDACTOR (HAS PXRIGIDACTOR* FIELD HERE AND THEN THE actor.userData pointer field will get set to pointer to our entity subclass.
+	
+*/
 
 enum EntityTypes {
 	ENVIRONMENT_GEOMETRY, // COMPONENTS = MESH ~~~~~~~CAN BE SPLIT UP INTO WALLS/SHELVES,RAMPS,ETC.
@@ -31,18 +45,26 @@ enum EntityTypes {
 
 
 class Entity {
-public:
-	Entity();
-	virtual ~Entity();
+	public:
+		Entity();
+		virtual ~Entity();
 
-	void addComponent(ComponentTypes componentType); // only adds a component with default values to entity. These values can be overwritten afterwords through getComponent and public field changing or getters/setters
-	void removeComponent(ComponentTypes componentType);
-	std::shared_ptr<Component> getComponent(ComponentTypes componentType);
-protected:
-	std::string _name;
-	EntityTypes _tag;
-	std::array<std::shared_ptr<Component>, ComponentTypes::NUMBER_OF_COMPONENT_TYPES> _components;
-private:
+		void addComponent(ComponentTypes componentType); // only adds a component with default values to entity. These values can be overwritten afterwords through getComponent and public field changing or getters/setters
+		void removeComponent(ComponentTypes componentType);
+		std::shared_ptr<Component> getComponent(ComponentTypes componentType);
+
+		//PxRigidActor* _actor;
+
+		virtual void updatePhysics(double deltaTime)=0;
+
+		//std::string getName();
+		EntityTypes getTag();
+
+	protected:
+		//std::string _name;
+		EntityTypes _tag;
+	private:
+		std::array<std::shared_ptr<Component>, ComponentTypes::NUMBER_OF_COMPONENT_TYPES> _components;
 
 };
 
