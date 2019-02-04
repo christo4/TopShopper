@@ -2,11 +2,14 @@
 #include "VehicleShoppingCart.h"
 
 
+
+#include "physics/physicsmanager.h" // ~~~~~~~I can have this here since i'm in .cpp (no cyclic dependencies!!!)
+
 //#include <ctype.h>
 //#include <iostream>
 //#include "vehicle/PxVehicleUtil.h"
 //#include "snippetvehiclecommon/SnippetVehicleSceneQuery.h"
-#include "snippetvehiclecommon/SnippetVehicleFilterShader.h"
+//#include "snippetvehiclecommon/SnippetVehicleFilterShader.h"
 //#include "snippetvehiclecommon/SnippetVehicleTireFriction.h"
 
 
@@ -107,7 +110,7 @@ VehicleDesc initVehicleDesc(PxPhysics *physics)
 	vehicleDesc.chassisCMOffset = chassisCMOffset;
 	vehicleDesc.chassisMaterial = physics->createMaterial(0.5f, 0.5f, 0.6f);
 	//word0 = collide type, word1 = collide against types, word2 = PxPairFlags
-	vehicleDesc.chassisSimFilterData = PxFilterData(COLLISION_FLAG_CHASSIS, COLLISION_FLAG_CHASSIS_AGAINST, 0, 0);
+	vehicleDesc.chassisSimFilterData = PxFilterData(CollisionFlags::COLLISION_FLAG_CHASSIS, CollisionFlags::COLLISION_FLAG_CHASSIS_AGAINST, 0, 0);
 
 	vehicleDesc.wheelMass = wheelMass;
 	vehicleDesc.wheelRadius = wheelRadius;
@@ -115,7 +118,7 @@ VehicleDesc initVehicleDesc(PxPhysics *physics)
 	vehicleDesc.wheelMOI = wheelMOI;
 	vehicleDesc.numWheels = nbWheels;
 	vehicleDesc.wheelMaterial = physics->createMaterial(0.5f, 0.5f, 0.6f);
-	vehicleDesc.chassisSimFilterData = PxFilterData(COLLISION_FLAG_WHEEL, COLLISION_FLAG_WHEEL_AGAINST, 0, 0);
+	vehicleDesc.chassisSimFilterData = PxFilterData(CollisionFlags::COLLISION_FLAG_WHEEL, CollisionFlags::COLLISION_FLAG_WHEEL_AGAINST, 0, 0);
 
 	return vehicleDesc;
 }
