@@ -26,6 +26,9 @@ public:
 	// get/set_ManagerName_dataSummary
 
 	GLFWwindow* get_RenderingManager_Window();
+
+	std::vector<std::shared_ptr<ShoppingCartPlayer>> get_PhysicsManager_ActiveScene_AllShoppingCartPlayers();
+
 private:
 	static Broker* _instance;
 	Broker();

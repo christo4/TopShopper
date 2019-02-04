@@ -259,6 +259,7 @@ void PhysicsManager::switchToScene1() {
 
 	std::shared_ptr<ShoppingCartPlayer> vehicle1 = instantiateShoppingCartPlayer();
 	vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setName("vehicle1"); // overwrite the default name
+	vehicle1->setInputID(1);
 	VehicleDesc &vehicleDesc = vehicle1->_shoppingCartBase->_vehicleDesc;
 	vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(PxTransform(0.0f, vehicleDesc.chassisDims.y*0.5f + vehicleDesc.wheelRadius + 1.0f, 0.0f, PxQuat(PxIdentity)));
 	physxScene->addActor(*vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor());
@@ -498,7 +499,7 @@ later on for a single scene, do CustomSimEC instance; and then call scene.setSIm
 // RETURNS AN INSTANCE OF SHOPPINGCARTPLAYER WITH DEFAULT (PREFAB) VALUES THAT SHOULD BE OVERWRITTEN IN THE CHANGESCENE METHODS
 std::shared_ptr<ShoppingCartPlayer> PhysicsManager::instantiateShoppingCartPlayer() {
 	VehicleShoppingCart *shoppingCartBase = new VehicleShoppingCart(gPhysics, gCooking);
-	std::shared_ptr<ShoppingCartPlayer> shoppingCartPlayer = std::make_shared<ShoppingCartPlayer>("default_name", shoppingCartBase);
+	std::shared_ptr<ShoppingCartPlayer> shoppingCartPlayer = std::make_shared<ShoppingCartPlayer>("default_name", shoppingCartBase, 0); // NOTE: an invalid input ID of 0 is placed here as a default since it must be set later
 	return shoppingCartPlayer;
 }
 

@@ -41,9 +41,9 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 	// 4. _audioManager.updateAllMilliseconds(deltaTime);
 	// etc.
 
+	_inputManager->updateMilliseconds(deltaTime); // NOTE: this needs to be done before physics updates
 	_physicsManager->updateMilliseconds(deltaTime);
 	_renderingManager->updateMilliseconds(deltaTime);
-	_inputManager->updateMilliseconds(deltaTime);
 
 	// ~~~~~~~~~WARNING: this should be commented out when no controller is connected...
 	/*
@@ -81,3 +81,9 @@ GLFWwindow* Broker::get_RenderingManager_Window() {
 	return _renderingManager->getWindow();
 }
 
+
+
+
+std::vector<std::shared_ptr<ShoppingCartPlayer>> Broker::get_PhysicsManager_ActiveScene_AllShoppingCartPlayers() {
+	return _physicsManager->getActiveScene()->getAllShoppingCartPlayers();
+}

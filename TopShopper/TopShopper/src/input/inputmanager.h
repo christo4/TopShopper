@@ -47,6 +47,8 @@ private:
 	int _joySticks[4] = { GLFW_JOYSTICK_1 ,GLFW_JOYSTICK_2 ,GLFW_JOYSTICK_3 ,GLFW_JOYSTICK_4 };
 	std::vector<Gamepad*> _gamePads;
 	Broker* _broker = nullptr;
+
+	void passAlongInputsToCarts();
 };
 
 #endif // INPUTMANAGER_H_

@@ -39,8 +39,8 @@ ShoppingCartPlayer::ShoppingCartPlayer(std::string name, physx::PxVehicleDrive4W
 */
 
 // INITS A SHOPPINGCARTPLAYER PREFAB WITH DEFAULT VALUES
-ShoppingCartPlayer::ShoppingCartPlayer(std::string name, VehicleShoppingCart *shoppingCartBase) 
-	: _shoppingCartBase(shoppingCartBase)
+ShoppingCartPlayer::ShoppingCartPlayer(std::string name, VehicleShoppingCart *shoppingCartBase, int inputID)
+	: _shoppingCartBase(shoppingCartBase), _inputID(inputID)
 {
 	// INIT BASIC INFO AND PHYSICS BASE ACTOR
 

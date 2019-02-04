@@ -91,6 +91,9 @@ public:
 
 	void switchToScene1();
 
+
+	std::shared_ptr<GameScene> getActiveScene() { return _activeScene; }
+
 private:
 	Broker* _broker = nullptr;
 
