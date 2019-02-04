@@ -158,14 +158,13 @@
     <ClCompile Include="src\loading\loadingmanager.cpp" />
     <ClCompile Include="src\objects\component.cpp" />
     <ClCompile Include="src\objects\entity.cpp" />
-    <ClCompile Include="src\objects\shoppingcart.cpp" />
+    <ClCompile Include="src\objects\shoppingcartplayer.cpp" />
     <ClCompile Include="src\physics\physicsmanager.cpp" />
     <ClCompile Include="src\rendering\renderingmanager.cpp" />
     <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicle4WCreate.cpp" />
     <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleCreate.cpp" />
-    <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleFilterShader.cpp" />
     <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleSceneQuery.cpp" />
-    <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleTireFriction.cpp" />
+    <ClCompile Include="src\vehicle\VehicleShoppingCart.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ai\aimanager.h" />
@@ -176,16 +175,12 @@
     <ClInclude Include="src\loading\loadingmanager.h" />
     <ClInclude Include="src\objects\component.h" />
     <ClInclude Include="src\objects\entity.h" />
-    <ClInclude Include="src\objects\shoppingcart.h" />
+    <ClInclude Include="src\objects\shoppingcartplayer.h" />
     <ClInclude Include="src\physics\physicsmanager.h" />
     <ClInclude Include="src\rendering\renderingmanager.h" />
-    <ClInclude Include="src\vehicle\snippetcommon\SnippetPVD.h" />
-    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleConcurrency.h" />
     <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleCreate.h" />
-    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleFilterShader.h" />
     <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleSceneQuery.h" />
-    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleTireFriction.h" />
-    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleWheelQueryResult.h" />
+    <ClInclude Include="src\vehicle\VehicleShoppingCart.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

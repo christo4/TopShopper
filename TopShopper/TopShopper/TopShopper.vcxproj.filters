@@ -36,25 +36,22 @@
     <ClCompile Include="src\core\scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\objects\shoppingcart.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicle4WCreate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleCreate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleFilterShader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleSceneQuery.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleTireFriction.cpp">
+    <ClCompile Include="src\loading\loadingmanager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\loading\loadingmanager.cpp">
+    <ClCompile Include="src\objects\shoppingcartplayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vehicle\VehicleShoppingCart.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -89,28 +86,16 @@
     <ClInclude Include="src\rendering\renderingmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\objects\shoppingcart.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleConcurrency.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleCreate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleFilterShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleSceneQuery.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleTireFriction.h">
+    <ClInclude Include="src\objects\shoppingcartplayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleWheelQueryResult.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\vehicle\snippetcommon\SnippetPVD.h">
+    <ClInclude Include="src\vehicle\VehicleShoppingCart.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

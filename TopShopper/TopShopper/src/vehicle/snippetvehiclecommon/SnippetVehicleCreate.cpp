@@ -30,8 +30,8 @@
 #include <new>
 #include "SnippetVehicleCreate.h"
 #include "SnippetVehicleSceneQuery.h"
-#include "SnippetVehicleFilterShader.h"
-#include "SnippetVehicleTireFriction.h"
+//#include "SnippetVehicleFilterShader.h"
+//#include "SnippetVehicleTireFriction.h"
 #include "PxPhysicsAPI.h"
 
 namespace snippetvehicle

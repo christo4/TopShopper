@@ -39,6 +39,8 @@
 
 //#define PVD_ENABLED // ~~~~~NOTE: comment this out if you dont have PVD installed or on release
 
+#define PVD_HOST "127.0.0.1" // Set this to the IP address of the system running the PhysX Visual Debugger that you want to connect to. DEFAULT = LOCALHOST
+
 
 
 #include <ctype.h>
@@ -46,21 +48,9 @@
 #include "physicsmanager.h"
 #include <iostream>
 
-#include "PxPhysicsAPI.h"
-
 #include "vehicle/PxVehicleUtil.h"
-#include "vehicle/snippetvehiclecommon/SnippetVehicleSceneQuery.h"
-#include "vehicle/snippetvehiclecommon/SnippetVehicleFilterShader.h"
-#include "vehicle/snippetvehiclecommon/SnippetVehicleTireFriction.h"
-#include "vehicle/snippetvehiclecommon/SnippetVehicleCreate.h"
-
-//#include "../snippetcommon/SnippetPrint.h"
-
-#ifdef PVD_ENABLED
-#include "vehicle/snippetcommon/SnippetPVD.h"
-#endif // PVD_ENABLED
-
-//#include "../snippetutils/SnippetUtils.h"
+#include "vehicle/snippetvehiclecommon/SnippetVehicleSceneQuery.h" // REQUIRED
+#include "vehicle/snippetvehiclecommon/SnippetVehicleCreate.h" // REQUIRED
 
 
 using namespace physx;
@@ -74,11 +64,8 @@ PxFoundation*			gFoundation = NULL;
 PxPhysics*				gPhysics = NULL;
 
 PxDefaultCpuDispatcher*	gDispatcher = NULL;
-PxScene*				gScene = NULL;
 
 PxCooking*				gCooking = NULL;
-
-PxMaterial*				gMaterial = NULL;
 
 #ifdef PVD_ENABLED
 PxPvd*                  gPvd = NULL;
@@ -89,489 +76,66 @@ PxBatchQuery*			gBatchQuery = NULL;
 
 PxVehicleDrivableSurfaceToTireFrictionPairs* gFrictionPairs = NULL;
 
-PxRigidStatic*			gGroundPlane = NULL;
-PxVehicleDrive4W*		gVehicle4W = NULL;
-
-bool					gIsVehicleInAir = true;
 
 
-PxF32 gSteerVsForwardSpeedData[2 * 8] =
-{
-	0.0f,		0.75f,
-	5.0f,		0.75f,
-	30.0f,		0.125f,
-	120.0f,		0.1f,
-	PX_MAX_F32, PX_MAX_F32,
-	PX_MAX_F32, PX_MAX_F32,
-	PX_MAX_F32, PX_MAX_F32,
-	PX_MAX_F32, PX_MAX_F32
-};
-PxFixedSizeLookupTable<8> gSteerVsForwardSpeedTable(gSteerVsForwardSpeedData, 4);
+/////////////////////////////////////////////////////////////////////////////
+// FRICTION STUFF...
 
-PxVehicleKeySmoothingData gKeySmoothingData =
-{
-	{
-		6.0f,	//rise rate eANALOG_INPUT_ACCEL
-		6.0f,	//rise rate eANALOG_INPUT_BRAKE		
-		6.0f,	//rise rate eANALOG_INPUT_HANDBRAKE	
-		2.5f,	//rise rate eANALOG_INPUT_STEER_LEFT
-		2.5f,	//rise rate eANALOG_INPUT_STEER_RIGHT
-	},
-	{
-		10.0f,	//fall rate eANALOG_INPUT_ACCEL
-		10.0f,	//fall rate eANALOG_INPUT_BRAKE		
-		10.0f,	//fall rate eANALOG_INPUT_HANDBRAKE	
-		5.0f,	//fall rate eANALOG_INPUT_STEER_LEFT
-		5.0f	//fall rate eANALOG_INPUT_STEER_RIGHT
-	}
-};
+void initFrictionPairs() {
+	// array of drivable surface types whose IDS get set to enum values
+	PxVehicleDrivableSurfaceType surfaceTypes[DrivableSurfaceTypes::NUMBER_OF_DRIVABLE_SURFACE_TYPES];
+	surfaceTypes[DrivableSurfaceTypes::WAXED_FLOOR].mType = DrivableSurfaceTypes::WAXED_FLOOR;
 
-PxVehiclePadSmoothingData gPadSmoothingData =
-{
-	{
-		6.0f,	//rise rate eANALOG_INPUT_ACCEL
-		6.0f,	//rise rate eANALOG_INPUT_BRAKE		
-		6.0f,	//rise rate eANALOG_INPUT_HANDBRAKE	
-		2.5f,	//rise rate eANALOG_INPUT_STEER_LEFT
-		2.5f,	//rise rate eANALOG_INPUT_STEER_RIGHT
-	},
-	{
-		10.0f,	//fall rate eANALOG_INPUT_ACCEL
-		10.0f,	//fall rate eANALOG_INPUT_BRAKE		
-		10.0f,	//fall rate eANALOG_INPUT_HANDBRAKE	
-		5.0f,	//fall rate eANALOG_INPUT_STEER_LEFT
-		5.0f	//fall rate eANALOG_INPUT_STEER_RIGHT
-	}
-};
+	// array of materials associated with each surface type
+	const PxMaterial* surfaceMaterials[DrivableSurfaceTypes::NUMBER_OF_DRIVABLE_SURFACE_TYPES];
+	surfaceMaterials[DrivableSurfaceTypes::WAXED_FLOOR] = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 
-PxVehicleDrive4WRawInputData gVehicleInputData;
+	// alloc memeory to hold info about each combo
+	PxVehicleDrivableSurfaceToTireFrictionPairs *surfaceTirePairs = PxVehicleDrivableSurfaceToTireFrictionPairs::allocate(TireTypes::NUMBER_OF_TIRE_TYPES, DrivableSurfaceTypes::NUMBER_OF_DRIVABLE_SURFACE_TYPES);
 
-enum DriveMode
-{
-	eDRIVE_MODE_ACCEL_FORWARDS = 0,
-	eDRIVE_MODE_ACCEL_REVERSE,
-	eDRIVE_MODE_HARD_TURN_LEFT,
-	eDRIVE_MODE_HANDBRAKE_TURN_LEFT,
-	eDRIVE_MODE_HARD_TURN_RIGHT,
-	eDRIVE_MODE_HANDBRAKE_TURN_RIGHT,
-	eDRIVE_MODE_BRAKE,
-	eDRIVE_MODE_NONE
-};
+	// setup the data to be all together
+	surfaceTirePairs->setup(TireTypes::NUMBER_OF_TIRE_TYPES, DrivableSurfaceTypes::NUMBER_OF_DRIVABLE_SURFACE_TYPES, surfaceMaterials, surfaceTypes);
 
-DriveMode gDriveModeOrder[] =
-{
-	eDRIVE_MODE_BRAKE,
-	eDRIVE_MODE_ACCEL_FORWARDS,
-	eDRIVE_MODE_BRAKE,
-	eDRIVE_MODE_ACCEL_REVERSE,
-	eDRIVE_MODE_BRAKE,
-	eDRIVE_MODE_HARD_TURN_LEFT,
-	eDRIVE_MODE_BRAKE,
-	eDRIVE_MODE_HARD_TURN_RIGHT,
-	eDRIVE_MODE_ACCEL_FORWARDS,
-	eDRIVE_MODE_HANDBRAKE_TURN_LEFT,
-	eDRIVE_MODE_ACCEL_FORWARDS,
-	eDRIVE_MODE_HANDBRAKE_TURN_RIGHT,
-	eDRIVE_MODE_NONE
-};
-
-PxF32					gVehicleModeLifetime = 4.0f;
-PxF32					gVehicleModeTimer = 0.0f;
-PxU32					gVehicleOrderProgress = 0;
-bool					gVehicleOrderComplete = false;
-bool					gMimicKeyInputs = false;
-
-VehicleDesc initVehicleDesc()
-{
-	//Set up the chassis mass, dimensions, moment of inertia, and center of mass offset.
-	//The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
-	//Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
-	const PxF32 chassisMass = 1500.0f; // ORIGINAL
-	//const PxF32 chassisMass = 100.0f; // WARNING: DONT SET IT TO A LOW VALUE WITHOUT CHANGING OTHER STUFF, cause it causes the cart to flip over and over
-	//const PxVec3 chassisDims(2.5f, 2.0f, 5.0f); // ORIGINAL
-	//const PxVec3 chassisDims(25.0f, 2.0f, 5.0f); // REALLY WIDE (X is widescreen axis)
-	//const PxVec3 chassisDims(2.5f, 20.0f, 5.0f); // REALLY TALL (Y is up)
-	//const PxVec3 chassisDims(2.5f, 2.0f, 50.0f); // REALLY LONG (Z is towards you)
-	const PxVec3 chassisDims(3.0f, 3.5f, 5.0f); // MORE SHOPPING CART SIZED
+	// FOR EACH COMBO, set the friction coefficient
+	surfaceTirePairs->setTypePairFriction(DrivableSurfaceTypes::WAXED_FLOOR, TireTypes::NORMAL, 1.0f); // friction coefficient = 1.0f
 
 
-	const PxVec3 chassisMOI
-	((chassisDims.y*chassisDims.y + chassisDims.z*chassisDims.z)*chassisMass / 12.0f,
-		(chassisDims.x*chassisDims.x + chassisDims.z*chassisDims.z)*0.8f*chassisMass / 12.0f, // EASIER TO ROTATE AROUND ITS Y-AXIS
-		(chassisDims.x*chassisDims.x + chassisDims.y*chassisDims.y)*chassisMass / 12.0f);
-	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y*0.5f + 0.65f, 0.25f);
-
-	//Set up the wheel mass, radius, width, moment of inertia, and number of wheels.
-	//Moment of inertia is just the moment of inertia of a cylinder.
-	const PxF32 wheelMass = 20.0f;
-	const PxF32 wheelRadius = 0.5f;
-	const PxF32 wheelWidth = 0.4f;
-	const PxF32 wheelMOI = 0.5f*wheelMass*wheelRadius*wheelRadius;
-	//const PxU32 nbWheels = 6; // ORIGINAL
-	const PxU32 nbWheels = 4;
-
-	VehicleDesc vehicleDesc;
-
-	vehicleDesc.chassisMass = chassisMass;
-	vehicleDesc.chassisDims = chassisDims;
-	vehicleDesc.chassisMOI = chassisMOI;
-	vehicleDesc.chassisCMOffset = chassisCMOffset;
-	vehicleDesc.chassisMaterial = gMaterial;
-	vehicleDesc.chassisSimFilterData = PxFilterData(COLLISION_FLAG_CHASSIS, COLLISION_FLAG_CHASSIS_AGAINST, 0, 0);
-
-	vehicleDesc.wheelMass = wheelMass;
-	vehicleDesc.wheelRadius = wheelRadius;
-	vehicleDesc.wheelWidth = wheelWidth;
-	vehicleDesc.wheelMOI = wheelMOI;
-	vehicleDesc.numWheels = nbWheels;
-	vehicleDesc.wheelMaterial = gMaterial;
-	vehicleDesc.chassisSimFilterData = PxFilterData(COLLISION_FLAG_WHEEL, COLLISION_FLAG_WHEEL_AGAINST, 0, 0);
-
-	return vehicleDesc;
-}
-
-void startAccelerateForwardsMode()
-{
-	if (gMimicKeyInputs)
-	{
-		gVehicleInputData.setDigitalAccel(true);
-	}
-	else
-	{
-		gVehicleInputData.setAnalogAccel(1.0f);
-	}
-}
-
-void startAccelerateReverseMode()
-{
-	gVehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eREVERSE);
-
-	if (gMimicKeyInputs)
-	{
-		gVehicleInputData.setDigitalAccel(true);
-	}
-	else
-	{
-		gVehicleInputData.setAnalogAccel(1.0f);
-	}
-}
-
-void startBrakeMode()
-{
-	if (gMimicKeyInputs)
-	{
-		gVehicleInputData.setDigitalBrake(true);
-	}
-	else
-	{
-		gVehicleInputData.setAnalogBrake(1.0f);
-	}
-}
-
-void startTurnHardLeftMode()
-{
-	if (gMimicKeyInputs)
-	{
-		gVehicleInputData.setDigitalAccel(true);
-		gVehicleInputData.setDigitalSteerLeft(true);
-	}
-	else
-	{
-		gVehicleInputData.setAnalogAccel(true);
-		gVehicleInputData.setAnalogSteer(-1.0f);
-	}
-}
-
-void startTurnHardRightMode()
-{
-	if (gMimicKeyInputs)
-	{
-		gVehicleInputData.setDigitalAccel(true);
-		gVehicleInputData.setDigitalSteerRight(true);
-	}
-	else
-	{
-		gVehicleInputData.setAnalogAccel(1.0f);
-		gVehicleInputData.setAnalogSteer(1.0f);
-	}
-}
-
-void startHandbrakeTurnLeftMode()
-{
-	if (gMimicKeyInputs)
-	{
-		gVehicleInputData.setDigitalSteerLeft(true);
-		gVehicleInputData.setDigitalHandbrake(true);
-	}
-	else
-	{
-		gVehicleInputData.setAnalogSteer(-1.0f);
-		gVehicleInputData.setAnalogHandbrake(1.0f);
-	}
-}
-
-void startHandbrakeTurnRightMode()
-{
-	if (gMimicKeyInputs)
-	{
-		gVehicleInputData.setDigitalSteerRight(true);
-		gVehicleInputData.setDigitalHandbrake(true);
-	}
-	else
-	{
-		gVehicleInputData.setAnalogSteer(1.0f);
-		gVehicleInputData.setAnalogHandbrake(1.0f);
-	}
+	// init the global variable to reflect our work
+	gFrictionPairs = surfaceTirePairs;
 }
 
 
-void releaseAllControls()
+
+/////////////////////////////////////////////////////////////////////////////
+// COLLISION FILTERING STUFF...
+
+// TODO: change this in the future to be a customfiltershader
+
+PxFilterFlags VehicleFilterShader
+(PxFilterObjectAttributes attributes0, PxFilterData filterData0,
+	PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+	PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
 {
-	if (gMimicKeyInputs)
-	{
-		gVehicleInputData.setDigitalAccel(false);
-		gVehicleInputData.setDigitalSteerLeft(false);
-		gVehicleInputData.setDigitalSteerRight(false);
-		gVehicleInputData.setDigitalBrake(false);
-		gVehicleInputData.setDigitalHandbrake(false);
-	}
-	else
-	{
-		gVehicleInputData.setAnalogAccel(0.0f);
-		gVehicleInputData.setAnalogSteer(0.0f);
-		gVehicleInputData.setAnalogBrake(0.0f);
-		gVehicleInputData.setAnalogHandbrake(0.0f);
-	}
+	PX_UNUSED(attributes0);
+	PX_UNUSED(attributes1);
+	PX_UNUSED(constantBlock);
+	PX_UNUSED(constantBlockSize);
+
+	if ((0 == (filterData0.word0 & filterData1.word1)) && (0 == (filterData1.word0 & filterData0.word1)))
+		return PxFilterFlag::eSUPPRESS;
+
+	pairFlags = PxPairFlag::eCONTACT_DEFAULT;
+	pairFlags |= PxPairFlags(PxU16(filterData0.word2 | filterData1.word2));
+
+	return PxFilterFlags();
 }
 
-/*
-void initPhysics()
-{
-	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
-	gPvd = PxCreatePvd(*gFoundation);
-	//PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
-	//gPvd->connect(*transport,PxPvdInstrumentationFlag::eALL);
-	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
-
-	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
-
-	PxU32 numWorkers = 1;
-	gDispatcher = PxDefaultCpuDispatcherCreate(numWorkers);
-	sceneDesc.cpuDispatcher = gDispatcher;
-	sceneDesc.filterShader = VehicleFilterShader;
-
-	gScene = gPhysics->createScene(sceneDesc);
-	PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
-	if (pvdClient)
-	{
-		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
-		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
-		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
-	}
-	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
-
-	gCooking = PxCreateCooking(PX_PHYSICS_VERSION, *gFoundation, PxCookingParams(PxTolerancesScale()));
-
-	/////////////////////////////////////////////
-
-	PxInitVehicleSDK(*gPhysics);
-	PxVehicleSetBasisVectors(PxVec3(0, 1, 0), PxVec3(0, 0, 1));
-	PxVehicleSetUpdateMode(PxVehicleUpdateMode::eVELOCITY_CHANGE);
-
-	//Create the batched scene queries for the suspension raycasts.
-	gVehicleSceneQueryData = VehicleSceneQueryData::allocate(1, PX_MAX_NB_WHEELS, 1, 1, WheelSceneQueryPreFilterBlocking, NULL, gAllocator);
-	gBatchQuery = VehicleSceneQueryData::setUpBatchedSceneQuery(0, *gVehicleSceneQueryData, gScene);
-
-	//Create the friction table for each combination of tire and surface type.
-	gFrictionPairs = createFrictionPairs(gMaterial);
-
-	//Create a plane to drive on.
-	PxFilterData groundPlaneSimFilterData(COLLISION_FLAG_GROUND, COLLISION_FLAG_GROUND_AGAINST, 0, 0);
-	gGroundPlane = createDrivablePlane(groundPlaneSimFilterData, gMaterial, gPhysics);
-	gScene->addActor(*gGroundPlane);
-
-	//Create a vehicle that will drive on the plane.
-	VehicleDesc vehicleDesc = initVehicleDesc();
-	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
-	PxTransform startTransform(PxVec3(0, (vehicleDesc.chassisDims.y*0.5f + vehicleDesc.wheelRadius + 1.0f), 0), PxQuat(PxIdentity));
-	gVehicle4W->getRigidDynamicActor()->setGlobalPose(startTransform);
-	gScene->addActor(*gVehicle4W->getRigidDynamicActor());
-
-	//Set the vehicle to rest in first gear.
-	//Set the vehicle to use auto-gears.
-	gVehicle4W->setToRestState();
-	gVehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
-	gVehicle4W->mDriveDynData.setUseAutoGears(true);
-
-	gVehicleModeTimer = 0.0f;
-	gVehicleOrderProgress = 0;
-	startBrakeMode();
-}
-*/
-
-void incrementDrivingMode(const PxF32 timestep)
-{
-	gVehicleModeTimer += timestep;
-	if (gVehicleModeTimer > gVehicleModeLifetime)
-	{
-		//If the mode just completed was eDRIVE_MODE_ACCEL_REVERSE then switch back to forward gears.
-		if (eDRIVE_MODE_ACCEL_REVERSE == gDriveModeOrder[gVehicleOrderProgress])
-		{
-			gVehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
-		}
-
-		//Increment to next driving mode.
-		gVehicleModeTimer = 0.0f;
-		gVehicleOrderProgress++;
-		releaseAllControls();
-
-		//If we are at the end of the list of driving modes then start again.
-		if (eDRIVE_MODE_NONE == gDriveModeOrder[gVehicleOrderProgress])
-		{
-			gVehicleOrderProgress = 0;
-			gVehicleOrderComplete = true;
-		}
-
-		//Start driving in the selected mode.
-		DriveMode eDriveMode = gDriveModeOrder[gVehicleOrderProgress];
-		switch (eDriveMode)
-		{
-		case eDRIVE_MODE_ACCEL_FORWARDS:
-			startAccelerateForwardsMode();
-			break;
-		case eDRIVE_MODE_ACCEL_REVERSE:
-			startAccelerateReverseMode();
-			break;
-		case eDRIVE_MODE_HARD_TURN_LEFT:
-			startTurnHardLeftMode();
-			break;
-		case eDRIVE_MODE_HANDBRAKE_TURN_LEFT:
-			startHandbrakeTurnLeftMode();
-			break;
-		case eDRIVE_MODE_HARD_TURN_RIGHT:
-			startTurnHardRightMode();
-			break;
-		case eDRIVE_MODE_HANDBRAKE_TURN_RIGHT:
-			startHandbrakeTurnRightMode();
-			break;
-		case eDRIVE_MODE_BRAKE:
-			startBrakeMode();
-			break;
-		case eDRIVE_MODE_NONE:
-			break;
-		};
-
-		//If the mode about to start is eDRIVE_MODE_ACCEL_REVERSE then switch to reverse gears.
-		if (eDRIVE_MODE_ACCEL_REVERSE == gDriveModeOrder[gVehicleOrderProgress])
-		{
-			gVehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eREVERSE);
-		}
-	}
-}
-
-/*
-void stepPhysics()
-{
-	const PxF32 timestep = 1.0f / 60.0f;
-
-	//Cycle through the driving modes to demonstrate how to accelerate/reverse/brake/turn etc.
-	incrementDrivingMode(timestep);
-
-	//Update the control inputs for the vehicle.
-	if (gMimicKeyInputs)
-	{
-		PxVehicleDrive4WSmoothDigitalRawInputsAndSetAnalogInputs(gKeySmoothingData, gSteerVsForwardSpeedTable, gVehicleInputData, timestep, gIsVehicleInAir, *gVehicle4W);
-	}
-	else
-	{
-		PxVehicleDrive4WSmoothAnalogRawInputsAndSetAnalogInputs(gPadSmoothingData, gSteerVsForwardSpeedTable, gVehicleInputData, timestep, gIsVehicleInAir, *gVehicle4W);
-	}
-
-	//Raycasts.
-	PxVehicleWheels* vehicles[1] = { gVehicle4W };
-	PxRaycastQueryResult* raycastResults = gVehicleSceneQueryData->getRaycastQueryResultBuffer(0);
-	const PxU32 raycastResultsSize = gVehicleSceneQueryData->getQueryResultBufferSize();
-	PxVehicleSuspensionRaycasts(gBatchQuery, 1, vehicles, raycastResultsSize, raycastResults);
-
-	//Vehicle update.
-	const PxVec3 grav = gScene->getGravity();
-	PxWheelQueryResult wheelQueryResults[PX_MAX_NB_WHEELS];
-	PxVehicleWheelQueryResult vehicleQueryResults[1] = { {wheelQueryResults, gVehicle4W->mWheelsSimData.getNbWheels()} };
-	PxVehicleUpdates(timestep, grav, *gFrictionPairs, 1, vehicles, vehicleQueryResults);
-
-	//Work out if the vehicle is in the air.
-	gIsVehicleInAir = gVehicle4W->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]);
-
-	//Scene update.
-	gScene->simulate(timestep);
-	gScene->fetchResults(true);
-}
-*/
-
-/*
-void cleanupPhysics()
-{
-	gVehicle4W->getRigidDynamicActor()->release();
-	gVehicle4W->free();
-	gGroundPlane->release();
-	gBatchQuery->release();
-	gVehicleSceneQueryData->free(gAllocator);
-	gFrictionPairs->release();
-	PxCloseVehicleSDK();
-
-	gMaterial->release();
-	gCooking->release();
-	gScene->release();
-	gDispatcher->release();
-	gPhysics->release();
-	//PxPvdTransport* transport = gPvd->getTransport();
-	//gPvd->release();
-	//transport->release();
-	gFoundation->release();
-
-	printf("SnippetVehicle4W done.\n");
-}
-*/
-
-/*
-void keyPress(unsigned char key, const PxTransform& camera)
-{
-	PX_UNUSED(camera);
-	PX_UNUSED(key);
-}
-*/
-
-/*
-int snippetMain(int, const char*const*)
-{
-#ifdef RENDER_SNIPPET
-	extern void renderLoop();
-	renderLoop();
-#else
-	initPhysics();
-	while (!gVehicleOrderComplete)
-	{
-		stepPhysics();
-	}
-	cleanupPhysics();
-#endif
-
-	return 0;
-}
-*/
 
 
 
 
-
-
-
-
-
-
-
-///////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+// PHYSICSMANAGER STUFF...
 
 
 
@@ -599,8 +163,6 @@ void PhysicsManager::init() {
 	gPvd->connect(*transport,PxPvdInstrumentationFlag::eALL);
 	#endif // PVD_ENABLED
 
-	
-
 	PxTolerancesScale simScale;
 	simScale.length = 1.0f; // 1 meter by default
 	simScale.speed = 9.81f; // 9.81 m/s by default (speed reached after falling for 1 second under 9.81m/s^2 gravity)
@@ -627,8 +189,6 @@ void PhysicsManager::init() {
 		exit(EXIT_FAILURE);
 	}
 
-	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
-
 	// SETUP VEHICLE SDK
 	PxInitVehicleSDK(*gPhysics);
 	PxVehicleSetBasisVectors(PxVec3(0.0f, 1.0f, 0.0f), PxVec3(0.0f, 0.0f, 1.0f)); // up = y, forward = z
@@ -636,22 +196,29 @@ void PhysicsManager::init() {
 
 
 
+	switchToScene1();
+
+}
 
 
-	// SCENE STUFF THAT WILL BE MOVED OUT LATER TO THEIR OWN METHODS...
+
+void PhysicsManager::switchToScene1() {
+	// TODO: cleanup scene we just transitioned from...
+
+	// init vehicle stuff, create entities / add their actors into PxScene, position them at starting transforms, etc.....
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
 	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
 
 	PxU32 numWorkers = 1; // 1 thread off the main thread (~~~~~~~~MAYBE CHANGE TO 0, to run on main thread?)
 	gDispatcher = PxDefaultCpuDispatcherCreate(numWorkers);
 	sceneDesc.cpuDispatcher = gDispatcher;
-	sceneDesc.filterShader = VehicleFilterShader;
+	sceneDesc.filterShader = VehicleFilterShader; // TODO: change this later to use a finished CustomFilterShader
+	//sceneDesc.filterShader = CustomFilterShader;
 
-	gScene = gPhysics->createScene(sceneDesc);
-
+	PxScene *physxScene = gPhysics->createScene(sceneDesc);
 
 	#ifdef PVD_ENABLED
-	PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
+	PxPvdSceneClient *pvdClient = physxScene->getScenePvdClient();
 	if (pvdClient)
 	{
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
@@ -660,83 +227,107 @@ void PhysicsManager::init() {
 	}
 	#endif // PVD_ENABLED
 
+	//Create the batched scene queries for the suspension raycasts.
+	PxU32 maxNumVehicles = 12; // 6 players + 6 dumb shopping cart obstacles???
+	PxU32 maxNumWheelsPerVehicle = 4;
+	gVehicleSceneQueryData = VehicleSceneQueryData::allocate(maxNumVehicles, maxNumWheelsPerVehicle, 1, maxNumVehicles, WheelSceneQueryPreFilterBlocking, NULL, gAllocator); // setup for 1 batch (batch ID=0 ???)
+	gBatchQuery = VehicleSceneQueryData::setUpBatchedSceneQuery(0, *gVehicleSceneQueryData, physxScene);
 
+	//Create the friction table for each combination of tire and surface type.
+	initFrictionPairs();
+
+	//Create a plane to drive on.
+
+	// NOTE: PXU32 is a typedef of UINT32
+	// ~~~~NOTE: below its calling the constructor to pass in word0, word1, word2, and word3 making up 128 bits
+	// the words can store any data that we want to pass to the filter shader
+	// The sample uses word0 = out collision flag
+	// word1 = flag combo of all flags that we can collide with
+
+	// TODO: change this to a ground entity later...
+
+	PxFilterData groundPlaneSimFilterData(COLLISION_FLAG_GROUND, COLLISION_FLAG_GROUND_AGAINST, 0, 0);
+	PxMaterial *groundMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+	PxRigidStatic *groundPlane = createDrivablePlane(groundPlaneSimFilterData, groundMaterial, gPhysics);
+	physxScene->addActor(*groundPlane);
 	
 
 
-
-	//Create the batched scene queries for the suspension raycasts.
-	gVehicleSceneQueryData = VehicleSceneQueryData::allocate(1, PX_MAX_NB_WHEELS, 1, 1, WheelSceneQueryPreFilterBlocking, NULL, gAllocator);
-	gBatchQuery = VehicleSceneQueryData::setUpBatchedSceneQuery(0, *gVehicleSceneQueryData, gScene);
-
-	//Create the friction table for each combination of tire and surface type.
-	gFrictionPairs = createFrictionPairs(gMaterial);
-
-	//Create a plane to drive on.
-	PxFilterData groundPlaneSimFilterData(COLLISION_FLAG_GROUND, COLLISION_FLAG_GROUND_AGAINST, 0, 0);
-	gGroundPlane = createDrivablePlane(groundPlaneSimFilterData, gMaterial, gPhysics);
-	gScene->addActor(*gGroundPlane);
+	// VEHICLE 1:
 
 	//Create a vehicle that will drive on the plane.
-	VehicleDesc vehicleDesc = initVehicleDesc();
-	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
-	PxTransform startTransform(PxVec3(0, (vehicleDesc.chassisDims.y*0.5f + vehicleDesc.wheelRadius + 1.0f), 0), PxQuat(PxIdentity));
-	gVehicle4W->getRigidDynamicActor()->setGlobalPose(startTransform);
-	gScene->addActor(*gVehicle4W->getRigidDynamicActor());
 
-	//Set the vehicle to rest in first gear.
-	//Set the vehicle to use auto-gears.
-	gVehicle4W->setToRestState();
-	gVehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
-	gVehicle4W->mDriveDynData.setUseAutoGears(true);
+	std::shared_ptr<ShoppingCartPlayer> vehicle1 = instantiateShoppingCartPlayer();
+	vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setName("vehicle1"); // overwrite the default name
+	VehicleDesc &vehicleDesc = vehicle1->_shoppingCartBase->_vehicleDesc;
+	vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(PxTransform(0.0f, vehicleDesc.chassisDims.y*0.5f + vehicleDesc.wheelRadius + 1.0f, 0.0f, PxQuat(PxIdentity)));
+	physxScene->addActor(*vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor());
 
-	gVehicleModeTimer = 0.0f;
-	gVehicleOrderProgress = 0;
-	startBrakeMode();
+
+
+	_activeScene = std::make_shared<Scene>(physxScene);
+	_activeScene->addEntity(vehicle1);
 
 }
+
 
 
 // ASIDE: if we want a fixed timestep like Unity then pass in say 1/30 or 1/60 but then we need to change UpdateAll() to only call physcismanager.init() when the deltaTimes accumulate enough
 void PhysicsManager::updateMilliseconds(double deltaTime) {
 
-	//Cycle through the driving modes to demonstrate how to accelerate/reverse/brake/turn etc.
-	incrementDrivingMode(deltaTime);
-
-	//Update the control inputs for the vehicle.
-	if (gMimicKeyInputs)
-	{
-		PxVehicleDrive4WSmoothDigitalRawInputsAndSetAnalogInputs(gKeySmoothingData, gSteerVsForwardSpeedTable, gVehicleInputData, deltaTime, gIsVehicleInAir, *gVehicle4W);
-	}
-	else
-	{
-		PxVehicleDrive4WSmoothAnalogRawInputsAndSetAnalogInputs(gPadSmoothingData, gSteerVsForwardSpeedTable, gVehicleInputData, deltaTime, gIsVehicleInAir, *gVehicle4W);
+	// call updatePhysics() on each entity in scene...
+	for (std::shared_ptr<Entity> &entity : _activeScene->_entities) {
+		entity->updatePhysics(deltaTime);
 	}
 
-	//Raycasts.
-	PxVehicleWheels* vehicles[1] = { gVehicle4W };
-	PxRaycastQueryResult* raycastResults = gVehicleSceneQueryData->getRaycastQueryResultBuffer(0);
+
+	// FURTHER VEHICLE UPDATES...
+
+	// ~~~~~~~TODO: change NBVehicles to account for bots and dumbcarts in future
+	
+	std::vector<std::shared_ptr<ShoppingCartPlayer>> shoppingCartPlayers = _activeScene->getAllShoppingCartPlayers();
+
+	//Raycasts...
+	
+	std::vector<PxVehicleWheels*> vehiclesVector;
+	for (std::shared_ptr<ShoppingCartPlayer> &shoppingCartPlayer : shoppingCartPlayers) {
+		vehiclesVector.push_back(shoppingCartPlayer->_shoppingCartBase->_vehicle4W);
+	}
+
+	PxRaycastQueryResult *raycastResults = gVehicleSceneQueryData->getRaycastQueryResultBuffer(0);
 	const PxU32 raycastResultsSize = gVehicleSceneQueryData->getQueryResultBufferSize();
-	PxVehicleSuspensionRaycasts(gBatchQuery, 1, vehicles, raycastResultsSize, raycastResults);
+	PxVehicleSuspensionRaycasts(gBatchQuery, vehiclesVector.size(), vehiclesVector.data(), raycastResultsSize, raycastResults);
 
-	//Vehicle update.
-	const PxVec3 grav = gScene->getGravity();
-	PxWheelQueryResult wheelQueryResults[PX_MAX_NB_WHEELS];
-	PxVehicleWheelQueryResult vehicleQueryResults[1] = { {wheelQueryResults, gVehicle4W->mWheelsSimData.getNbWheels()} };
-	PxVehicleUpdates(deltaTime, grav, *gFrictionPairs, 1, vehicles, vehicleQueryResults);
+
+	//Vehicle update...
+	const PxVec3 grav = _activeScene->_physxScene->getGravity();
+	PxWheelQueryResult wheelQueryResults[PX_MAX_NB_WHEELS]; // ~~~~~~~~~~~~~~maybe this should be 4???
+	//PxVehicleWheelQueryResult vehicleQueryResults[1] = { {wheelQueryResults, gVehicle4W->mWheelsSimData.getNbWheels()} };
+	// ~~~~~~~~~~~~~HACK FOR NOW... change to NBVEHICLES tomorrow...
+	PxVehicleWheelQueryResult vehicleQueryResults[1] = { {wheelQueryResults, 4} };
+	PxVehicleUpdates(deltaTime, grav, *gFrictionPairs, shoppingCartPlayers.size(), vehiclesVector.data(), vehicleQueryResults);
 
 	//Work out if the vehicle is in the air.
-	gIsVehicleInAir = gVehicle4W->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]);
+	//gIsVehicleInAir = gVehicle4W->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]);
+	
 
-	//Scene update.
-	gScene->simulate(deltaTime);
-	gScene->fetchResults(true); // wait for results to come in before moving on to next system
+	// ~~~~~~~~~~~~~HACK FOR NOW... change to for int i = 0 and then queryresults[i] tomorrow...
+	// Update isAirborne flags for each vehicle...
+	for (std::shared_ptr<ShoppingCartPlayer> &shoppingCartPlayer : shoppingCartPlayers) {
+		shoppingCartPlayer->_shoppingCartBase->setIsAirborne(shoppingCartPlayer->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]));
+	}
+
+
+	// Scene update...
+	_activeScene->_physxScene->simulate(deltaTime);
+	_activeScene->_physxScene->fetchResults(true); // wait for results to come in before moving on to next system
 
 }
 
 
 
 void PhysicsManager::cleanup() {
+	/*
 	gVehicle4W->getRigidDynamicActor()->release();
 	gVehicle4W->free();
 	gGroundPlane->release();
@@ -762,7 +353,168 @@ void PhysicsManager::cleanup() {
 
 	
 	gFoundation->release();
+	*/
 }
+
+
+
+
+// NOTE: PxFilterObjectAttributes is a typedef of PxU32
+/*
+PxFilterFlags CustomFilterShader
+(PxFilterObjectAttributes attributes0, PxFilterData filterData0,
+	PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+	PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
+{
+
+	// ~~~~~NOTE: I think that PX_UNUSED means that these params arent used anywhere
+	PX_UNUSED(attributes0);
+	PX_UNUSED(filterData0);
+	PX_UNUSED(attributes1);
+	PX_UNUSED(filterData1);
+	PX_UNUSED(constantBlock);
+	PX_UNUSED(constantBlockSize);
+
+	// this was passed by reference
+	// I think these are the only flags we currently need
+	pairFlags = PxPairFlag::eSOLVE_CONTACT | PxPairFlag::eDETECT_DISCRETE_CONTACT | PxPairFlag::eNOTIFY_TOUCH_FOUND;
+
+	return PxFilterFlag::eDEFAULT;
+
+// use eCALLBACK and eSURPORESS/KILL
+
+	
+	if ((0 == (filterData0.word0 & filterData1.word1)) && (0 == (filterData1.word0 & filterData0.word1)))
+		return PxFilterFlag::eSUPPRESS;
+
+	pairFlags = PxPairFlag::eCONTACT_DEFAULT;
+	pairFlags |= PxPairFlags(PxU16(filterData0.word2 | filterData1.word2));
+	
+
+	//return PxFilterFlags();
+}
+*/
+
+
+
+
+// ~~~~~~~~~~~~~~NOTE: use PxActorFlag::Enum eDISABLE_SIMULATION / GRAVITY 
+// USE	pxrigiddynamic::setKinematicTarget to move kinematic actors
+
+
+
+
+
+/*
+CALLBACK INFO
+- callback are called from fetchresults() rather than on the simulation thread
+
+- OnTrigger
+- OnContact
+
+- NOTE: for these 2 events to be received, must set a flag in the filter shader callback for ALL PAIRS of interacting objects for which events are required
+
+- use PxActor.GetType and then be able to downcast to subclass Static or DYnamic
+
+*/
+
+
+/*
+class CustomSimulationEventCallback : public PxSimulationEventCallback {
+	public:
+		CustomSimulationEventCallback() {}
+		virtual ~CustomSimulationEventCallback() {}
+		void onConstraintBreak(PxConstraintInfo *constraints, PxU32 count) override {}
+		void onWake(PxActor **actors, PxU32 count) override {}
+		void onSleep(PxActor **actors, PxU32 count) override {}
+
+
+		// SAMPLE SUBMARINE EXAMPLE IS AMAZING!!!!!!!!!!!!!!!!!
+		// ~~~~~~~~NOTE: pairs is a pointer to an array of PxContactPair
+		// size of this array is nbPairs
+		// an array name is a constant pointer to the 1st element of the array
+		void onContact(const PxContactPairHeader &pairHeader, const PxContactPair *pairs, PxU32 nbPairs) override {
+
+			for (PxU32 i = 0; i < nbPairs; i++) { // loop through each contact pair
+				const PxContactPair& pair = pairs[i]; // pure alias of pair
+
+				// we only care about NOTIFY_TOUCH_FOUND events, but you could have else if blocks for each event to check for
+				if (pair.events & PxPairFlag::eNOTIFY_TOUCH_FOUND) { // check if NOTIFY_TOUCH_FOUND bit was set in last frame...
+					// HERE DO ALL THE PAIR EVENT CHECKING...
+					// E.G. A SHOPPING CART PLAYER COLLIDES WITH ANOTHER PLAYER, IF SO CHECK IF EITHER IS BOOSTING AND SEE WHICH ONE(S) HIT HEAD ON
+
+
+				}
+			}
+
+
+			// can get actors / pairs
+			// can get actor name as a way of identifying what happened
+			// OR MAYBE SETUP USERDATA to point to an instance of Entity which has a tag enum field
+			// then based on this enum flag, it can be downcasted when necessary to get subclass info (if needed)
+		} // CARE ABOUT THIS
+		
+		// ~~~~~~~~~NOTE: in c++ false ==0 and true = !false (thats why we can use bitwise flags, so 1000000 ~= 0001000 ~= true, but 0000000 == false 
+		// but NOTE: if (2 == true) will be false
+		// TIP: could have an event represented as a bitflag and then to check if no events occured, we just check if the flag combo == 0 like if (flags)
+		
+		// QUESTION: I WONDER IF YOU COULD HAVE ENTITY SUBCLASS PXSIMEVENTCALLBACK AND THEN EACH HAS THEIR OWN ONCONTACT/ONTRIGGER, BUT THEN IT IS MORE DISJOINT AND UGLY
+
+
+		// THIS vvvvvvvvvvvvvvvvvvvv
+		// ~~~~~~~~~~~~~~~~~~~~~TODO: figure out configuring the userData of each Actor to be set to the specific entity subclass so that once a tag is identified, we can reinterpret_cast and call a reaction method
+
+		//WARNING: By default collisions between kinematic rigid bodies and kinematic and static rigid bodies will not get reported.To enable these reports raise the PxSceneFlag::eENABLE_KINEMATIC_PAIRS or ::eENABLE_KINEMATIC_STATIC_PAIRS flag respectively by calling PxScene::setFlag().
+
+
+
+
+		void onTrigger(PxTriggerPair *pairs, PxU32 count) override {} // CARE ABOUT THIS
+
+
+
+		void onAdvance(const PxRigidBody *const *bodyBuffer, const PxTransform *poseBuffer, const PxU32 count) override {}
+	private:
+
+};
+*/
+
+/*
+
+later on for a single scene, do CustomSimEC instance; and then call scene.setSImulationEventCallback() or scenedesc.simulationEVentCallback
+
+
+
+*/
+
+
+
+
+
+
+// ENTITY BUILDER METHODS...
+
+
+// RETURNS AN INSTANCE OF SHOPPINGCARTPLAYER WITH DEFAULT (PREFAB) VALUES THAT SHOULD BE OVERWRITTEN IN THE CHANGESCENE METHODS
+std::shared_ptr<ShoppingCartPlayer> PhysicsManager::instantiateShoppingCartPlayer() {
+	VehicleShoppingCart *shoppingCartBase = new VehicleShoppingCart(gPhysics, gCooking);
+	std::shared_ptr<ShoppingCartPlayer> shoppingCartPlayer = std::make_shared<ShoppingCartPlayer>("default_name", shoppingCartBase);
+	return shoppingCartPlayer;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
