@@ -261,7 +261,8 @@ void PhysicsManager::switchToScene1() {
 	vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setName("vehicle1"); // overwrite the default name
 	vehicle1->setInputID(1);
 	VehicleDesc &vehicleDesc = vehicle1->_shoppingCartBase->_vehicleDesc;
-	vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(PxTransform(0.0f, vehicleDesc.chassisDims.y*0.5f + vehicleDesc.wheelRadius + 1.0f, 0.0f, PxQuat(PxIdentity)));
+	//vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(PxTransform(0.0f, vehicleDesc.chassisDims.y*0.5f + vehicleDesc.wheelRadius + 1.0f, 0.0f, PxQuat(PxIdentity)));
+	vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(PxTransform(0.0f, 10.0f, 0.0f, PxQuat(PxIdentity)));
 	physxScene->addActor(*vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor());
 
 

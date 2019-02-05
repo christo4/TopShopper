@@ -94,8 +94,8 @@ void InputManager::passAlongInputsToCarts() {
 		physx::PxReal accel = glm::clamp(((pad->rightTrigger + 1) / 2), 0.0f, 1.0f);
 		physx::PxReal reverse = glm::clamp(((pad->leftTrigger + 1) / 2), 0.0f, 1.0f);
 		physx::PxReal handbrake = pad->xButton ? 1.0f : 0.0f;
-		physx::PxReal steer = glm::clamp(pad->leftStickX, 0.0f, 1.0f);
-		bool turboButtonPressed = pad->bButton;
+		physx::PxReal steer = glm::clamp(pad->leftStickX *-1, -1.0f, 1.0f); // must be negated otherwise steering is backwards
+		bool turboButtonPressed = pad->bButton; // this function doesnt work as intended yet...
 
 		playerCart->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
 

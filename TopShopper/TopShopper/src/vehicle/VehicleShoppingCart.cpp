@@ -20,13 +20,27 @@ using namespace snippetvehicle;
 
 
 
-
+// can tweak this stuff to feel more cartoony... (in terms of turn radius)
+/* ORIGINAL
 PxF32 gSteerVsForwardSpeedData[2 * 8] =
 {
 	0.0f,		0.75f,
 	5.0f,		0.75f,
 	30.0f,		0.125f,
 	120.0f,		0.1f,
+	PX_MAX_F32, PX_MAX_F32,
+	PX_MAX_F32, PX_MAX_F32,
+	PX_MAX_F32, PX_MAX_F32,
+	PX_MAX_F32, PX_MAX_F32
+};
+*/
+// same turn angle at every speed...
+PxF32 gSteerVsForwardSpeedData[2 * 8] =
+{
+	0.0f,		1.0f,
+	5.0f,		1.0f,
+	30.0f,		1.0f,
+	120.0f,		1.0f,
 	PX_MAX_F32, PX_MAX_F32,
 	PX_MAX_F32, PX_MAX_F32,
 	PX_MAX_F32, PX_MAX_F32,
@@ -78,8 +92,8 @@ VehicleDesc initVehicleDesc(PxPhysics *physics)
 	//Set up the chassis mass, dimensions, moment of inertia, and center of mass offset.
 	//The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
 	//Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
-	const PxF32 chassisMass = 1500.0f; // ORIGINAL
-	//const PxF32 chassisMass = 100.0f; // WARNING: DONT SET IT TO A LOW VALUE WITHOUT CHANGING OTHER STUFF, cause it causes the cart to flip over and over
+	//const PxF32 chassisMass = 1500.0f; // ORIGINAL
+	const PxF32 chassisMass = 500.0f; // WARNING: DONT SET IT TO A LOW VALUE WITHOUT CHANGING OTHER STUFF, cause it causes the cart to flip over and over
 	const PxVec3 chassisDims(2.5f, 2.0f, 5.0f); // ORIGINAL
 	//const PxVec3 chassisDims(25.0f, 2.0f, 5.0f); // REALLY WIDE (X is widescreen axis)
 	//const PxVec3 chassisDims(2.5f, 20.0f, 5.0f); // REALLY TALL (Y is up)
