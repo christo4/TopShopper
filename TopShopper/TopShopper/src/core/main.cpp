@@ -8,10 +8,7 @@ int main() {
 	Broker* broker = Broker::getInstance();
 	broker->initAll();
 	GLFWwindow* window = broker->get_RenderingManager_Window();
-	std::vector<glm::vec3> returnVertex;
-	std::vector<glm::vec2> returnUV; 
-	std::vector<glm::vec3> returnNormal;
-	broker->loadObj("../TopShopper/Objects/rectangle.obj", returnVertex, returnUV, returnNormal);
+	
 
 
 	// call main loop

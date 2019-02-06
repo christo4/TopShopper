@@ -4,8 +4,13 @@
 #ifndef LOADINGMANAGER_H_
 #define LOADINGMANAGER_H_
 
+
 #include <vector>
 #include <glm/glm.hpp>
+
+
+
+
 
 
 class Broker;
@@ -16,7 +21,8 @@ public:
 	virtual ~LoadingManager();
 	void init();
 	void updateMilliseconds(double deltaTime);
-	bool loadObject(const char* imageName, std::vector<glm::vec3>&returnVertex, std::vector<glm::vec2>&returnUV, std::vector<glm::vec3>&returnNormal);
+	void loadObject(const char* imageName, std::vector<glm::vec4>&returnVertices, std::vector<glm::vec2>&returnUV, std::vector<glm::vec3>&returnNormal, std::vector<unsigned int>&returnIndex);
+	
 private:
 	Broker* _broker = nullptr;
 };

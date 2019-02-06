@@ -14,10 +14,11 @@ Broker* Broker::getInstance() {
 }
 
 Broker::Broker() {
+	_loadingManager = new LoadingManager(this);
 	_physicsManager = new PhysicsManager(this);
 	_renderingManager = new RenderingManager(this);
 	_inputManager = new InputManager(this);
-	_loadingManager = new LoadingManager(this);
+	
 }
 
 
@@ -25,10 +26,10 @@ Broker::Broker() {
 void Broker::initAll() {
 	// ~~~~~TODO: figure out proper order to init each system
 	
+	_loadingManager->init();
 	_physicsManager->init();
 	_renderingManager->init();
 	_inputManager->init();
-	_loadingManager->init();
 	// etc. ........;
 }
 
@@ -76,24 +77,7 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 
 	
 }
-void Broker::loadObj(const char* imageName, std::vector<glm::vec3>&returnVertex, std::vector<glm::vec2>&returnUV, std::vector<glm::vec3>&returnNormal) {
-	std::vector<glm::vec3> returnVertex1;
-	std::vector<glm::vec2> returnUV1;
-	std::vector<glm::vec3> returnNormal1;
 
-	bool check = _loadingManager->loadObject("../Objects/Earth.obj", returnVertex1, returnUV1, returnNormal1);
-
-	std::cout << check << std::endl;
-
-	//std::cout << check << std::endl;
-
-	//std::cout << check << std::endl;
-
-
-	//if (check == false) {
-		//std::exit(1);
-	//}
-}
 
 
 GLFWwindow* Broker::get_RenderingManager_Window() {

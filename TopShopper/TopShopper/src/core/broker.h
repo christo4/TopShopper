@@ -26,7 +26,6 @@ public:
 	// get/set_ManagerName_dataSummary
 
 	GLFWwindow* get_RenderingManager_Window();
-	void loadObj(const char* imageName, std::vector<glm::vec3>&returnVertex, std::vector<glm::vec2>&returnUV, std::vector<glm::vec3>&returnNormal);
 private:
 	static Broker* _instance;
 	Broker();
