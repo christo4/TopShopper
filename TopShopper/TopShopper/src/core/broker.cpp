@@ -17,6 +17,7 @@ Broker::Broker() {
 	_physicsManager = new PhysicsManager(this);
 	_renderingManager = new RenderingManager(this);
 	_inputManager = new InputManager(this);
+	_loadingManager = new LoadingManager(this);
 }
 
 
@@ -79,11 +80,19 @@ void Broker::loadObj(const char* imageName, std::vector<glm::vec3>&returnVertex,
 	std::vector<glm::vec3> returnVertex1;
 	std::vector<glm::vec2> returnUV1;
 	std::vector<glm::vec3> returnNormal1;
-	//broker->loadObj("../TopShopper/Objects/rectangle.obj", returnVertex, returnUV, returnNormal);
-	bool check = _loadingManager->loadObject("../TopShopper/Objects/rectangle.obj", returnVertex1, returnUV1, returnNormal1);
-	if (check == false) {
-		std::exit(1);
-	}
+
+	bool check = _loadingManager->loadObject("../Objects/Earth.obj", returnVertex1, returnUV1, returnNormal1);
+
+	std::cout << check << std::endl;
+
+	//std::cout << check << std::endl;
+
+	//std::cout << check << std::endl;
+
+
+	//if (check == false) {
+		//std::exit(1);
+	//}
 }
 
 

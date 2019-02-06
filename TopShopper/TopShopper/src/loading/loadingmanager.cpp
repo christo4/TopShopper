@@ -33,9 +33,7 @@ bool LoadingManager::loadObject(const char* imageName, std::vector<glm::vec3>&re
 	std::vector<glm::vec2> inputUV;
 	std::vector<glm::vec3> inputNormal;
 
-	FILE * inputFile;
-	errno_t error = fopen_s(&inputFile, imageName, "r");
-
+	FILE * inputFile = fopen(imageName, "r");
 	if (inputFile == NULL) {
 		return false;
 		std::exit(0);
@@ -44,28 +42,28 @@ bool LoadingManager::loadObject(const char* imageName, std::vector<glm::vec3>&re
 
 		char firstWordInLine[365];
 
-		int check = fscanf_s(inputFile, "%s", firstWordInLine);
+		int check = fscanf(inputFile, "%s", firstWordInLine);
 		if (check == EOF) break;
 
 		if (strcmp(firstWordInLine, "v") == 0) {
 			glm::vec3 v;
-			fscanf_s(inputFile, "%f %f %f\n", &v.x, &v.y, &v.z);
+			fscanf(inputFile, "%f %f %f\n", &v.x, &v.y, &v.z);
 			inputVertex.push_back(v);
 		}
 		else if (strcmp(firstWordInLine, "vt") == 0) {
 			glm::vec3 uv;
-			fscanf_s(inputFile, "%f %f\n", &uv.x, &uv.y);
+			fscanf(inputFile, "%f %f\n", &uv.x, &uv.y);
 			inputUV.push_back(uv);
 		}
 		else if (strcmp(firstWordInLine, "vn") == 0) {
 			glm::vec3 n;
-			fscanf_s(inputFile, "%f %f %f\n", &n.x, &n.y, &n.z);
+			fscanf(inputFile, "%f %f %f\n", &n.x, &n.y, &n.z);
 			inputNormal.push_back(n);
 		}
 		else if (strcmp(firstWordInLine, "f") == 0) {
 			std::string v1, v2, v3;
 			unsigned int vert1[3], vert2[3], vert3[3];
-			int matches = fscanf_s(inputFile, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vert1[0], &vert2[0], &vert3[0], &vert1[1], &vert2[1], &vert3[1], &vert1[2], &vert2[2], &vert3[2]);
+			int matches = fscanf(inputFile, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vert1[0], &vert2[0], &vert3[0], &vert1[1], &vert2[1], &vert3[1], &vert1[2], &vert2[2], &vert3[2]);
 
 			if (matches != 9) {
 				return false;
