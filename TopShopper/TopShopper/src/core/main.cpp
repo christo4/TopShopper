@@ -8,7 +8,7 @@ int main() {
 	Broker* broker = Broker::getInstance();
 	broker->initAll();
 	GLFWwindow* window = broker->get_RenderingManager_Window();
-
+	
 
 
 	// call main loop

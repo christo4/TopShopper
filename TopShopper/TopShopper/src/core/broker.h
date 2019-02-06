@@ -41,6 +41,7 @@ private:
 	PhysicsManager *_physicsManager = nullptr;
 	RenderingManager *_renderingManager = nullptr;
 	InputManager * _inputManager = nullptr;
+	LoadingManager * _loadingManager = nullptr;
 
 };
 

@@ -14,9 +14,11 @@ Broker* Broker::getInstance() {
 }
 
 Broker::Broker() {
+	_loadingManager = new LoadingManager(this);
 	_physicsManager = new PhysicsManager(this);
 	_renderingManager = new RenderingManager(this);
 	_inputManager = new InputManager(this);
+	
 }
 
 
@@ -24,6 +26,7 @@ Broker::Broker() {
 void Broker::initAll() {
 	// ~~~~~TODO: figure out proper order to init each system
 	
+	_loadingManager->init();
 	_physicsManager->init();
 	_renderingManager->init();
 	_inputManager->init();
@@ -46,6 +49,7 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 	_renderingManager->updateMilliseconds(deltaTime);
 
 	// ~~~~~~~~~WARNING: this should be commented out when no controller is connected...
+
 	/*
 	Gamepad * meme = _inputManager->getGamePad(1);
 

@@ -134,10 +134,7 @@
     <ClInclude Include="src\core\gamescene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vehicle\snippetcommon\SnippetPVD.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleConcurrency.h">
+    <ClInclude Include="src\loading\OBJ_Loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

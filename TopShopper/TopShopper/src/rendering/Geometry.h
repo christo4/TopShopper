@@ -30,6 +30,8 @@ public:
 	std::vector<glm::vec3> colors;
 	std::vector<glm::vec2> uvs;
 
+	std::vector<unsigned int> indices;
+
 	//Pointers to the vao and vbos associated with the geometry
 	GLuint vao;
 	GLuint vertexBuffer;
