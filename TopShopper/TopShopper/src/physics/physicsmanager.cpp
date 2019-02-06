@@ -37,7 +37,7 @@
 // ****************************************************************************
 
 
-//#define PVD_ENABLED // ~~~~~NOTE: comment this out if you dont have PVD installed or on release
+#define PVD_ENABLED // ~~~~~NOTE: comment this out if you dont have PVD installed or on release
 
 #define PVD_HOST "127.0.0.1" // Set this to the IP address of the system running the PhysX Visual Debugger that you want to connect to. DEFAULT = LOCALHOST
 
@@ -50,7 +50,7 @@
 
 #include "vehicle/PxVehicleUtil.h"
 #include "vehicle/snippetvehiclecommon/SnippetVehicleSceneQuery.h" // REQUIRED
-#include "vehicle/snippetvehiclecommon/SnippetVehicleCreate.h" // REQUIRED
+//#include "vehicle/snippetvehiclecommon/SnippetVehicleCreate.h" // REQUIRED (or not apparently..., it gets included through VehicleShoppingCart)
 
 
 using namespace physx;
@@ -246,12 +246,44 @@ void PhysicsManager::switchToScene1() {
 
 	// TODO: change this to a ground entity later...
 
+	/*
 	PxFilterData groundPlaneSimFilterData(CollisionFlags::COLLISION_FLAG_GROUND, CollisionFlags::COLLISION_FLAG_GROUND_AGAINST, 0, 0);
 	PxMaterial *groundMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 	PxRigidStatic *groundPlane = createDrivablePlane(groundPlaneSimFilterData, groundMaterial, gPhysics);
 	physxScene->addActor(*groundPlane);
-	
+	*/
 
+	
+	// HARDCODED FOR NOW!!!
+	std::vector<PxVec3> groundVerts;
+	groundVerts.push_back(PxVec3(100.0f, 1.0f, -100.0f)); // far right (in PVD)
+	groundVerts.push_back(PxVec3(100.0f, 1.0f, 100.0f)); // near right 
+	groundVerts.push_back(PxVec3(-100.0f, 1.0f, 100.0f)); // near left
+	groundVerts.push_back(PxVec3(-100.0f, 1.0f, -100.0f)); // far left
+
+	std::vector<PxU32> groundIndices;
+	groundIndices.push_back(PxU32(2));
+	groundIndices.push_back(PxU32(1));
+	groundIndices.push_back(PxU32(0));
+	groundIndices.push_back(PxU32(3));
+	groundIndices.push_back(PxU32(2));
+	groundIndices.push_back(PxU32(0));
+
+	PxFilterData groundSimFilterData(CollisionFlags::COLLISION_FLAG_GROUND, CollisionFlags::COLLISION_FLAG_GROUND_AGAINST, 0, 0);
+
+	PxMaterial *groundMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+
+	PxRigidStatic *groundActor = createDrivableTerrain(groundVerts, groundIndices, groundSimFilterData, groundMaterial, gPhysics, gCooking);
+
+	physxScene->addActor(*groundActor);
+
+
+	// IT NOW WORKS!!!
+	// WHAT IVE LEARNED!!!
+	// THE SAMPLE OBJ FILE I WAS USING HAD the faces in wrong order, I reversed the order and that worked, but 1 triangle was pass-throughable
+	// to fix this, I tried decrementing the indices by 1 (now its 0-indexed rather than 1-indexed like in the file) and that seems to have fixed it.
+	// Thus if you reverse the order of the indices (within their triplets) it flips the plane upside down and NO COLLISION OCCURS WITH THE "INSIDE" OF A TRIANGLE 
+	
 
 	// VEHICLE 1:
 
@@ -262,7 +294,7 @@ void PhysicsManager::switchToScene1() {
 	vehicle1->setInputID(1);
 	VehicleDesc &vehicleDesc = vehicle1->_shoppingCartBase->_vehicleDesc;
 	//vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(PxTransform(0.0f, vehicleDesc.chassisDims.y*0.5f + vehicleDesc.wheelRadius + 1.0f, 0.0f, PxQuat(PxIdentity)));
-	vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(PxTransform(0.0f, 10.0f, 0.0f, PxQuat(PxIdentity)));
+	vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(PxTransform(0.0f, 5.0f, 0.0f, PxQuat(PxIdentity)));
 	physxScene->addActor(*vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor());
 
 

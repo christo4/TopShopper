@@ -59,6 +59,63 @@ PxRigidStatic* createDrivablePlane(const PxFilterData& simFilterData, PxMaterial
 	return groundPlane;
 }
 
+
+/////////////////////////
+// CUSTOM FUNCTION...
+
+// PRETTY SURE IT NEEDS TO BE VEC3's here...
+// TODO: ... figure out if indices should start at 0 or 1
+PxRigidStatic* createDrivableTerrain(const std::vector<PxVec3>& verts, const std::vector<PxU32>& indices, const PxFilterData& simFilterData, PxMaterial* material, PxPhysics* physics, PxCooking* cooking)
+{ 
+	PxRigidStatic* drivableTerrain = physics->createRigidStatic(PxTransform(0.0f, 0.0f, 0.0f, PxQuat(PxIdentity)));
+
+	// now cook and create a triangle mesh from verts
+
+	PxTriangleMeshDesc meshDesc;
+	meshDesc.points.count = verts.size();
+	meshDesc.points.stride = sizeof(PxVec3);
+	meshDesc.points.data = verts.data(); // ~~~~~I think this works? (cause its expecting const PxVec3* (array of PxVec3s)
+	
+	meshDesc.triangles.count = indices.size() / 3;
+	meshDesc.triangles.stride = 3 * sizeof(PxU32);
+	meshDesc.triangles.data = indices.data();
+
+	PxTriangleMesh *triMesh = nullptr;
+	PxDefaultMemoryOutputStream buf;
+	if (cooking->cookTriangleMesh(meshDesc, buf)) {
+		PxDefaultMemoryInputData id(buf.getData(), buf.getSize());
+		triMesh = physics->createTriangleMesh(id);
+	}
+
+
+	PxShape *shape = physics->createShape(PxTriangleMeshGeometry(triMesh), *material, true); // is exclusive shape
+
+	// then setup filterdata properly to be drivable
+	//Set the query filter data of the ground geometry so that the vehicle raycasts can hit the ground.
+
+	PxFilterData qryFilterData;
+	setupDrivableSurface(qryFilterData);
+	shape->setQueryFilterData(qryFilterData);
+
+	//Set the simulation filter data of the ground geometry so that it collides with the chassis of a vehicle but not the wheels.
+	shape->setSimulationFilterData(simFilterData);
+
+	// later on, attach shape to drivable terrain...
+	drivableTerrain->attachShape(*shape);
+
+	return drivableTerrain;
+}
+
+
+
+
+/////////////////////////
+
+
+
+
+
+
 static PxConvexMesh* createConvexMesh(const PxVec3* verts, const PxU32 numVerts, PxPhysics& physics, PxCooking& cooking)
 {
 	// Create descriptor for convex mesh
