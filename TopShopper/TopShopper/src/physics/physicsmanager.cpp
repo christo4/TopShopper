@@ -256,19 +256,43 @@ void PhysicsManager::switchToScene1() {
 	
 	// HARDCODED FOR NOW!!!
 	std::vector<PxVec3> groundVerts;
-	groundVerts.push_back(PxVec3(100.0f, 1.0f, -100.0f)); // far right (in PVD)
-	groundVerts.push_back(PxVec3(100.0f, 1.0f, 100.0f)); // near right 
-	groundVerts.push_back(PxVec3(-100.0f, 1.0f, 100.0f)); // near left
-	groundVerts.push_back(PxVec3(-100.0f, 1.0f, -100.0f)); // far left
+	groundVerts.push_back(PxVec3(100.0f, 50.0f, -100.0f)); // far right (in PVD)
+	groundVerts.push_back(PxVec3(100.0f, 50.0f, 100.0f)); // near right 
+	groundVerts.push_back(PxVec3(-100.0f, 50.0f, 100.0f)); // near left
+	groundVerts.push_back(PxVec3(-100.0f, 50.0f, -100.0f)); // far left
+
+	groundVerts.push_back(PxVec3(0.0f, 0.0f, -200.0f)); // far center
+	groundVerts.push_back(PxVec3(0.0f, 0.0f, 200.0f)); // near center
+	groundVerts.push_back(PxVec3(-200.0f, 0.0f, 0.0f)); // left center
+	groundVerts.push_back(PxVec3(200.0f, 0.0f, 0.0f)); // right center
+
+
 
 	std::vector<PxU32> groundIndices;
 	groundIndices.push_back(PxU32(2));
 	groundIndices.push_back(PxU32(1));
 	groundIndices.push_back(PxU32(0));
+
 	groundIndices.push_back(PxU32(3));
 	groundIndices.push_back(PxU32(2));
 	groundIndices.push_back(PxU32(0));
 
+	groundIndices.push_back(PxU32(3));
+	groundIndices.push_back(PxU32(0));
+	groundIndices.push_back(PxU32(4));
+
+	groundIndices.push_back(PxU32(2));
+	groundIndices.push_back(PxU32(5));
+	groundIndices.push_back(PxU32(1));
+
+	groundIndices.push_back(PxU32(3));
+	groundIndices.push_back(PxU32(6));
+	groundIndices.push_back(PxU32(2));
+
+	groundIndices.push_back(PxU32(1));
+	groundIndices.push_back(PxU32(7));
+	groundIndices.push_back(PxU32(0));	
+	
 	PxFilterData groundSimFilterData(CollisionFlags::COLLISION_FLAG_GROUND, CollisionFlags::COLLISION_FLAG_GROUND_AGAINST, 0, 0);
 
 	PxMaterial *groundMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
@@ -294,7 +318,7 @@ void PhysicsManager::switchToScene1() {
 	vehicle1->setInputID(1);
 	VehicleDesc &vehicleDesc = vehicle1->_shoppingCartBase->_vehicleDesc;
 	//vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(PxTransform(0.0f, vehicleDesc.chassisDims.y*0.5f + vehicleDesc.wheelRadius + 1.0f, 0.0f, PxQuat(PxIdentity)));
-	vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(PxTransform(0.0f, 5.0f, 0.0f, PxQuat(PxIdentity)));
+	vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(PxTransform(0.0f, 60.0f, 0.0f, PxQuat(PxIdentity)));
 	physxScene->addActor(*vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor());
 
 
