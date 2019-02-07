@@ -29,6 +29,8 @@ public:
 
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> get_PhysicsManager_ActiveScene_AllShoppingCartPlayers();
 
+	Geometry* get_LoadingManager_Geometry(GeometryTypes type);
+
 private:
 	static Broker* _instance;
 	Broker();

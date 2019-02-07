@@ -13,11 +13,9 @@
 
 using namespace objl;
 
-
-
-Geometry gVehicleChassisGeo;
-Geometry gVehicleWheelGeo;
-Geometry gGroundGeo;
+Geometry* VehicleChassisGeo = new Geometry();
+Geometry* VehicleWheelGeo = new Geometry();
+Geometry* GroundGeo = new Geometry();
 
 
 
@@ -36,10 +34,10 @@ void LoadingManager::init() {
 
 	loadObject("../TopShopper/resources/Objects/rect.obj", returnVertices, returnUV, returnNormal, returnIndex);
 
-	gVehicleChassisGeo.verts = returnVertices;
-	gVehicleChassisGeo.uvs = returnUV;
-	gVehicleChassisGeo.normals = returnNormal;
-	gVehicleChassisGeo.indices = returnIndex;
+	VehicleChassisGeo->verts = returnVertices;
+	VehicleChassisGeo->uvs = returnUV;
+	VehicleChassisGeo->normals = returnNormal;
+	VehicleChassisGeo->indices = returnIndex;
 
 	returnVertices.clear();
 	returnUV.clear();
@@ -85,4 +83,18 @@ void LoadingManager::loadObject(const char* imageName, std::vector<glm::vec4>&re
 	
 	returnIndex = loader.LoadedIndices;
 	
+}
+
+
+Geometry* LoadingManager::getGeometry(GeometryTypes type) {
+	switch (type) {
+	case GeometryTypes::VEHICLE_CHASSIS_GEO:
+		return VehicleChassisGeo;
+	case GeometryTypes::VEHICLE_WHEEL_GEO:
+		return VehicleWheelGeo;
+	case GeometryTypes::GROUND_GEO:
+		return GroundGeo;
+	default:
+		return nullptr;
+	}
 }

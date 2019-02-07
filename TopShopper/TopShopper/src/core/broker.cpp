@@ -91,3 +91,8 @@ GLFWwindow* Broker::get_RenderingManager_Window() {
 std::vector<std::shared_ptr<ShoppingCartPlayer>> Broker::get_PhysicsManager_ActiveScene_AllShoppingCartPlayers() {
 	return _physicsManager->getActiveScene()->getAllShoppingCartPlayers();
 }
+
+
+Geometry* Broker::get_LoadingManager_Geometry(GeometryTypes type) {
+	return _loadingManager->getGeometry(type);
+}
