@@ -1,40 +1,30 @@
-
 #ifndef SHOPPINGCARTPLAYER_H_
 #define SHOPPINGCARTPLAYER_H_
 
 #include "entity.h"
-//#include "vehicle/PxVehicleDrive4W.h"
-#include "vehicle/VehicleShoppingCart.h"
 
-
+class VehicleShoppingCart;
 
 class ShoppingCartPlayer : public Entity {
 	public:
-		//ShoppingCartPlayer(std::string name, physx::PxVehicleDrive4W *vehicle4W);
-		ShoppingCartPlayer(std::string name, VehicleShoppingCart *shoppingCartBase, int inputID);
+		ShoppingCartPlayer(VehicleShoppingCart *shoppingCartBase, int inputID);
 		virtual ~ShoppingCartPlayer();
-		// functions to control what audio clip plays on certain events, reaction functions based on collision pairs (e.g. increment points by value passed in by collision)
 
-		VehicleShoppingCart *_shoppingCartBase;
-
+		VehicleShoppingCart *_shoppingCartBase = nullptr;
 
 		void updatePhysics(double deltaTime) override;
 
-		//physx::PxVehicleDrive4W *_vehicle4W = nullptr;
-		//physx::PxRigidDynamic *_actor = nullptr;
-
-
-
 		int getInputID() { return _inputID; }
 		void setInputID(int id) { _inputID = id; }
+
+		// TODO: functions to control what audio clip plays on certain events, reaction functions based on collision pairs (e.g. increment points by value passed in by collision)
+
 	private:
-		// bunch of game state stuff like shopping list, points,
+		int _inputID; // either 1, 2, 3 or 4 (what human player this cart belongs to)
 
-
-		int _inputID;
+		// TODO: bunch of game state stuff like shopping list, points,
 
 };
-
 
 
 

@@ -1,6 +1,7 @@
 //TODO: can maybe include a callback of some kind which detects the connecting and disconnecting of controllers in real time.
 #include "inputmanager.h"
 #include "core/broker.h"
+#include "vehicle/VehicleShoppingCart.h"
 
 InputManager::InputManager(Broker * broker): _broker(broker) {
 

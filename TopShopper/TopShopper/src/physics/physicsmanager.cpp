@@ -49,8 +49,9 @@
 #include <iostream>
 
 #include "vehicle/PxVehicleUtil.h"
-#include "vehicle/snippetvehiclecommon/SnippetVehicleSceneQuery.h" // REQUIRED
-//#include "vehicle/snippetvehiclecommon/SnippetVehicleCreate.h" // REQUIRED (or not apparently..., it gets included through VehicleShoppingCart)
+#include "vehicle/snippetvehiclecommon/SnippetVehicleSceneQuery.h"
+#include "vehicle/snippetvehiclecommon/SnippetVehicleCreate.h"
+#include "vehicle/VehicleShoppingCart.h"
 
 
 using namespace physx;
@@ -313,6 +314,7 @@ void PhysicsManager::switchToScene1() {
 
 	//Create a vehicle that will drive on the plane.
 
+	/*
 	std::shared_ptr<ShoppingCartPlayer> vehicle1 = instantiateShoppingCartPlayer();
 	vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setName("vehicle1"); // overwrite the default name
 	vehicle1->setInputID(1);
@@ -325,6 +327,34 @@ void PhysicsManager::switchToScene1() {
 
 	_activeScene = std::make_shared<GameScene>(physxScene);
 	_activeScene->addEntity(vehicle1);
+	*/
+
+	
+	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 60.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
+	vehicle1->setInputID(1);
+	VehicleDesc &vehicleDesc = vehicle1->_shoppingCartBase->_vehicleDesc;
+	physxScene->addActor(*vehicle1->_actor);
+
+
+	_activeScene = std::make_shared<GameScene>(physxScene);
+	_activeScene->addEntity(vehicle1);
+
+
+	/*
+	// TEST STUFF
+	PxRigidDynamic *babyDYN = gPhysics->createRigidDynamic(PxTransform(0, 0, 0, PxQuat(PxIdentity)));
+	PxRigidActor *testAct = babyDYN;
+	if (testAct->getType() == PxActorType::Enum::eRIGID_DYNAMIC) {
+		//PxRigidDynamic *testDyn = dynamic_cast<PxRigidDynamic*>(testAct);
+		//PxRigidDynamic *testDYN123 = dynamic_cast<PxRigidDynamic*>(testAct);
+		//PxRigidDynamic *testDyn123 = static_cast<PxRigidDynamic*>(testAct);
+		PxRigidDynamic *testDYN123 = testAct->is<PxRigidDynamic>(); // AHA! THIS IS HOW YOU DYNAMIC DOWNCAST IN PHYSX!!! (MAKE SURE TO PUT INSIDE AN IF STATEMENT THOUGH)
+	
+	}
+	else if (testAct->getType() == PxActorType::Enum::eRIGID_STATIC) {
+		int y = 3;
+	}
+	*/
 
 }
 
@@ -413,6 +443,41 @@ void PhysicsManager::cleanup() {
 	gFoundation->release();
 	*/
 }
+
+
+
+std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, physx::PxTransform transform, std::string name) {
+
+	const char *cName = name.c_str();
+
+	switch (type) {
+		//case EntityTypes::GROUND:
+			//
+			//break;
+	case EntityTypes::SHOPPING_CART_PLAYER:
+	{
+		VehicleShoppingCart *shoppingCartBase = new VehicleShoppingCart(gPhysics, gCooking);
+		std::shared_ptr<ShoppingCartPlayer> shoppingCartPlayer = std::make_shared<ShoppingCartPlayer>(shoppingCartBase, 0); // NOTE: an invalid input ID of 0 is placed here as a default since it must be set later
+		shoppingCartPlayer->_actor->setName(cName);
+		(shoppingCartPlayer->_actor->is<PxRigidDynamic>())->setGlobalPose(transform);
+		return shoppingCartPlayer;
+	}
+	default:
+		return nullptr;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -554,11 +619,14 @@ later on for a single scene, do CustomSimEC instance; and then call scene.setSIm
 
 
 // RETURNS AN INSTANCE OF SHOPPINGCARTPLAYER WITH DEFAULT (PREFAB) VALUES THAT SHOULD BE OVERWRITTEN IN THE CHANGESCENE METHODS
-std::shared_ptr<ShoppingCartPlayer> PhysicsManager::instantiateShoppingCartPlayer() {
-	VehicleShoppingCart *shoppingCartBase = new VehicleShoppingCart(gPhysics, gCooking);
-	std::shared_ptr<ShoppingCartPlayer> shoppingCartPlayer = std::make_shared<ShoppingCartPlayer>("default_name", shoppingCartBase, 0); // NOTE: an invalid input ID of 0 is placed here as a default since it must be set later
-	return shoppingCartPlayer;
-}
+//std::shared_ptr<ShoppingCartPlayer> PhysicsManager::instantiateShoppingCartPlayer() {
+	//VehicleShoppingCart *shoppingCartBase = new VehicleShoppingCart(gPhysics, gCooking);
+	//std::shared_ptr<ShoppingCartPlayer> shoppingCartPlayer = std::make_shared<ShoppingCartPlayer>("default_name", shoppingCartBase, 0); // NOTE: an invalid input ID of 0 is placed here as a default since it must be set later
+	//return shoppingCartPlayer;
+//}
+
+
+
 
 
 
