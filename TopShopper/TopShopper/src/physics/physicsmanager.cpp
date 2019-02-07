@@ -313,22 +313,6 @@ void PhysicsManager::switchToScene1() {
 	// VEHICLE 1:
 
 	//Create a vehicle that will drive on the plane.
-
-	/*
-	std::shared_ptr<ShoppingCartPlayer> vehicle1 = instantiateShoppingCartPlayer();
-	vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setName("vehicle1"); // overwrite the default name
-	vehicle1->setInputID(1);
-	VehicleDesc &vehicleDesc = vehicle1->_shoppingCartBase->_vehicleDesc;
-	//vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(PxTransform(0.0f, vehicleDesc.chassisDims.y*0.5f + vehicleDesc.wheelRadius + 1.0f, 0.0f, PxQuat(PxIdentity)));
-	vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(PxTransform(0.0f, 60.0f, 0.0f, PxQuat(PxIdentity)));
-	physxScene->addActor(*vehicle1->_shoppingCartBase->_vehicle4W->getRigidDynamicActor());
-
-
-
-	_activeScene = std::make_shared<GameScene>(physxScene);
-	_activeScene->addEntity(vehicle1);
-	*/
-
 	
 	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 60.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
 	vehicle1->setInputID(1);
@@ -338,23 +322,6 @@ void PhysicsManager::switchToScene1() {
 
 	_activeScene = std::make_shared<GameScene>(physxScene);
 	_activeScene->addEntity(vehicle1);
-
-
-	/*
-	// TEST STUFF
-	PxRigidDynamic *babyDYN = gPhysics->createRigidDynamic(PxTransform(0, 0, 0, PxQuat(PxIdentity)));
-	PxRigidActor *testAct = babyDYN;
-	if (testAct->getType() == PxActorType::Enum::eRIGID_DYNAMIC) {
-		//PxRigidDynamic *testDyn = dynamic_cast<PxRigidDynamic*>(testAct);
-		//PxRigidDynamic *testDYN123 = dynamic_cast<PxRigidDynamic*>(testAct);
-		//PxRigidDynamic *testDyn123 = static_cast<PxRigidDynamic*>(testAct);
-		PxRigidDynamic *testDYN123 = testAct->is<PxRigidDynamic>(); // AHA! THIS IS HOW YOU DYNAMIC DOWNCAST IN PHYSX!!! (MAKE SURE TO PUT INSIDE AN IF STATEMENT THOUGH)
-	
-	}
-	else if (testAct->getType() == PxActorType::Enum::eRIGID_STATIC) {
-		int y = 3;
-	}
-	*/
 
 }
 
@@ -451,6 +418,10 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	const char *cName = name.c_str();
 
 	switch (type) {
+	case EntityTypes::GROUND:
+	{
+
+	}
 		//case EntityTypes::GROUND:
 			//
 			//break;
