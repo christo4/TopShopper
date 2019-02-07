@@ -1,6 +1,3 @@
-
-
-
 #ifndef PHYSICSMANAGER_H_
 #define PHYSICSMANAGER_H_
 
@@ -68,6 +65,11 @@ public:
 	void updateMilliseconds(double deltaTime);
 	void cleanup();
 
+	std::shared_ptr<Entity> instantiateEntity(EntityTypes type, physx::PxTransform transform, std::string name);
+	void switchToScene1();
+	std::shared_ptr<GameScene> getActiveScene() { return _activeScene; }
+
+
 	/*
 	// MAYBE MOVE THESE INTO A SPECIAL PHYSICS COMPONENT
 	void disableShapeInContactTests(physx::PxShape *shape);
@@ -78,27 +80,11 @@ public:
 	void setShapeSolid(physx::PxShape *shape);
 	*/
 
-	// EXAMPLES:
-	//physx::PxRigidStatic* createEnvironmentGeometryBase();
-	//physx::PxRigidStatic* createGroundBase();
-	//physx::PxRigidStatic* createPuddleBase();
-	//physx::PxRigidDynamic* createShoppingCartBotBase();
-	//physx::PxRigidDynamic* createShoppingCartObstacleBase();
-
-	std::shared_ptr<ShoppingCartPlayer> instantiateShoppingCartPlayer();
-
-	//physx::PxRigidStatic* createUIBase();
-
-	void switchToScene1();
-
-
-	std::shared_ptr<GameScene> getActiveScene() { return _activeScene; }
 
 private:
 	Broker* _broker = nullptr;
 
 	std::shared_ptr<GameScene> _activeScene = nullptr;
-	//std::vector<std::shared_ptr<Scene>> _scenes;
 };
 
 

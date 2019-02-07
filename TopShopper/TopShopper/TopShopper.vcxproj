@@ -159,6 +159,7 @@
     <ClCompile Include="src\loading\loadingmanager.cpp" />
     <ClCompile Include="src\objects\component.cpp" />
     <ClCompile Include="src\objects\entity.cpp" />
+    <ClCompile Include="src\objects\ground.cpp" />
     <ClCompile Include="src\objects\shoppingcartplayer.cpp" />
     <ClCompile Include="src\physics\physicsmanager.cpp" />
     <ClCompile Include="src\rendering\Geometry.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="src\loading\OBJ_Loader.h" />
     <ClInclude Include="src\objects\component.h" />
     <ClInclude Include="src\objects\entity.h" />
+    <ClInclude Include="src\objects\ground.h" />
     <ClInclude Include="src\objects\shoppingcartplayer.h" />
     <ClInclude Include="src\physics\physicsmanager.h" />
     <ClInclude Include="src\rendering\Geometry.h" />

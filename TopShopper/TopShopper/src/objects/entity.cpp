@@ -1,29 +1,16 @@
-
-
-
 #include "entity.h"
 
+using namespace physx;
 
-Entity::Entity() {
+Entity::Entity(PxActor *actor, EntityTypes tag) 
+	: _actor(actor), _tag(tag)
+{
 
 }
 
 Entity::~Entity() {
 
 }
-
-
-
-/*
-std::string Entity::getName() {
-	return _name;
-}
-*/
-
-EntityTypes Entity::getTag() {
-	return _tag;
-}
-
 
 
 // RULES:

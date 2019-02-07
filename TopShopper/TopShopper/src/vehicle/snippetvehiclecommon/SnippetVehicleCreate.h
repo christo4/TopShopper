@@ -33,6 +33,7 @@
 #include "PxPhysicsAPI.h"
 //#include "vehicle/PxVehicleDriveTank.h"
 //#include "vehicle/PxVehicleNoDrive.h"
+#include <vector>
 
 namespace snippetvehicle
 {
@@ -42,6 +43,8 @@ using namespace physx;
 ////////////////////////////////////////////////
 
 PxRigidStatic* createDrivablePlane(const PxFilterData& simFilterData, PxMaterial* material, PxPhysics* physics);
+PxRigidStatic* createDrivableTerrain(const std::vector<PxVec3>& verts, const std::vector<PxU32>& indices, const PxFilterData& simFilterData, PxMaterial* material, PxPhysics* physics, PxCooking* cooking);
+
 
 ////////////////////////////////////////////////
 
