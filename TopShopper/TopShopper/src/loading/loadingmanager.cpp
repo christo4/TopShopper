@@ -1,6 +1,3 @@
-
-
-
 #include "loadingmanager.h"
 #include <iostream>
 //#define _CRT_SECURE_NO_WARNINGS // this shouldnt be necessary since I already defined it in properties>c++>preprocessor
@@ -32,6 +29,7 @@ void LoadingManager::init() {
 	std::vector<glm::vec3>returnNormal;
 	std::vector<unsigned int>returnIndex;
 
+	// TODO: change this to chassis.obj later
 	loadObject("../TopShopper/resources/Objects/rect.obj", returnVertices, returnUV, returnNormal, returnIndex);
 
 	VehicleChassisGeo->verts = returnVertices;
@@ -44,7 +42,26 @@ void LoadingManager::init() {
 	returnNormal.clear();
 	returnIndex.clear();
 
-	// THEN DO NEXT GEO BELOW...
+	//////////////////
+
+	// GROUND GEOMETRY:
+
+	// TODO: change this to ground.obj later
+	// NOTE: an .obj file requires normals! (even if we dont use them)
+	loadObject("../TopShopper/resources/Objects/groundTest.obj", returnVertices, returnUV, returnNormal, returnIndex);
+
+	GroundGeo->verts = returnVertices;
+	GroundGeo->uvs = returnUV;
+	GroundGeo->normals = returnNormal;
+	GroundGeo->indices = returnIndex;
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	returnIndex.clear();
+
+	///////////////////
+
 }
 
 void LoadingManager::updateMilliseconds(double deltaTime) {
@@ -53,14 +70,17 @@ void LoadingManager::updateMilliseconds(double deltaTime) {
 
 
 
+// TODO: change the objparser (AGAIN :( ) since this one is incredibly inneficient 
 void LoadingManager::loadObject(const char* imageName, std::vector<glm::vec4>&returnVertices, std::vector<glm::vec2>&returnUV, std::vector<glm::vec3>&returnNormal, std::vector<unsigned int>&returnIndex) {
 	
 	objl::Loader loader;
 	bool loaded = loader.LoadFile(imageName);
 	if (!loaded) {
-		std::exit(1);
+		std::exit(EXIT_FAILURE);
 	}
-	
+
+	// NOTE: loader.LoadedVertices will have size = number of faces (f-lines)
+	// thus, there will be duplicated pos/uv/norm data and the indices will just be 0, 1, 2, ..., indices.size()-1
 	for (Vertex v : loader.LoadedVertices) {
 		glm::vec4 pos;
 		glm::vec2 uv;
@@ -81,6 +101,8 @@ void LoadingManager::loadObject(const char* imageName, std::vector<glm::vec4>&re
 		returnNormal.push_back(norm);
 	}
 	
+
+	// NOTE: this parser is stupid and should be replaced, but for now this vector is 0-indexed which is what we want
 	returnIndex = loader.LoadedIndices;
 	
 }

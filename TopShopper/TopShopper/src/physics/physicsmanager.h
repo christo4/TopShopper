@@ -4,6 +4,7 @@
 #include "PxPhysicsAPI.h"
 #include <memory>
 #include "objects/shoppingcartplayer.h"
+#include "objects/ground.h"
 #include "core/gamescene.h"
 
 class Broker;

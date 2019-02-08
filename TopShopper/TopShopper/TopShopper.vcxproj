@@ -97,7 +97,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)middleware\glfw\include;$(SolutionDir)middleware\glad\include;$(SolutionDir)middleware\glm-0.9.8.2;$(SolutionDir)middleware\stb;$(SolutionDir)middleware;$(SolutionDir)Physx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)middleware\glfw\lib;$(SolutionDir)Physx\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -169,6 +169,7 @@
     <ClCompile Include="src\rendering\Scene.cpp" />
     <ClCompile Include="src\rendering\ShaderTools.cpp" />
     <ClCompile Include="src\rendering\texture.cpp" />
+    <ClCompile Include="src\utility\utility.cpp" />
     <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicle4WCreate.cpp" />
     <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleCreate.cpp" />
     <ClCompile Include="src\vehicle\snippetvehiclecommon\SnippetVehicleSceneQuery.cpp" />
@@ -193,6 +194,7 @@
     <ClInclude Include="src\rendering\Scene.h" />
     <ClInclude Include="src\rendering\ShaderTools.h" />
     <ClInclude Include="src\rendering\texture.h" />
+    <ClInclude Include="src\utility\utility.h" />
     <ClInclude Include="src\vehicle\snippetcommon\SnippetPVD.h" />
     <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleConcurrency.h" />
     <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleCreate.h" />

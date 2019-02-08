@@ -76,6 +76,7 @@ PxRigidStatic* createDrivableTerrain(const std::vector<PxVec3>& verts, const std
 	meshDesc.points.stride = sizeof(PxVec3);
 	meshDesc.points.data = verts.data(); // ~~~~~I think this works? (cause its expecting const PxVec3* (array of PxVec3s)
 	
+	// NOTE: indices are 0-based...
 	meshDesc.triangles.count = indices.size() / 3;
 	meshDesc.triangles.stride = 3 * sizeof(PxU32);
 	meshDesc.triangles.data = indices.data();

@@ -37,6 +37,7 @@
 // ****************************************************************************
 
 
+
 #define PVD_ENABLED // ~~~~~NOTE: comment this out if you dont have PVD installed or on release
 
 #define PVD_HOST "127.0.0.1" // Set this to the IP address of the system running the PhysX Visual Debugger that you want to connect to. DEFAULT = LOCALHOST
@@ -52,6 +53,11 @@
 #include "vehicle/snippetvehiclecommon/SnippetVehicleSceneQuery.h"
 #include "vehicle/snippetvehiclecommon/SnippetVehicleCreate.h"
 #include "vehicle/VehicleShoppingCart.h"
+
+#include "utility/utility.h"
+
+#include "core/broker.h"
+#include "rendering/Geometry.h"
 
 
 using namespace physx;
@@ -237,7 +243,6 @@ void PhysicsManager::switchToScene1() {
 	//Create the friction table for each combination of tire and surface type.
 	initFrictionPairs();
 
-	//Create a plane to drive on.
 
 	// NOTE: PXU32 is a typedef of UINT32
 	// ~~~~NOTE: below its calling the constructor to pass in word0, word1, word2, and word3 making up 128 bits
@@ -245,62 +250,11 @@ void PhysicsManager::switchToScene1() {
 	// The sample uses word0 = out collision flag
 	// word1 = flag combo of all flags that we can collide with
 
-	// TODO: change this to a ground entity later...
 
-	/*
-	PxFilterData groundPlaneSimFilterData(CollisionFlags::COLLISION_FLAG_GROUND, CollisionFlags::COLLISION_FLAG_GROUND_AGAINST, 0, 0);
-	PxMaterial *groundMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
-	PxRigidStatic *groundPlane = createDrivablePlane(groundPlaneSimFilterData, groundMaterial, gPhysics);
-	physxScene->addActor(*groundPlane);
-	*/
+	// GROUND:
 
-	
-	// HARDCODED FOR NOW!!!
-	std::vector<PxVec3> groundVerts;
-	groundVerts.push_back(PxVec3(100.0f, 50.0f, -100.0f)); // far right (in PVD)
-	groundVerts.push_back(PxVec3(100.0f, 50.0f, 100.0f)); // near right 
-	groundVerts.push_back(PxVec3(-100.0f, 50.0f, 100.0f)); // near left
-	groundVerts.push_back(PxVec3(-100.0f, 50.0f, -100.0f)); // far left
-
-	groundVerts.push_back(PxVec3(0.0f, 0.0f, -200.0f)); // far center
-	groundVerts.push_back(PxVec3(0.0f, 0.0f, 200.0f)); // near center
-	groundVerts.push_back(PxVec3(-200.0f, 0.0f, 0.0f)); // left center
-	groundVerts.push_back(PxVec3(200.0f, 0.0f, 0.0f)); // right center
-
-
-
-	std::vector<PxU32> groundIndices;
-	groundIndices.push_back(PxU32(2));
-	groundIndices.push_back(PxU32(1));
-	groundIndices.push_back(PxU32(0));
-
-	groundIndices.push_back(PxU32(3));
-	groundIndices.push_back(PxU32(2));
-	groundIndices.push_back(PxU32(0));
-
-	groundIndices.push_back(PxU32(3));
-	groundIndices.push_back(PxU32(0));
-	groundIndices.push_back(PxU32(4));
-
-	groundIndices.push_back(PxU32(2));
-	groundIndices.push_back(PxU32(5));
-	groundIndices.push_back(PxU32(1));
-
-	groundIndices.push_back(PxU32(3));
-	groundIndices.push_back(PxU32(6));
-	groundIndices.push_back(PxU32(2));
-
-	groundIndices.push_back(PxU32(1));
-	groundIndices.push_back(PxU32(7));
-	groundIndices.push_back(PxU32(0));	
-	
-	PxFilterData groundSimFilterData(CollisionFlags::COLLISION_FLAG_GROUND, CollisionFlags::COLLISION_FLAG_GROUND_AGAINST, 0, 0);
-
-	PxMaterial *groundMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
-
-	PxRigidStatic *groundActor = createDrivableTerrain(groundVerts, groundIndices, groundSimFilterData, groundMaterial, gPhysics, gCooking);
-
-	physxScene->addActor(*groundActor);
+	std::shared_ptr<Ground> ground = std::dynamic_pointer_cast<Ground>(instantiateEntity(EntityTypes::GROUND, PxTransform(0.0f, 0.0f, 0.0f, PxQuat(PxIdentity)), "ground"));
+	physxScene->addActor(*(ground->_actor));
 
 
 	// IT NOW WORKS!!!
@@ -316,11 +270,11 @@ void PhysicsManager::switchToScene1() {
 	
 	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 60.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
 	vehicle1->setInputID(1);
-	VehicleDesc &vehicleDesc = vehicle1->_shoppingCartBase->_vehicleDesc;
-	physxScene->addActor(*vehicle1->_actor);
+	physxScene->addActor(*(vehicle1->_actor));
 
 
 	_activeScene = std::make_shared<GameScene>(physxScene);
+	_activeScene->addEntity(ground);
 	_activeScene->addEntity(vehicle1);
 
 }
@@ -420,7 +374,16 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	switch (type) {
 	case EntityTypes::GROUND:
 	{
-
+		std::vector<PxVec3> groundVerts = castVectorOfGLMVec4ToVectorOfPxVec3((_broker->get_LoadingManager_Geometry(GeometryTypes::GROUND_GEO))->verts);
+		std::vector<PxU32> groundIndices = (_broker->get_LoadingManager_Geometry(GeometryTypes::GROUND_GEO))->indices;
+		//std::reverse(std::begin(groundIndices), std::end(groundIndices)); // NO NEED TO REVERSE IN THIS CONFIGURATION< BUT MIGHT NEED THIS IN FUTURE (OR I COULD USE THE PXMESHFLAG)
+		PxFilterData groundSimFilterData(CollisionFlags::COLLISION_FLAG_GROUND, CollisionFlags::COLLISION_FLAG_GROUND_AGAINST, 0, 0);
+		PxMaterial *groundMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+		PxRigidStatic *groundActor = createDrivableTerrain(groundVerts, groundIndices, groundSimFilterData, groundMaterial, gPhysics, gCooking);
+		std::shared_ptr<Ground> ground = std::make_shared<Ground>(groundActor);
+		ground->_actor->setName(cName);
+		(ground->_actor->is<PxRigidStatic>())->setGlobalPose(transform);
+		return ground;
 	}
 		//case EntityTypes::GROUND:
 			//
