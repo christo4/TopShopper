@@ -1,5 +1,2 @@
-
-
-
 #include "component.h"
 

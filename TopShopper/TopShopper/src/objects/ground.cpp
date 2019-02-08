@@ -10,7 +10,6 @@ Ground::Ground(PxRigidStatic *actor)
 	_actor->userData = this;
 
 	addComponent(ComponentTypes::MESH);
-	addComponent(ComponentTypes::NAV_MESH);
 }
 
 
