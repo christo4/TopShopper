@@ -54,7 +54,7 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 	glfwSwapBuffers(_window);
 
 	// poll for events (probably move into inputManager later on)
-	glfwPollEvents();
+	//glfwPollEvents();
 
 	// any other stuff...
 }

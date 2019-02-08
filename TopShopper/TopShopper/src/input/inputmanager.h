@@ -1,8 +1,6 @@
-
-
-
 #ifndef INPUTMANAGER_H_
 #define INPUTMANAGER_H_
+
 #include <vector>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -32,6 +30,17 @@ struct Gamepad {
 	bool leftButton;
 };
 
+// ONLY HAVE 1 KEYBOARD and MOUSE
+struct KeyboardAndMouse {
+	bool wKey;
+	bool aKey;
+	bool sKey;
+	bool dKey;
+	bool leftShiftKey;
+	bool spaceKey;
+	// NOTE: can add more controls in future if we need them
+};
+
 
 class Broker;
 
@@ -42,11 +51,13 @@ public:
 	void init();
 	void updateMilliseconds(double deltaTime);
 	Gamepad * getGamePad(int gamePadNumber);
+	KeyboardAndMouse* getKeyboardAndMouse() { return _keyboardAndMouse; }
 private:
 	int _numGamepads;
 	int _joySticks[4] = { GLFW_JOYSTICK_1 ,GLFW_JOYSTICK_2 ,GLFW_JOYSTICK_3 ,GLFW_JOYSTICK_4 };
 	std::vector<Gamepad*> _gamePads;
 	Broker* _broker = nullptr;
+	KeyboardAndMouse* _keyboardAndMouse = new KeyboardAndMouse();
 
 	void passAlongInputsToCarts();
 };

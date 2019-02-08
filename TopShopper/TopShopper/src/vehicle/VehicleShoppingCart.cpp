@@ -1,22 +1,9 @@
-
 #include "VehicleShoppingCart.h"
-
-
-
 #include "physics/physicsmanager.h" // ~~~~~~~I can have this here since i'm in .cpp (no cyclic dependencies!!!)
-
-//#include <ctype.h>
-//#include <iostream>
-//#include "vehicle/PxVehicleUtil.h"
-//#include "snippetvehiclecommon/SnippetVehicleSceneQuery.h"
-//#include "snippetvehiclecommon/SnippetVehicleFilterShader.h"
-//#include "snippetvehiclecommon/SnippetVehicleTireFriction.h"
-
 
 
 using namespace physx;
 using namespace snippetvehicle;
-
 
 
 
@@ -139,18 +126,7 @@ VehicleDesc initVehicleDesc(PxPhysics *physics)
 
 
 
-
-
-
-
-
-
-
-
-
-
 // CLASS STUFF...
-
 
 VehicleShoppingCart::VehicleShoppingCart(PxPhysics *physics, PxCooking *cooking) {
 	_vehicleDesc = initVehicleDesc(physics);
@@ -166,14 +142,6 @@ VehicleShoppingCart::~VehicleShoppingCart() {
 }
 
 
-
-
-
-
-
-
-
-// ~~~~~~TODO: write these to take into account reverse trigger and figure out what to do in key-combos... 
 void VehicleShoppingCart::processRawInputDataKeyboard(const bool accelKeyPressed, const bool reverseKeyPressed, const bool handbrakeKeyPressed, const bool steerLeftKeyPressed, const bool steerRightKeyPressed, const bool turboKeyPressed) {
 
 	// CASES:
@@ -182,12 +150,19 @@ void VehicleShoppingCart::processRawInputDataKeyboard(const bool accelKeyPressed
 	// DOWN pressed = accel = true (REVERSE)
 	// neither pressed = accel = false (no gear change needed)
 
+	_isKeyAndMouseControlled = true; // flag that this vehicle is being controlled by a keyboard/mouse
+
 	bool isAccelerating;
 
 	// TURBO KEY OVERRIDES ACCELKEY/REVERSEKEY (It does not override handbrake however)
 	if (turboKeyPressed) {
-		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFOURTH);
-		isAccelerating = true;
+		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
+		isAccelerating = false;
+		PxQuat quat = _vehicle4W->getRigidDynamicActor()->getGlobalPose().q;
+		float turboSpeed = 30.0f;
+		PxVec3 forward(0.0f, 0.0f, turboSpeed);
+		forward = quat.rotate(forward);
+		_vehicle4W->getRigidDynamicActor()->setLinearVelocity(forward); // NOTE: maybe set a high acceleration instead? (also maybe make it so that cart has to be grounded to boost)
 	}
 	else if (accelKeyPressed && reverseKeyPressed) {
 		isAccelerating = false;
@@ -204,7 +179,6 @@ void VehicleShoppingCart::processRawInputDataKeyboard(const bool accelKeyPressed
 		isAccelerating = false;
 	}
 	
-	
 	_rawInputData.setDigitalAccel(isAccelerating);
 	_rawInputData.setDigitalBrake(false);
 	_rawInputData.setDigitalHandbrake(handbrakeKeyPressed);
@@ -216,6 +190,8 @@ void VehicleShoppingCart::processRawInputDataController(const PxReal accel, cons
 	
 	/*
 	ROCKET LEAGUE DRIVING MODEL...
+
+	https://rocketleague.fandom.com/wiki/Controls
 
 	ACCEL = R2/RT
 	REVERSE = L2/LT
@@ -229,16 +205,23 @@ void VehicleShoppingCart::processRawInputDataController(const PxReal accel, cons
 	Other way I thought was if you set accel = max and brake = min and still change egars same way
 	maybe for turbo it puts you in a higher gear? and sets you're accel = 1.0f and disables 
 
-	//TODO: could have a threshold change for minimizing twitches
+	//TODO: could have a threshold change for minimizing twitches (this doesnt seem necessary)
 	//TODO: maybe I should change it so that if the current gear is the same as the new one, then dont call a change to it since I dont know if it resets anything
 	*/
+
+	_isKeyAndMouseControlled = false; // flag that this vehicle is being controlled by a gamepad
 
 	PxReal netAccel;
 
 	// TURBO BUTTON OVERRIDES TRIGGERS (It does not override handbrake however)
 	if (turboButtonPressed) {
-		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFOURTH); // TODO: play around with which gear to use
-		netAccel = 1.0f; 
+		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
+		netAccel = 0.0f;
+		PxQuat quat = _vehicle4W->getRigidDynamicActor()->getGlobalPose().q;
+		float turboSpeed = 30.0f;
+		PxVec3 forward(0.0f, 0.0f, turboSpeed);
+		forward = quat.rotate(forward);
+		_vehicle4W->getRigidDynamicActor()->setLinearVelocity(forward); // NOTE: maybe set a high acceleration instead? (also maybe make it so that cart has to be grounded to boost)
 	}
 	else if (accel >= reverse) {
 		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
@@ -271,16 +254,15 @@ void VehicleShoppingCart::clearRawInputDataController() {
 }
 
 
-
-
-
-
 void VehicleShoppingCart::updatePhysics(double deltaTime) {
 
 	// Update the control inputs for the vehicle...
 
-	// if key controlled...
-	//PxVehicleDrive4WSmoothDigitalRawInputsAndSetAnalogInputs(gKeySmoothingData, gSteerVsForwardSpeedTable, _rawInputData, deltaTime, getIsAirborne(), *_vehicle4W);
-	// if controller controlled...
-	PxVehicleDrive4WSmoothAnalogRawInputsAndSetAnalogInputs(gPadSmoothingData, gSteerVsForwardSpeedTable, _rawInputData, deltaTime, getIsAirborne(), *_vehicle4W);
+	if (_isKeyAndMouseControlled) { // if key controlled...
+		PxVehicleDrive4WSmoothDigitalRawInputsAndSetAnalogInputs(gKeySmoothingData, gSteerVsForwardSpeedTable, _rawInputData, deltaTime, getIsAirborne(), *_vehicle4W);
+	}
+	else { // if controller controlled...
+		PxVehicleDrive4WSmoothAnalogRawInputsAndSetAnalogInputs(gPadSmoothingData, gSteerVsForwardSpeedTable, _rawInputData, deltaTime, getIsAirborne(), *_vehicle4W);
+	}
+
 }

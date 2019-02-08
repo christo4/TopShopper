@@ -1,4 +1,3 @@
-
 #ifndef VEHICLE_SHOPPING_CART_H_
 #define VEHICLE_SHOPPING_CART_H_
 
@@ -26,15 +25,15 @@ class VehicleShoppingCart {
 		void clearRawInputDataKeyboard();
 		void clearRawInputDataController();
 
-
 		void updatePhysics(double deltaTime);
 
 	private:
 		physx::PxVehicleDrive4WRawInputData _rawInputData;
 		bool _isAirborne;
 
-
-
+		// ***NOTE: only 1 of the process methods should be called in a frame (exclusively key/M or gamepad controlled)
+		// This flag will then be used to select which smoothing data / setting method to use
+		bool _isKeyAndMouseControlled = true; // if false then isGamePadControlled 
 
 };
 

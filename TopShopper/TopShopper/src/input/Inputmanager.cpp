@@ -20,6 +20,8 @@ void InputManager::init(){
 //updates the states of each of the gamepad structs in the gamepads array when called
 void InputManager::updateMilliseconds(double deltaTime) {
 
+	glfwPollEvents(); // NOTE: I MOVED THIS HERE FROM THE RENDERING CODE SINCE IT DIDNT WORK OTHERWISE
+
 	int numAxes;
 	int numButtons;
 	const float * axesArray = NULL;
@@ -55,12 +57,18 @@ void InputManager::updateMilliseconds(double deltaTime) {
 		_gamePads[i]->leftButton = (bool) buttonArray[13];
 	}
 
+	// KEYBOARD AND MOUSE INPUT...
+	GLFWwindow* window = _broker->get_RenderingManager_Window();
+	_keyboardAndMouse->wKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W);
+	_keyboardAndMouse->aKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A);
+	_keyboardAndMouse->sKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S);
+	_keyboardAndMouse->dKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D);
+	_keyboardAndMouse->leftShiftKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT_SHIFT);
+	_keyboardAndMouse->spaceKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE);
 
-	// now that our gamepads have been updated, we pass the input along to update the control state of every player cart...
+	// now that our gamepads/keyboard/mouse have been updated, we pass the input along to update the control state of every player cart...
 
 	passAlongInputsToCarts();
-
-
 
 }
 
@@ -80,27 +88,37 @@ InputManager::~InputManager()
 
 void InputManager::passAlongInputsToCarts() {
 
-	if (_numGamepads < 1) {
-		return;
-	}
-
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> playerCarts = _broker->get_PhysicsManager_ActiveScene_AllShoppingCartPlayers();
 
 	for (std::shared_ptr<ShoppingCartPlayer> &playerCart : playerCarts) {
 		int playerID = playerCart->getInputID();
-		// ~~~~~~~~~I can either do no error checking here or leave it be and a wrongly set ID will cause an indexoutofbounds error
-		Gamepad *pad = getGamePad(playerID);
-		// now read inputs from this gamepad and pass it along to cart's processInput methods that will then change movement behaviour for next physics step
-		
-		physx::PxReal accel = glm::clamp(((pad->rightTrigger + 1) / 2), 0.0f, 1.0f);
-		physx::PxReal reverse = glm::clamp(((pad->leftTrigger + 1) / 2), 0.0f, 1.0f);
-		physx::PxReal handbrake = pad->xButton ? 1.0f : 0.0f;
-		physx::PxReal steer = glm::clamp(pad->leftStickX *-1, -1.0f, 1.0f); // must be negated otherwise steering is backwards
-		bool turboButtonPressed = pad->bButton; // this function doesnt work as intended yet...
 
-		playerCart->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
+		if (_numGamepads < 1) { // Keyboard/Mouse enabled (single player)
+			if (playerID != 1) continue;
 
+			bool accelKeyPressed = _keyboardAndMouse->wKey;
+			bool reverseKeyPressed = _keyboardAndMouse->sKey;
+			bool handbrakeKeyPressed = _keyboardAndMouse->leftShiftKey;
+			bool steerLeftKeyPressed = _keyboardAndMouse->dKey; // NOTE: the steer keys have to be reversed here
+			bool steerRightKeyPressed = _keyboardAndMouse->aKey;
+			bool turboKeyPressed = _keyboardAndMouse->spaceKey;
+
+			playerCart->_shoppingCartBase->processRawInputDataKeyboard(accelKeyPressed, reverseKeyPressed, handbrakeKeyPressed, steerLeftKeyPressed, steerRightKeyPressed, turboKeyPressed);
+			break;
+		}
+		else { // Gamepads enabled
+			// ~~~~~~~~~I can either do no error checking here or leave it be and a wrongly set ID will cause an indexoutofbounds error
+			Gamepad *pad = getGamePad(playerID);
+			// now read inputs from this gamepad and pass it along to cart's processInput methods that will then change movement behaviour for next physics step
+
+			physx::PxReal accel = glm::clamp(((pad->rightTrigger + 1) / 2), 0.0f, 1.0f);
+			physx::PxReal reverse = glm::clamp(((pad->leftTrigger + 1) / 2), 0.0f, 1.0f);
+			physx::PxReal handbrake = pad->xButton ? 1.0f : 0.0f;
+			physx::PxReal steer = glm::clamp(pad->leftStickX *-1, -1.0f, 1.0f); // must be negated otherwise steering is backwards
+			bool turboButtonPressed = pad->bButton; // this function doesnt work as intended yet...
+
+			playerCart->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
+		}
 	}
-
 
 }
