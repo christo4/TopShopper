@@ -2,6 +2,8 @@
 
 
 #include "renderingmanager.h"
+#include "../core/broker.h"
+#include "../loading/loadingmanager.h"
 #include <iostream>
 #include <string>
 
@@ -14,16 +16,14 @@
 #include "Scene.h"
 
 
-RenderingManager::RenderingManager(Broker* broker) 
-	: _broker(broker)
-{
+RenderingManager::RenderingManager(Broker* broker) : _broker(broker){
 	openWindow();
 	init();
 }
 
 RenderingManager::~RenderingManager() {
 	delete renderingEngine;
-	delete scene;
+	//delete scene;
 }
 
 GLFWwindow* RenderingManager::getWindow() {
@@ -35,12 +35,7 @@ GLFWwindow* RenderingManager::getWindow() {
 void RenderingManager::init() {
 	//openWindow();
 	renderingEngine = new RenderingEngine();
-	scene = new Scene(renderingEngine, _window);
-
-	//bool check = scene->objectLoader("sphere.obj", vertex, uv, normal);
-	//if (check == false) {
-		//std::exit(0);
-	//}
+	//scene = new Scene(renderingEngine, _window);
 
 	//scene->sphereMaker((scene->theta), scene->radius, scene->phi, vertex, uv, normal);
 }
@@ -49,12 +44,25 @@ void RenderingManager::init() {
 void RenderingManager::updateMilliseconds(double deltaTime) {
 	// render stuff...
 	
-	scene->displayScene();
+	//scene->displayScene();
+	
+	Geometry  meme = *(_broker->get_LoadingManager_Geometry(VEHICLE_CHASSIS_GEO));
+
+
+	meme.drawMode = GL_LINE_STRIP;
+
+	renderingEngine->assignBuffers(meme);
+	renderingEngine->setBufferData(meme);
+
+
+	_objects.push_back(meme);
+
+
+	renderingEngine->RenderScene(_objects);
+	
+	
 	// swap front and back buffers
 	glfwSwapBuffers(_window);
-
-	// poll for events (probably move into inputManager later on)
-	//glfwPollEvents();
 
 	// any other stuff...
 }
@@ -91,10 +99,6 @@ void RenderingManager::openWindow() {
 		return;
 	}
 
-	//Set the custom error callback function
-	//Errors will be printed to the console
-	//glfwSetErrorCallback(ErrorCallback);
-
 	//Attempt to create a window with an OpenGL 4.1 core profile context
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -109,14 +113,6 @@ void RenderingManager::openWindow() {
 		return;
 	}
 
-	//Set the custom function that tracks key presses
-	//glfwSetKeyCallback(window, KeyCallback);
-
-	//glfwSetMouseButtonCallback(window, mouseButtonCallback);
-
-	//glfwSetCursorPosCallback(window, cursor_position_callback);
-
-	//Bring the new window to the foreground (not strictly necessary but convenient)
 	glfwMakeContextCurrent(_window);
 	glfwSetWindowUserPointer(_window, this);
 

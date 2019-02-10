@@ -4,11 +4,12 @@
 #ifndef RENDERINGMANAGER_H_
 #define RENDERINGMANAGER_H_
 
+#include "Geometry.h"
 
 class Broker; 
 struct GLFWwindow;
 class RenderingEngine;
-class Scene;
+//class Scene;
 
 class RenderingManager {
 public:
@@ -23,7 +24,7 @@ public:
 
 	void QueryGLVersion();
 
-	Scene* getScene() { return scene; }
+	//Scene* getScene() { return scene; }
 
 private:
 	Broker* _broker = nullptr;
@@ -31,7 +32,8 @@ private:
 	GLFWwindow* _window = nullptr;
 
 	RenderingEngine* renderingEngine;
-	Scene* scene;
+	//Scene* scene;
+	std::vector<Geometry> _objects;
 
 	void openWindow();
 };
