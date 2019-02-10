@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ai\aimanager.cpp" />
     <ClCompile Include="src\core\broker.cpp" />
     <ClCompile Include="src\core\main.cpp" />
     <ClCompile Include="src\core\gamescene.cpp" />

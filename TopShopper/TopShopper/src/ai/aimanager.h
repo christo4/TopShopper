@@ -1,6 +1,3 @@
-
-
-
 #ifndef AIMANAGER_H_
 #define AIMANAGER_H_
 

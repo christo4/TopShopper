@@ -28,6 +28,8 @@ public:
 	GLFWwindow* get_RenderingManager_Window();
 
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> get_PhysicsManager_ActiveScene_AllShoppingCartPlayers();
+	std::vector<std::shared_ptr<SpareChange>> get_PhysicsManager_ActiveScene_AllSpareChange();
+
 
 	Geometry* get_LoadingManager_Geometry(GeometryTypes type);
 
@@ -40,11 +42,12 @@ private:
 	//AudioManager _audioManager;
 	// input manager
 	// loading manager
+	AIManager *_aiManager = nullptr;
 	PhysicsManager *_physicsManager = nullptr;
 	RenderingManager *_renderingManager = nullptr;
 	InputManager * _inputManager = nullptr;
 	LoadingManager * _loadingManager = nullptr;
-
+	
 };
 
 

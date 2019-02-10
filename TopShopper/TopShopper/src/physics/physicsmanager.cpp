@@ -86,6 +86,13 @@ PxVehicleDrivableSurfaceToTireFrictionPairs* gFrictionPairs = NULL;
 CustomSimulationEventCallback gSimEventCallback;
 
 
+
+///////////
+// TEMPORARY: for Milestone 2 only
+std::vector<PxTransform> gSpawnPoints = { PxTransform(40.0f, 51.0f, 40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 51.0f, 40.0f, PxQuat(PxIdentity)), PxTransform(40.0f, 51.0f, -40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 51.0f, -40.0f, PxQuat(PxIdentity)) };
+int gSpawnID = 0;
+
+
 /////////////////////////////////////////////////////////////////////////////
 // FRICTION STUFF...
 
@@ -428,11 +435,24 @@ void PhysicsManager::updateMilliseconds(double deltaTime) {
 	_activeScene->_physxScene->fetchResults(true); // wait for results to come in before moving on to next system
 
 
+	// remove actors that were flagged for destroy
 	for (int i = 0; i < _activeScene->_entities.size(); i++) {
 		if (_activeScene->_entities.at(i)->getDestroyFlag()) {
 			_activeScene->_physxScene->removeActor(*(_activeScene->_entities.at(i)->_actor));
 			_activeScene->_entities.erase(_activeScene->_entities.begin() + i);
 		}
+	}
+
+	// TEMPORARY:
+	// spawn a new spare change if last one was destroyed
+
+	std::vector<std::shared_ptr<SpareChange>> spareChangeVec = _activeScene->getAllSpareChange();
+	if (spareChangeVec.size() == 0) {
+		gSpawnID++;
+		if (gSpawnID >= gSpawnPoints.size()) gSpawnID = 0;
+		std::shared_ptr<SpareChange> spareChangeNEW = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, gSpawnPoints.at(gSpawnID), "spareChangeNEW"));
+		_activeScene->_physxScene->addActor(*(spareChangeNEW->_actor));
+		_activeScene->addEntity(spareChangeNEW);
 	}
 
 }

@@ -14,6 +14,7 @@ Broker* Broker::getInstance() {
 }
 
 Broker::Broker() {
+	_aiManager = new AIManager(this);
 	_loadingManager = new LoadingManager(this);
 	_physicsManager = new PhysicsManager(this);
 	_renderingManager = new RenderingManager(this);
@@ -28,6 +29,7 @@ void Broker::initAll() {
 	
 	_loadingManager->init();
 	_physicsManager->init();
+	_aiManager->init();
 	_renderingManager->init();
 	_inputManager->init();
 	// etc. ........;
@@ -46,6 +48,7 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 
 	_inputManager->updateMilliseconds(deltaTime); // NOTE: this needs to be done before physics updates
 	_physicsManager->updateMilliseconds(deltaTime);
+	_aiManager->updateMilliseconds(deltaTime); // TODO: figure out what order to put this in
 	_renderingManager->updateMilliseconds(deltaTime);
 
 	// ~~~~~~~~~WARNING: this should be commented out when no controller is connected...
@@ -91,6 +94,11 @@ GLFWwindow* Broker::get_RenderingManager_Window() {
 std::vector<std::shared_ptr<ShoppingCartPlayer>> Broker::get_PhysicsManager_ActiveScene_AllShoppingCartPlayers() {
 	return _physicsManager->getActiveScene()->getAllShoppingCartPlayers();
 }
+
+std::vector<std::shared_ptr<SpareChange>> Broker::get_PhysicsManager_ActiveScene_AllSpareChange() {
+	return _physicsManager->getActiveScene()->getAllSpareChange();
+}
+
 
 
 Geometry* Broker::get_LoadingManager_Geometry(GeometryTypes type) {
