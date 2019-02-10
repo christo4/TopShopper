@@ -81,3 +81,9 @@ std::shared_ptr<Component> Entity::getComponent(ComponentTypes componentType) {
 	int index = componentType; // enum -> int
 	return _components.at(index); // either a shared_ptr (if attached) or nullptr (if not attached)
 }
+
+
+
+void Entity::destroy() {
+	_destroyFlag = true;
+}

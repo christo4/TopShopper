@@ -7,7 +7,7 @@
 
 class Entity;
 class ShoppingCartPlayer;
-
+class SpareChange;
 
 namespace physx {
 	class PxScene;
@@ -28,6 +28,8 @@ class GameScene {
 		// ~~~~~~~~also have remove entity - by name? or maybe by pointer
 
 		std::vector<std::shared_ptr<ShoppingCartPlayer>> getAllShoppingCartPlayers();
+
+		std::vector<std::shared_ptr<SpareChange>> getAllSpareChange();
 
 
 		std::vector<std::shared_ptr<Entity>> _entities;

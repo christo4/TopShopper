@@ -83,6 +83,7 @@ PxBatchQuery*			gBatchQuery = NULL;
 
 PxVehicleDrivableSurfaceToTireFrictionPairs* gFrictionPairs = NULL;
 
+CustomSimulationEventCallback gSimEventCallback;
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -136,6 +137,92 @@ PxFilterFlags VehicleFilterShader
 
 	return PxFilterFlags();
 }
+
+
+//the basic usage of the filter shader, and it will ensure that SampleSubmarine::onContact() is called for all interesting pairs.
+// Callback for every collision pair??? (i guess it applies to each shape?)
+// will be called for all pairs of shapes that come near each other -- more precisely: for all pairs of shapes whose axis aligned bounding boxes in world space are found to intersect for the first time. All behavior beyond that is determined by what SampleSubmarineFilterShader() returns.
+PxFilterFlags CustomFilterShader
+(PxFilterObjectAttributes attributes0, PxFilterData filterData0,
+	PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+	PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
+{
+	PX_UNUSED(constantBlock);
+	PX_UNUSED(constantBlockSize);
+
+	if ((0 == (filterData0.word0 & filterData1.word1)) && (0 == (filterData1.word0 & filterData0.word1)))
+		return PxFilterFlag::eSUPPRESS;
+
+	// if either (or both) object is a trigger...
+	if (PxFilterObjectIsTrigger(attributes0) || PxFilterObjectIsTrigger(attributes1)) {
+		pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
+		return PxFilterFlag::eDEFAULT;
+	}
+
+	// if both are solid (or not-simulated???)...
+	pairFlags = PxPairFlag::eCONTACT_DEFAULT;
+	//pairFlags |= PxPairFlags(PxU16(filterData0.word2 | filterData1.word2));
+
+
+	// trigger the contact callback for pairs (A,B) where
+	// the filtermask of A contains the ID of B and vice-versa (symmetric relationship)
+	if ((filterData0.word0 & filterData1.word1) && (filterData1.word0 & filterData0.word1))
+		pairFlags |= PxPairFlag::eNOTIFY_TOUCH_FOUND;
+
+	return PxFilterFlag::eDEFAULT;
+
+/*
+	PX_UNUSED(attributes0);
+	PX_UNUSED(attributes1);
+	PX_UNUSED(constantBlock);
+	PX_UNUSED(constantBlockSize);
+
+	// NOTE: this is just making sure we defined a symmetric relationship for collisions...
+	if ((0 == (filterData0.word0 & filterData1.word1)) && (0 == (filterData1.word0 & filterData0.word1)))
+		return PxFilterFlag::eSUPPRESS;
+
+	pairFlags = PxPairFlag::eCONTACT_DEFAULT;
+	pairFlags |= PxPairFlags(PxU16(filterData0.word2 | filterData1.word2));
+
+	return PxFilterFlags();
+	*/
+}
+
+
+/*
+PxFilterFlags CustomFilterShader
+(PxFilterObjectAttributes attributes0, PxFilterData filterData0,
+	PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+	PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
+{
+
+	// ~~~~~NOTE: I think that PX_UNUSED means that these params arent used anywhere
+	PX_UNUSED(attributes0);
+	PX_UNUSED(filterData0);
+	PX_UNUSED(attributes1);
+	PX_UNUSED(filterData1);
+	PX_UNUSED(constantBlock);
+	PX_UNUSED(constantBlockSize);
+
+	// this was passed by reference
+	// I think these are the only flags we currently need
+	pairFlags = PxPairFlag::eSOLVE_CONTACT | PxPairFlag::eDETECT_DISCRETE_CONTACT | PxPairFlag::eNOTIFY_TOUCH_FOUND;
+
+	return PxFilterFlag::eDEFAULT;
+
+// use eCALLBACK and eSURPORESS/KILL
+
+
+	if ((0 == (filterData0.word0 & filterData1.word1)) && (0 == (filterData1.word0 & filterData0.word1)))
+		return PxFilterFlag::eSUPPRESS;
+
+	pairFlags = PxPairFlag::eCONTACT_DEFAULT;
+	pairFlags |= PxPairFlags(PxU16(filterData0.word2 | filterData1.word2));
+
+
+	//return PxFilterFlags();
+}
+*/
 
 
 
@@ -219,8 +306,8 @@ void PhysicsManager::switchToScene1() {
 	PxU32 numWorkers = 1; // 1 thread off the main thread (~~~~~~~~MAYBE CHANGE TO 0, to run on main thread?)
 	gDispatcher = PxDefaultCpuDispatcherCreate(numWorkers);
 	sceneDesc.cpuDispatcher = gDispatcher;
-	sceneDesc.filterShader = VehicleFilterShader; // TODO: change this later to use a finished CustomFilterShader
-	//sceneDesc.filterShader = CustomFilterShader;
+	sceneDesc.filterShader = CustomFilterShader; // TODO: change this later to use a finished CustomFilterShader
+	sceneDesc.simulationEventCallback = &gSimEventCallback;
 
 	PxScene *physxScene = gPhysics->createScene(sceneDesc);
 
@@ -273,9 +360,18 @@ void PhysicsManager::switchToScene1() {
 	physxScene->addActor(*(vehicle1->_actor));
 
 
+
+	// SPARE CHANGE 1:
+
+	//FOR TESTING COLLISION BEFORE WE AUTO SPAWN THEM (NOTE: THEIR NAMES WILL BE THE SAME BUT THAT DOESNT MATTER)
+
+	std::shared_ptr<SpareChange> spareChange1 = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, PxTransform(30.0f, 51.0f, 30.0f, PxQuat(PxIdentity)), "spareChange1"));
+	physxScene->addActor(*(spareChange1->_actor));
+
 	_activeScene = std::make_shared<GameScene>(physxScene);
 	_activeScene->addEntity(ground);
 	_activeScene->addEntity(vehicle1);
+	_activeScene->addEntity(spareChange1);
 
 }
 
@@ -331,6 +427,14 @@ void PhysicsManager::updateMilliseconds(double deltaTime) {
 	_activeScene->_physxScene->simulate(deltaTime);
 	_activeScene->_physxScene->fetchResults(true); // wait for results to come in before moving on to next system
 
+
+	for (int i = 0; i < _activeScene->_entities.size(); i++) {
+		if (_activeScene->_entities.at(i)->getDestroyFlag()) {
+			_activeScene->_physxScene->removeActor(*(_activeScene->_entities.at(i)->_actor));
+			_activeScene->_entities.erase(_activeScene->_entities.begin() + i);
+		}
+	}
+
 }
 
 
@@ -366,10 +470,9 @@ void PhysicsManager::cleanup() {
 }
 
 
-
-std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, physx::PxTransform transform, std::string name) {
-
-	const char *cName = name.c_str();
+// TODO: delete all local pointers
+// HAVE TO CHANGE THIS!!! - change std::string to const char* (since cStr returns empty..)
+std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, physx::PxTransform transform, const char *name) {
 
 	switch (type) {
 	case EntityTypes::GROUND:
@@ -381,20 +484,36 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 		PxMaterial *groundMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
 		PxRigidStatic *groundActor = createDrivableTerrain(groundVerts, groundIndices, groundSimFilterData, groundMaterial, gPhysics, gCooking);
 		std::shared_ptr<Ground> ground = std::make_shared<Ground>(groundActor);
-		ground->_actor->setName(cName);
+		ground->_actor->setName(name);
 		(ground->_actor->is<PxRigidStatic>())->setGlobalPose(transform);
 		return ground;
 	}
-		//case EntityTypes::GROUND:
-			//
-			//break;
 	case EntityTypes::SHOPPING_CART_PLAYER:
 	{
 		VehicleShoppingCart *shoppingCartBase = new VehicleShoppingCart(gPhysics, gCooking);
 		std::shared_ptr<ShoppingCartPlayer> shoppingCartPlayer = std::make_shared<ShoppingCartPlayer>(shoppingCartBase, 0); // NOTE: an invalid input ID of 0 is placed here as a default since it must be set later
-		shoppingCartPlayer->_actor->setName(cName);
+		shoppingCartPlayer->_actor->setName(name);
 		(shoppingCartPlayer->_actor->is<PxRigidDynamic>())->setGlobalPose(transform);
 		return shoppingCartPlayer;
+	}
+	case EntityTypes::SPARE_CHANGE:
+	{
+		PxReal radius = 1.0f;
+		PxSphereGeometry col(radius);
+		PxFilterData simFilterData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
+		PxMaterial *mat = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+		PxShape *shape = gPhysics->createShape(col, *mat, true, PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION);
+		PxFilterData qryFilterData;
+		setupNonDrivableSurface(qryFilterData);
+		shape->setQueryFilterData(qryFilterData);
+		shape->setSimulationFilterData(simFilterData);
+		PxRigidDynamic *actor = gPhysics->createRigidDynamic(PxTransform(0.0f, 0.0f, 0.0f, PxQuat(PxIdentity)));
+		actor->attachShape(*shape);
+		actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+		std::shared_ptr<SpareChange> spareChange = std::make_shared<SpareChange>(actor);
+		spareChange->_actor->setName(name);
+		(spareChange->_actor->is<PxRigidDynamic>())->setGlobalPose(transform);
+		return spareChange;
 	}
 	default:
 		return nullptr;
@@ -402,6 +521,9 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 }
 
 
+// NOTE: if you dont attach the shape to an actor it wont render (DUH!)
+
+// NOTE: a solid collider will be pass-throughable by default without filtering...
 
 
 
@@ -414,43 +536,6 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 
 
 
-
-
-// NOTE: PxFilterObjectAttributes is a typedef of PxU32
-/*
-PxFilterFlags CustomFilterShader
-(PxFilterObjectAttributes attributes0, PxFilterData filterData0,
-	PxFilterObjectAttributes attributes1, PxFilterData filterData1,
-	PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize)
-{
-
-	// ~~~~~NOTE: I think that PX_UNUSED means that these params arent used anywhere
-	PX_UNUSED(attributes0);
-	PX_UNUSED(filterData0);
-	PX_UNUSED(attributes1);
-	PX_UNUSED(filterData1);
-	PX_UNUSED(constantBlock);
-	PX_UNUSED(constantBlockSize);
-
-	// this was passed by reference
-	// I think these are the only flags we currently need
-	pairFlags = PxPairFlag::eSOLVE_CONTACT | PxPairFlag::eDETECT_DISCRETE_CONTACT | PxPairFlag::eNOTIFY_TOUCH_FOUND;
-
-	return PxFilterFlag::eDEFAULT;
-
-// use eCALLBACK and eSURPORESS/KILL
-
-	
-	if ((0 == (filterData0.word0 & filterData1.word1)) && (0 == (filterData1.word0 & filterData0.word1)))
-		return PxFilterFlag::eSUPPRESS;
-
-	pairFlags = PxPairFlag::eCONTACT_DEFAULT;
-	pairFlags |= PxPairFlags(PxU16(filterData0.word2 | filterData1.word2));
-	
-
-	//return PxFilterFlags();
-}
-*/
 
 
 
@@ -474,6 +559,77 @@ CALLBACK INFO
 - use PxActor.GetType and then be able to downcast to subclass Static or DYnamic
 
 */
+
+
+
+void CustomSimulationEventCallback::onAdvance(const physx::PxRigidBody *const *bodyBuffer, const physx::PxTransform *poseBuffer, const physx::PxU32 count) {}
+void CustomSimulationEventCallback::onConstraintBreak(physx::PxConstraintInfo *constraints, physx::PxU32 count) {}
+
+void CustomSimulationEventCallback::onContact(const physx::PxContactPairHeader &pairHeader, const physx::PxContactPair *pairs, physx::PxU32 nbPairs) {
+	//std::cout << pairHeader.actors[0]->getName() << std::endl;
+	//std::cout << pairHeader.actors[1]->getName() << std::endl;
+}
+
+
+void CustomSimulationEventCallback::onSleep(physx::PxActor **actors, physx::PxU32 count) {}
+
+
+
+// ????
+// I think this gets called ONCE for all pairs that a collision was reported for during this frame...
+//void CustomSimulationEventCallback::onContact(const PxContactPairHeader &pairHeader, const PxContactPair *pairs, PxU32 nbPairs) {
+	//pairHeader.
+//}
+
+//https://docs.nvidia.com/gameworks/content/gameworkslibrary/physx/guide/Manual/RigidBodyCollision.html
+//The code above iterates through all pairs of overlapping shapes that involve a trigger shape.If it is found that the treasure has been touched by the submarine then the flag gTreasureFound is set true.
+
+// NOTE: MY GUESS IS THAT THIS CALLBACK GETS CALLED TWICE PER PAIR???
+// OR MAYBE the triggershape is the shape with a trigger collider and othershape is the solid shape (or 2nd trigger shape?)
+// ~~~~~~~~POSSIBLE BUG ... it seems like this gets called both for ontriggereneter and ontriggerleave (possible fix would be to change defaulttrigger flags to remove notfiy_touch_lost
+void CustomSimulationEventCallback::onTrigger(PxTriggerPair *pairs, PxU32 count) {
+
+	for (PxU32 i = 0; i < count; i++) {
+
+		// ignore pairs when shapes have been deleted
+		if (pairs[i].flags & (PxTriggerPairFlag::eREMOVED_SHAPE_TRIGGER |
+			PxTriggerPairFlag::eREMOVED_SHAPE_OTHER))
+			continue;
+
+		Entity *otherEntity = static_cast<Entity*>((pairs[i].otherActor)->userData);
+		Entity *triggerEntity = static_cast<Entity*>((pairs[i].triggerActor)->userData);
+
+		if (otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER && triggerEntity->getTag() == EntityTypes::SPARE_CHANGE) {
+			ShoppingCartPlayer *shoppingCartPlayer = static_cast<ShoppingCartPlayer*>((pairs[i].otherActor)->userData);
+			SpareChange *spareChange = static_cast<SpareChange*>((pairs[i].triggerActor)->userData);
+
+			spareChange->destroy();
+
+			// call shoppingCartPlayer->incrementPoints(spareChange->pts))
+			// also destroy pickup
+			// call GameScene::removeEntity(spareChange) which removes it from _entities and then releases all physics stuff (maybe just releast _actor which might auto release the shapes??)
+			// ~~~~~~~~NOTE: should GameScene::addEntity also add it to the physx scene?? - maybe not in case we want some entities that arent in physx scene. Then again each entity has a transform and could just be set to non simulated
+			//spareChange->_actor->getScene()->removeActor(*(spareChange->_actor));
+			//PxScene *sceneTEST = spareChange->_actor->getScene();
+			//sceneTEST->removeActor(*(spareChange->_actor)); NOTE: API WRITES CANT OCCUR IN A CALLBACK FUCNTION, so I can't call any function that will affect ask here???
+			// NEW PLAN: call Entity::flagToDestroy() on spare change, which will set Entity::toDestroy() which will then the PhysicsManager will call its ::cleanupDestroyedEntities()
+		}
+
+		// CAN add more pairs of interest here...
+
+		//if (dynamic_cast<ShoppingCartPlayer*>((&pairs[i].otherActor->userData)
+
+		//if ((&pairs[i].otherShape->getActor() == mSubmarineActor) &&
+			//(&pairs[i].triggerShape->getActor() == gTreasureActor))
+		//{
+			//gTreasureFound = true;
+		//}
+	}
+}
+
+
+void CustomSimulationEventCallback::onWake(physx::PxActor **actors, physx::PxU32 count) {}
+
 
 
 /*

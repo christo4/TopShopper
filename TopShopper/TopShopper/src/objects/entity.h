@@ -56,6 +56,7 @@ namespace physx {
 
 
 
+// NOTE: more types can be added as needed (e.g. shelves / environment obstacles)
 enum EntityTypes {
 	// VEHICLES...
 	SHOPPING_CART_PLAYER,				// COMPONENTS = AUDIO_LISTENER, AUDIO_SOURCE, CAMERA, MESH
@@ -103,10 +104,16 @@ class Entity {
 
 		EntityTypes getTag() { return _tag; }
 
+		bool getDestroyFlag() { return _destroyFlag; }
+
+		void destroy();
+
 	private:
 		EntityTypes _tag;
 
 		std::array<std::shared_ptr<Component>, ComponentTypes::NUMBER_OF_COMPONENT_TYPES> _components;
+
+		bool _destroyFlag = false;
 
 };
 

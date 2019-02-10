@@ -3,7 +3,7 @@
 //#include "objects/entity.h"
 
 #include "objects/shoppingcartplayer.h"
-
+#include "objects/sparechange.h"
 
 using namespace physx;
 
@@ -33,11 +33,25 @@ std::vector<std::shared_ptr<ShoppingCartPlayer>> GameScene::getAllShoppingCartPl
 	for (std::shared_ptr<Entity> &entity : _entities) {
 		if (entity->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
 			// downcast...
-			// BUILD errors with line below...
 			std::shared_ptr<ShoppingCartPlayer> shoppingCartPlayer = std::dynamic_pointer_cast<ShoppingCartPlayer>(entity);
 			shoppingCartPlayers.push_back(shoppingCartPlayer);
 		}
 	}
 
 	return shoppingCartPlayers;
+}
+
+
+
+std::vector<std::shared_ptr<SpareChange>> GameScene::getAllSpareChange() {
+	std::vector<std::shared_ptr<SpareChange>> spareChangeVec; // empty vector
+	for (std::shared_ptr<Entity> &entity : _entities) {
+		if (entity->getTag() == EntityTypes::SPARE_CHANGE) {
+			// downcast...
+			std::shared_ptr<SpareChange> spareChange = std::dynamic_pointer_cast<SpareChange>(entity);
+			spareChangeVec.push_back(spareChange);
+		}
+	}
+
+	return spareChangeVec;
 }

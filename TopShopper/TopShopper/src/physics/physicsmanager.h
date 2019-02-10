@@ -5,6 +5,7 @@
 #include <memory>
 #include "objects/shoppingcartplayer.h"
 #include "objects/ground.h"
+#include "objects/sparechange.h"
 #include "core/gamescene.h"
 
 class Broker;
@@ -32,19 +33,21 @@ void initFrictionPairs();
 
 // describes what each entity type / actors can collide with...
 // each collision flag should be unique, but against flags can be duplicates
-// can have at most 32 shift
+// can have at most 32 shifts (0-31)
 enum CollisionFlags {
 	COLLISION_FLAG_GROUND				= (1 << 0),
 	COLLISION_FLAG_WHEEL				= (1 << 1),
 	COLLISION_FLAG_CHASSIS				= (1 << 2),
 	COLLISION_FLAG_OBSTACLE				= (1 << 3),
 	COLLISION_FLAG_DRIVABLE_OBSTACLE	= (1 << 4),
+	COLLISION_FLAG_PICKUP				= (1 << 5),
 
-	COLLISION_FLAG_GROUND_AGAINST				=													COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE,
-	COLLISION_FLAG_WHEEL_AGAINST				=							COLLISION_FLAG_WHEEL |	COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE,
-	COLLISION_FLAG_CHASSIS_AGAINST				= COLLISION_FLAG_GROUND |	COLLISION_FLAG_WHEEL |	COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE,
-	COLLISION_FLAG_OBSTACLE_AGAINST				= COLLISION_FLAG_GROUND |	COLLISION_FLAG_WHEEL |	COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE,
-	COLLISION_FLAG_DRIVABLE_OBSTACLE_AGAINST	= COLLISION_FLAG_GROUND |							COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE
+	COLLISION_FLAG_GROUND_AGAINST				=												 COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE | COLLISION_FLAG_PICKUP,
+	COLLISION_FLAG_WHEEL_AGAINST				=						  COLLISION_FLAG_WHEEL | COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE								     | COLLISION_FLAG_PICKUP,
+	COLLISION_FLAG_CHASSIS_AGAINST				= COLLISION_FLAG_GROUND | COLLISION_FLAG_WHEEL | COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE | COLLISION_FLAG_PICKUP,
+	COLLISION_FLAG_OBSTACLE_AGAINST				= COLLISION_FLAG_GROUND | COLLISION_FLAG_WHEEL | COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE | COLLISION_FLAG_PICKUP,
+	COLLISION_FLAG_DRIVABLE_OBSTACLE_AGAINST	= COLLISION_FLAG_GROUND | 					     COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE | COLLISION_FLAG_PICKUP,
+	COLLISION_FLAG_PICKUP_AGAINST				= COLLISION_FLAG_GROUND | COLLISION_FLAG_WHEEL | COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE | COLLISION_FLAG_PICKUP
 };
 
 physx::PxFilterFlags VehicleFilterShader
@@ -53,8 +56,10 @@ physx::PxFilterFlags VehicleFilterShader
  physx::PxPairFlags& pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize);
 
 
-
-
+physx::PxFilterFlags CustomFilterShader
+(physx::PxFilterObjectAttributes attributes0, physx::PxFilterData filterData0,
+	physx::PxFilterObjectAttributes attributes1, physx::PxFilterData filterData1,
+	physx::PxPairFlags& pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize);
 
 
 
@@ -66,7 +71,7 @@ public:
 	void updateMilliseconds(double deltaTime);
 	void cleanup();
 
-	std::shared_ptr<Entity> instantiateEntity(EntityTypes type, physx::PxTransform transform, std::string name);
+	std::shared_ptr<Entity> instantiateEntity(EntityTypes type, physx::PxTransform transform, const char *name);
 	void switchToScene1();
 	std::shared_ptr<GameScene> getActiveScene() { return _activeScene; }
 
@@ -87,6 +92,23 @@ private:
 
 	std::shared_ptr<GameScene> _activeScene = nullptr;
 };
+
+
+
+
+
+class CustomSimulationEventCallback : public physx::PxSimulationEventCallback {
+	public:
+		void onAdvance(const physx::PxRigidBody *const *bodyBuffer, const physx::PxTransform *poseBuffer, const physx::PxU32 count) override;
+		void onConstraintBreak(physx::PxConstraintInfo *constraints, physx::PxU32 count) override;
+		void onContact(const physx::PxContactPairHeader &pairHeader, const physx::PxContactPair *pairs, physx::PxU32 nbPairs) override;
+		void onSleep(physx::PxActor **actors, physx::PxU32 count) override;
+		void onTrigger(physx::PxTriggerPair *pairs, physx::PxU32 count) override;
+		void onWake(physx::PxActor **actors, physx::PxU32 count) override;
+};
+
+
+
 
 
 
