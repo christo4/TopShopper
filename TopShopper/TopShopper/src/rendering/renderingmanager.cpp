@@ -13,7 +13,6 @@
 #include <GLFW/glfw3.h>
 
 #include "RenderingEngine.h"
-#include "Scene.h"
 
 
 RenderingManager::RenderingManager(Broker* broker) : _broker(broker){
@@ -23,7 +22,6 @@ RenderingManager::RenderingManager(Broker* broker) : _broker(broker){
 
 RenderingManager::~RenderingManager() {
 	delete renderingEngine;
-	//delete scene;
 }
 
 GLFWwindow* RenderingManager::getWindow() {
@@ -35,16 +33,11 @@ GLFWwindow* RenderingManager::getWindow() {
 void RenderingManager::init() {
 	//openWindow();
 	renderingEngine = new RenderingEngine();
-	//scene = new Scene(renderingEngine, _window);
-
-	//scene->sphereMaker((scene->theta), scene->radius, scene->phi, vertex, uv, normal);
 }
 
 
 void RenderingManager::updateMilliseconds(double deltaTime) {
 	// render stuff...
-	
-	//scene->displayScene();
 	
 	Geometry  meme = *(_broker->get_LoadingManager_Geometry(VEHICLE_CHASSIS_GEO));
 
@@ -104,9 +97,9 @@ void RenderingManager::openWindow() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	int width = 512;
+	int width = 1024;
 	int height = 512;
-	_window = glfwCreateWindow(width, height, "CPSC 453 OpenGL Boilerplate", 0, 0);
+	_window = glfwCreateWindow(width, height, "TopShopper", 0, 0);
 	if (!_window) {
 		std::cout << "Program failed to create GLFW window, TERMINATING" << std::endl;
 		glfwTerminate();
