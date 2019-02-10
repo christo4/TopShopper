@@ -60,9 +60,6 @@
     <ClCompile Include="src\rendering\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\rendering\Scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\rendering\RenderingEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -134,9 +131,6 @@
     <ClInclude Include="src\rendering\Geometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\rendering\Scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\rendering\RenderingEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -164,5 +158,19 @@
     <ClInclude Include="src\objects\sparechange.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\shaders\.vertex.glsl.swp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\shaders\fragment.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\shaders\fragment.glsl~">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\shaders\vertex.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

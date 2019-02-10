@@ -103,7 +103,6 @@
     <ClCompile Include="src\rendering\glad.c" />
     <ClCompile Include="src\rendering\RenderingEngine.cpp" />
     <ClCompile Include="src\rendering\renderingmanager.cpp" />
-    <ClCompile Include="src\rendering\Scene.cpp" />
     <ClCompile Include="src\rendering\ShaderTools.cpp" />
     <ClCompile Include="src\rendering\texture.cpp" />
     <ClCompile Include="src\utility\utility.cpp" />
@@ -129,7 +128,6 @@
     <ClInclude Include="src\rendering\Geometry.h" />
     <ClInclude Include="src\rendering\RenderingEngine.h" />
     <ClInclude Include="src\rendering\renderingmanager.h" />
-    <ClInclude Include="src\rendering\Scene.h" />
     <ClInclude Include="src\rendering\ShaderTools.h" />
     <ClInclude Include="src\rendering\texture.h" />
     <ClInclude Include="src\utility\utility.h" />
@@ -138,6 +136,12 @@
     <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleCreate.h" />
     <ClInclude Include="src\vehicle\snippetvehiclecommon\SnippetVehicleSceneQuery.h" />
     <ClInclude Include="src\vehicle\VehicleShoppingCart.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\shaders\.vertex.glsl.swp" />
+    <None Include="resources\shaders\fragment.glsl" />
+    <None Include="resources\shaders\fragment.glsl~" />
+    <None Include="resources\shaders\vertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

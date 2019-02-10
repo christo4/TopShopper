@@ -43,6 +43,7 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 
 
 	meme.drawMode = GL_LINE_STRIP;
+	//meme.drawMode = GL_TRIANGLES;
 
 	renderingEngine->assignBuffers(meme);
 	renderingEngine->setBufferData(meme);
