@@ -38,7 +38,7 @@
 
 
 
-#define PVD_ENABLED // ~~~~~NOTE: comment this out if you dont have PVD installed or on release
+//#define PVD_ENABLED // ~~~~~NOTE: comment this out if you dont have PVD installed or on release
 
 #define PVD_HOST "127.0.0.1" // Set this to the IP address of the system running the PhysX Visual Debugger that you want to connect to. DEFAULT = LOCALHOST
 
