@@ -13,7 +13,7 @@ using namespace objl;
 Geometry* VehicleChassisGeo = new Geometry();
 Geometry* VehicleWheelGeo = new Geometry();
 Geometry* GroundGeo = new Geometry();
-
+Geometry* SpareChangeGeo = new Geometry();
 
 
 LoadingManager::LoadingManager(Broker* broker) {
@@ -61,6 +61,20 @@ void LoadingManager::init() {
 	returnIndex.clear();
 
 	///////////////////
+
+
+	loadObject("../TopShopper/resources/Objects/sphere.obj", returnVertices, returnUV, returnNormal, returnIndex);
+
+	SpareChangeGeo->verts = returnVertices;
+	SpareChangeGeo->uvs = returnUV;
+	SpareChangeGeo->normals = returnNormal;
+	SpareChangeGeo->indices = returnIndex;
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	returnIndex.clear();
+
 
 }
 
@@ -116,6 +130,8 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return VehicleWheelGeo;
 	case GeometryTypes::GROUND_GEO:
 		return GroundGeo;
+	case GeometryTypes::SPARE_CHANGE_GEO:
+		return SpareChangeGeo;
 	default:
 		return nullptr;
 	}

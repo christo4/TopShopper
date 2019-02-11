@@ -65,14 +65,13 @@ void RenderingManager::RenderScene(const std::vector<Geometry>& objects) {
 	//physx::PxVec3 offset(20 * glm::cos(angle), 10, 20 * glm::sin(angle));
 	//physx::PxVec3 cameraPos = playerPos + offset;
 
-
-	physx::PxVec3 testVec(10, 10, -10);
+	physx::PxVec3 testVec(0, 5, -10);
 	testVec = playerRot.rotate(testVec);
 
 	glm::mat4 View = glm::lookAt(
 		//glm::vec3(offsetVec.x, offsetVec.y, offsetVec.z), // camera position rotates with player
 		//glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z), // camera position rotates with player
-		glm::vec3(playerPos.x, playerPos.y + testVec.y, playerPos.z + testVec.z), // camera position
+		glm::vec3(playerPos.x + testVec.x, playerPos.y + testVec.y, playerPos.z + testVec.z), // camera position
 		//glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at center of cart chassis
 		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at 
 		glm::vec3(0, 1, 0)  // up vector
@@ -206,20 +205,20 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 
 
 	
-	Geometry meme = *(_broker->get_LoadingManager_Geometry(GeometryTypes::GROUND_GEO));
+	Geometry ground = *(_broker->get_LoadingManager_Geometry(GeometryTypes::GROUND_GEO));
 
 
 	//meme.drawMode = GL_LINE_STRIP;
-	for (int i = 0; i < meme.verts.size(); i++) {
-		meme.colors.push_back(glm::vec3(0.0f, 1.0f,0.0f));
+	for (int i = 0; i < ground.verts.size(); i++) {
+		ground.colors.push_back(glm::vec3(0.0f, 1.0f,0.0f));
 	}
-	meme.drawMode = GL_TRIANGLES;
+	ground.drawMode = GL_TRIANGLES;
 
-	assignBuffers(meme);
-	setBufferData(meme);
+	assignBuffers(ground);
+	setBufferData(ground);
 
 
-	_objects.push_back(meme);
+	_objects.push_back(ground);
 	
 
 	std::shared_ptr<ShoppingCartPlayer> player = _broker->get_PhysicsManager_ActiveScene_AllShoppingCartPlayers().at(0);
@@ -250,6 +249,36 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 
 	_objects.push_back(chassisDefault);
 
+
+
+	
+	std::shared_ptr<SpareChange> spareChange = _broker->get_PhysicsManager_ActiveScene_AllSpareChange().at(0);
+	physx::PxRigidDynamic* scDyn = spareChange->_actor->is<physx::PxRigidDynamic>();
+	physx::PxTransform scTransform = scDyn->getGlobalPose();
+	physx::PxVec3 scPos = scTransform.p;
+
+	Geometry scDefault = *(_broker->get_LoadingManager_Geometry(GeometryTypes::SPARE_CHANGE_GEO));
+
+	std::vector<glm::vec4> newSCVerts;
+	std::vector<glm::vec3> newSCColors;
+
+	// TODO: change later to use an actual detailed mesh and accoutn for rotation
+	for (glm::vec4 v : scDefault.verts) {
+		physx::PxVec3 vPhys(v.x, v.y, v.z);
+		vPhys += scPos;
+		newSCVerts.push_back(glm::vec4(vPhys.x, vPhys.y, vPhys.z, 1.0f));
+		newSCColors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+	}
+
+	scDefault.verts = newSCVerts;
+	scDefault.colors = newSCColors;
+
+	scDefault.drawMode = GL_TRIANGLES;
+	assignBuffers(scDefault);
+	setBufferData(scDefault);
+
+	_objects.push_back(scDefault);
+	
 
 
 
