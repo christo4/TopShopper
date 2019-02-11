@@ -203,16 +203,6 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 	}
 
 	_objects.clear();
-	
-	
-	
-
-	// VERY POOR FOR NOW...
-	for (Geometry& geoDel : _objects) {
-		deleteBufferData(geoDel);
-	}
-
-	_objects.clear();
 
 
 	
