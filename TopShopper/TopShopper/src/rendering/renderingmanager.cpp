@@ -41,7 +41,8 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 	Geometry  meme = *(_broker->get_LoadingManager_Geometry(VEHICLE_CHASSIS_GEO));
 
 
-	meme.drawMode = GL_TRIANGLES;
+	meme.drawMode = GL_LINE_STRIP;
+	//meme.drawMode = GL_TRIANGLES;
 
 	renderingEngine->assignBuffers(meme);
 	renderingEngine->setBufferData(meme);

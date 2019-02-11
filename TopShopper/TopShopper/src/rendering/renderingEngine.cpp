@@ -78,10 +78,10 @@ void RenderingEngine::assignBuffers(Geometry& geometry) {
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(0);
 
-	/*glGenBuffers(1, &geometry.normalBuffer);
+	glGenBuffers(1, &geometry.normalBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(2);*/
+	glEnableVertexAttribArray(2);
 
 	/*glGenBuffers(1, &geometry.colorBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
