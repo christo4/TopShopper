@@ -192,7 +192,11 @@ void RenderingManager::init() {
 
 
 void RenderingManager::updateMilliseconds(double deltaTime) {
+	for (Geometry& geoDel : _objects) {
+		deleteBufferData(geoDel);
+	}
 
+	_objects.clear();
 	
 	Geometry  meme = *(_broker->get_LoadingManager_Geometry(GeometryTypes::GROUND_GEO));
 
