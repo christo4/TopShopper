@@ -86,6 +86,10 @@ public:
 	void setShapeSolid(physx::PxShape *shape);
 	*/
 
+	physx::PxShape** getAllShapes();
+	physx::PxU32 getNbShapes();
+
+
 
 private:
 	Broker* _broker = nullptr;

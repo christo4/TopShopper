@@ -104,3 +104,14 @@ std::vector<std::shared_ptr<SpareChange>> Broker::get_PhysicsManager_ActiveScene
 Geometry* Broker::get_LoadingManager_Geometry(GeometryTypes type) {
 	return _loadingManager->getGeometry(type);
 }
+
+
+
+physx::PxShape** Broker::get_PhysicsManager_AllShapes() {
+	return _physicsManager->getAllShapes();
+}
+
+
+physx::PxU32 Broker::get_PhysicsManager_NbShapes() {
+	return _physicsManager->getNbShapes();
+}

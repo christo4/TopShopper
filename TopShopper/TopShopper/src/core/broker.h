@@ -30,6 +30,9 @@ public:
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> get_PhysicsManager_ActiveScene_AllShoppingCartPlayers();
 	std::vector<std::shared_ptr<SpareChange>> get_PhysicsManager_ActiveScene_AllSpareChange();
 
+	physx::PxShape** get_PhysicsManager_AllShapes();
+	physx::PxU32 get_PhysicsManager_NbShapes();
+
 
 	Geometry* get_LoadingManager_Geometry(GeometryTypes type);
 

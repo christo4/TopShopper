@@ -547,7 +547,18 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 
 
 
+physx::PxShape** PhysicsManager::getAllShapes() {
+	PxU32 bufSize = gPhysics->getNbShapes();
+	PxShape** buf = new PxShape*[bufSize];
+	gPhysics->getShapes(buf, bufSize);
+	return buf;
+}
 
+
+
+physx::PxU32 PhysicsManager::getNbShapes() {
+	return gPhysics->getNbShapes();
+}
 
 
 
