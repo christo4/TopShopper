@@ -24,7 +24,8 @@ public:
 
 	void QueryGLVersion();
 
-	//Scene* getScene() { return scene; }
+	glm::mat4 Camera(float theta, float radius, float phi);
+
 
 private:
 
@@ -35,7 +36,6 @@ private:
 	RenderingEngine* renderingEngine;
 
 	std::vector<Geometry> _objects;
-	//Scene* scene;
 
 	
 

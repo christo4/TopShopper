@@ -36,6 +36,13 @@ public:
 
 	//Pointer to the current shader program being used to render
 	GLuint shaderProgram;
+	
+	glm::mat4 getCamera();
+	void setCamera(glm::mat4 mvp);
+	
+	glm::mat4 camera;
+
+
 };
 
 #endif /* RENDERINGENGINE_H_ */

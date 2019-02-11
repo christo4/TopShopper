@@ -32,7 +32,35 @@ GLFWwindow* RenderingManager::getWindow() {
 
 void RenderingManager::init() {
 	renderingEngine = new RenderingEngine();
+	glm::mat4 mvp = Camera(60.0f, 90.0f, 0.0f);
+	renderingEngine->setCamera(mvp);
+}
 
+glm::mat4 RenderingManager::Camera(float theta, float radius, float phi) {
+	int height;
+	int width;
+	glfwGetWindowSize(_window, &width, &height);
+	//float fov = 60.0f;
+
+	glm::mat4 Projection = glm::perspective(glm::radians(theta), (float)width / (float)height, 0.1f, 200.0f);
+
+
+	float x, y, z;
+
+	theta *= 3.14f / 180.f;
+	x = float(radius * sin(theta) * sin(phi));
+	y = float(radius * cos(theta));
+	z = float(radius * cos(phi) * sin(theta));
+
+	glm::mat4 View = glm::lookAt(
+		glm::vec3(x, y, z), // Camera is at (4,3,3), in World Space
+		glm::vec3(0, 0, 0), // and looks at the origin
+		glm::vec3(0, 1, 0)  // up vector
+	);
+
+	glm::mat4 Model = glm::mat4(1.0f);
+	glm::mat4 mvp = Projection * View * Model;
+	return mvp;
 }
 
 

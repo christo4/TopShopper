@@ -33,20 +33,7 @@ void RenderingEngine::RenderScene(const std::vector<Geometry>& objects) {
 	// scene geometry, then tell OpenGL to draw our geometry
 	glUseProgram(shaderProgram);
 
-	float fov = 60.0f;
-	int width = 1024;
-	int height = 512;
-
-	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 200.0f);
-
-	glm::mat4 View = glm::lookAt(
-		glm::vec3(4, 3, 3), // Camera is at (4,3,3), in World Space
-		glm::vec3(0, 0, 0), // and looks at the origin
-		glm::vec3(0, 1, 0)  // up vector
-	);
-
-	glm::mat4 Model = glm::mat4(1.0f);
-	glm::mat4 mvp = Projection * View * Model;
+	glm::mat4 mvp = getCamera();
 
 	GLuint MatrixID = glGetUniformLocation(shaderProgram, "MVP");
 	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
@@ -119,6 +106,14 @@ void RenderingEngine::deleteBufferData(Geometry& geometry) {
 	glDeleteBuffers(1, &geometry.colorBuffer);
 	glDeleteBuffers(1, &geometry.uvBuffer);
 	glDeleteVertexArrays(1, &geometry.vao);
+}
+
+glm::mat4 RenderingEngine::getCamera() {
+	return camera;
+}
+
+void RenderingEngine::setCamera(glm::mat4 mvp) {
+	camera = mvp;
 }
 
 bool RenderingEngine::CheckGLErrors() {
