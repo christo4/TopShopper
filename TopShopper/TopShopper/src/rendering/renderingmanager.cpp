@@ -32,7 +32,7 @@ GLFWwindow* RenderingManager::getWindow() {
 
 void RenderingManager::init() {
 	renderingEngine = new RenderingEngine();
-	glm::mat4 mvp = Camera(60.0f, 90.0f, 0.0f);
+	glm::mat4 mvp = Camera(60.0f, 5.0f, 0.0f);
 	renderingEngine->setCamera(mvp);
 }
 
