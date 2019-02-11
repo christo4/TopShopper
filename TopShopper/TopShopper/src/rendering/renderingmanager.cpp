@@ -60,7 +60,7 @@ void RenderingManager::RenderScene(const std::vector<Geometry>& objects) {
 	//offsetVec = playerRot.rotate(offsetVec);
 	//float angle = playerRot.getAngle();
 
-	std::cout << angle << std::endl;
+	//std::cout << angle << std::endl;
 
 	//physx::PxVec3 offset(20 * glm::cos(angle), 10, 20 * glm::sin(angle));
 	//physx::PxVec3 cameraPos = playerPos + offset;
@@ -211,7 +211,7 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 	_objects.clear();
 
 
-	/*
+	
 	Geometry meme = *(_broker->get_LoadingManager_Geometry(GeometryTypes::GROUND_GEO));
 
 
