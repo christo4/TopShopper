@@ -8,6 +8,8 @@
 
 // interpolated colour received from vertex stage
 in vec2 uv;
+in float z;
+
 
 // first output is mapped to the framebuffer's colour index by default
 out vec4 FragmentColour;
@@ -17,6 +19,6 @@ uniform sampler2D imageTexture;
 void main(void)
 {
     // write colour output without modification
-    //FragmentColour = vec4(uv, 0);
-	FragmentColour = texture(imageTexture, uv);
+    FragmentColour = vec4(uv, 0, 0);
+    //FragmentColour = texture(imageTexture, uv);
 }

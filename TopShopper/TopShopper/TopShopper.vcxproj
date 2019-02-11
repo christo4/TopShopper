@@ -138,9 +138,7 @@
     <ClInclude Include="src\vehicle\VehicleShoppingCart.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\shaders\.vertex.glsl.swp" />
     <None Include="resources\shaders\fragment.glsl" />
-    <None Include="resources\shaders\fragment.glsl~" />
     <None Include="resources\shaders\vertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

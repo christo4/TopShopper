@@ -40,7 +40,16 @@ void RenderingEngine::RenderScene(const std::vector<Geometry>& objects) {
 	int height = 512;
 
 	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 200.0f);
-	//glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 200.0f);
+	
+	float newTheta = (60.0f);
+	float newRadius = (120.0f);
+	float newPhi = (0.0f);
+	float x, y, z;
+
+	newTheta *= 3.14f / 180.f;
+	x = float(newRadius * sin(newTheta) * sin(newPhi));
+	y = float(newRadius * cos(newTheta));
+	z = float(newRadius * cos(newPhi) * sin(newTheta));
 
 	glm::mat4 View = glm::lookAt(
 		glm::vec3(4, 3, 3), // Camera is at (4,3,3), in World Space

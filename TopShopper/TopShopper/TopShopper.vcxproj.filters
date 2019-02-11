@@ -160,13 +160,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\shaders\.vertex.glsl.swp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="resources\shaders\fragment.glsl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resources\shaders\fragment.glsl~">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="resources\shaders\vertex.glsl">
