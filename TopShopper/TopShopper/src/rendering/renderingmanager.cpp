@@ -58,17 +58,23 @@ void RenderingManager::RenderScene(const std::vector<Geometry>& objects) {
 
 	//physx::PxVec3 offsetVec(playerPos.x, playerPos.y + 10.0f, playerPos.z - 10.0f);
 	//offsetVec = playerRot.rotate(offsetVec);
-	float angle = playerRot.getAngle();
+	//float angle = playerRot.getAngle();
 
 	//std::cout << angle << std::endl;
 
-	physx::PxVec3 offset(20 * glm::cos(angle), 10, 20 * glm::sin(angle));
-	physx::PxVec3 cameraPos = playerPos + offset;
+	//physx::PxVec3 offset(20 * glm::cos(angle), 10, 20 * glm::sin(angle));
+	//physx::PxVec3 cameraPos = playerPos + offset;
+
+
+	physx::PxVec3 testVec(10, 10, -10);
+	testVec = playerRot.rotate(testVec);
 
 	glm::mat4 View = glm::lookAt(
 		//glm::vec3(offsetVec.x, offsetVec.y, offsetVec.z), // camera position rotates with player
-		glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z), // camera position rotates with player
-		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at center of cart chassis
+		//glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z), // camera position rotates with player
+		glm::vec3(playerPos.x, playerPos.y + testVec.y, playerPos.z + testVec.z), // camera position
+		//glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at center of cart chassis
+		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at 
 		glm::vec3(0, 1, 0)  // up vector
 	);
 
@@ -190,8 +196,20 @@ void RenderingManager::init() {
 
 void RenderingManager::updateMilliseconds(double deltaTime) {
 
+	
+	
+	
+
+	// VERY POOR FOR NOW...
+	for (Geometry& geoDel : _objects) {
+		deleteBufferData(geoDel);
+	}
+
+	_objects.clear();
+
+
 	/*
-	Geometry  meme = *(_broker->get_LoadingManager_Geometry(GeometryTypes::GROUND_GEO));
+	Geometry meme = *(_broker->get_LoadingManager_Geometry(GeometryTypes::GROUND_GEO));
 
 
 	//meme.drawMode = GL_LINE_STRIP;
@@ -200,11 +218,10 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 
 	assignBuffers(meme);
 	setBufferData(meme);
-	
+
 
 	_objects.push_back(meme);
 	*/
-
 
 	std::shared_ptr<ShoppingCartPlayer> player = _broker->get_PhysicsManager_ActiveScene_AllShoppingCartPlayers().at(0);
 	physx::PxRigidDynamic* playerDyn = player->_actor->is<physx::PxRigidDynamic>();
