@@ -9,6 +9,7 @@
 class Broker; 
 struct GLFWwindow;
 class RenderingEngine;
+//class Scene;
 
 class RenderingManager {
 public:
@@ -23,7 +24,10 @@ public:
 
 	void QueryGLVersion();
 
+	//Scene* getScene() { return scene; }
+
 private:
+
 	Broker* _broker = nullptr;
 
 	GLFWwindow* _window = nullptr;
@@ -31,6 +35,9 @@ private:
 	RenderingEngine* renderingEngine;
 
 	std::vector<Geometry> _objects;
+	//Scene* scene;
+
+	
 
 	void openWindow();
 };

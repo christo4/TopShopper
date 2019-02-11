@@ -15,7 +15,7 @@
 #include "RenderingEngine.h"
 
 
-RenderingManager::RenderingManager(Broker* broker) : _broker(broker){
+RenderingManager::RenderingManager(Broker* broker): _broker(broker){
 	openWindow();
 	init();
 }
@@ -31,34 +31,27 @@ GLFWwindow* RenderingManager::getWindow() {
 
 
 void RenderingManager::init() {
-	//openWindow();
 	renderingEngine = new RenderingEngine();
+
 }
 
 
 void RenderingManager::updateMilliseconds(double deltaTime) {
-	// render stuff...
-	
+
 	Geometry  meme = *(_broker->get_LoadingManager_Geometry(VEHICLE_CHASSIS_GEO));
 
 
-	meme.drawMode = GL_LINE_STRIP;
-	//meme.drawMode = GL_TRIANGLES;
+	meme.drawMode = GL_TRIANGLES;
 
 	renderingEngine->assignBuffers(meme);
 	renderingEngine->setBufferData(meme);
-
+	
 
 	_objects.push_back(meme);
 
 
 	renderingEngine->RenderScene(_objects);
-	
-	
-	// swap front and back buffers
 	glfwSwapBuffers(_window);
-
-	// any other stuff...
 }
 
 
@@ -70,22 +63,6 @@ void RenderingManager::cleanup() {
 
 
 void RenderingManager::openWindow() {
-	/*
-	// init the library
-	if (glfwInit() == 0) {
-		exit(EXIT_FAILURE);
-	}
-
-	//_window = glfwCreateWindow(1024, 576, "Top Shopper", glfwGetPrimaryMonitor(), NULL); // full screen window (currently unresponsive and can't close)
-	_window = glfwCreateWindow(1024, 768, "Top Shopper", NULL, NULL);
-	if (!_window) {
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
-
-	glfwMakeContextCurrent(_window);
-	*/
-
 
 	//Initialize the GLFW windowing system
 	if (!glfwInit()) {
@@ -100,7 +77,7 @@ void RenderingManager::openWindow() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	int width = 1024;
 	int height = 512;
-	_window = glfwCreateWindow(width, height, "TopShopper", 0, 0);
+	_window = glfwCreateWindow(width, height, "Top Shopper", 0, 0);
 	if (!_window) {
 		std::cout << "Program failed to create GLFW window, TERMINATING" << std::endl;
 		glfwTerminate();
@@ -110,14 +87,11 @@ void RenderingManager::openWindow() {
 	glfwMakeContextCurrent(_window);
 	glfwSetWindowUserPointer(_window, this);
 
-
-	//Intialize GLAD (finds appropriate OpenGL configuration for your system)
 	if (!gladLoadGL()) {
 		std::cout << "GLAD init failed" << std::endl;
 		return;
 	}
 
-	//Query and print out information about our OpenGL environment
 	QueryGLVersion();
 }
 

@@ -3,13 +3,11 @@
  *
  *  Created on: Sep 10, 2018
  *      Author: John Hall
+*		Repurposed from CPSC 453
  */
 
 #include "RenderingEngine.h"
-
 #include <iostream>
-
-//cpp file purposely included here because it just contains some global functions
 #include "ShaderTools.h"
 
 RenderingEngine::RenderingEngine() {
@@ -40,16 +38,6 @@ void RenderingEngine::RenderScene(const std::vector<Geometry>& objects) {
 	int height = 512;
 
 	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 200.0f);
-	
-	float newTheta = (60.0f);
-	float newRadius = (120.0f);
-	float newPhi = (0.0f);
-	float x, y, z;
-
-	newTheta *= 3.14f / 180.f;
-	x = float(newRadius * sin(newTheta) * sin(newPhi));
-	y = float(newRadius * cos(newTheta));
-	z = float(newRadius * cos(newPhi) * sin(newTheta));
 
 	glm::mat4 View = glm::lookAt(
 		glm::vec3(4, 3, 3), // Camera is at (4,3,3), in World Space
@@ -58,10 +46,11 @@ void RenderingEngine::RenderScene(const std::vector<Geometry>& objects) {
 	);
 
 	glm::mat4 Model = glm::mat4(1.0f);
-	glm::mat4 mvp = Model * View * Projection;
+	glm::mat4 mvp = Projection * View * Model;
 
 	GLuint MatrixID = glGetUniformLocation(shaderProgram, "MVP");
 	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+
 
 	for (const Geometry& g : objects) {
 		glBindVertexArray(g.vao);
@@ -69,7 +58,7 @@ void RenderingEngine::RenderScene(const std::vector<Geometry>& objects) {
 		// reset state to default (no shader or geometry bound)
 		glBindVertexArray(0);
 	}
-	glUseProgram(0);
+	glUseProgram(0); //unbind the shader
 
 	// check for an report any OpenGL errors
 	CheckGLErrors();
