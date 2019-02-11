@@ -8,21 +8,21 @@
 
 // location indices for these attributes correspond to those specified in the
 // InitializeGeometry() function of the main program
-layout(location = 0) in vec3 VertexPosition;
-layout(location = 1) in vec2 VertexUV;
+layout(location = 0) in vec4 VertexPosition;
+layout(location = 1) in vec3 VertexColor;
 
 uniform mat4 MVP;
 
 // output to be interpolated between vertices and passed to the fragment stage
-out vec2 uv;
+out vec3 color;
 out float z;
 
 void main()
 {
     // assign vertex position without modification
-    gl_Position =  MVP * vec4(VertexPosition, 1.0);
+    gl_Position =  MVP * VertexPosition;
 
     // assign output colour to be interpolated
-    uv = VertexUV;
+    color = VertexColor;
 	z = VertexPosition[1];
 }

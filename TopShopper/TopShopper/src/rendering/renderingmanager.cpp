@@ -60,7 +60,7 @@ void RenderingManager::RenderScene(const std::vector<Geometry>& objects) {
 	//offsetVec = playerRot.rotate(offsetVec);
 	//float angle = playerRot.getAngle();
 
-	//std::cout << angle << std::endl;
+	std::cout << angle << std::endl;
 
 	//physx::PxVec3 offset(20 * glm::cos(angle), 10, 20 * glm::sin(angle));
 	//physx::PxVec3 cameraPos = playerPos + offset;
@@ -118,16 +118,18 @@ void RenderingManager::assignBuffers(Geometry& geometry) {
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(2);
 
-	/*glGenBuffers(1, &geometry.colorBuffer);
+	glGenBuffers(1, &geometry.colorBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
 	//Parameters in order: Index of vbo in the vao, number of primitives per element, primitive type, etc.
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);*/
+	glEnableVertexAttribArray(1);
 
+	/*
 	glGenBuffers(1, &geometry.uvBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(1);
+	*/
 
 
 }
@@ -141,11 +143,12 @@ void RenderingManager::setBufferData(Geometry& geometry) {
 	/*glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.normals.size(), geometry.normals.data(), GL_STATIC_DRAW);*/
 
-	/*glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.colors.size(), geometry.colors.data(), GL_STATIC_DRAW);*/
-
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.colors.size(), geometry.colors.data(), GL_STATIC_DRAW);
+	/*
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * geometry.uvs.size(), geometry.uvs.data(), GL_STATIC_DRAW);
+	*/
 }
 
 void RenderingManager::deleteBufferData(Geometry& geometry) {
@@ -213,15 +216,17 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 
 
 	//meme.drawMode = GL_LINE_STRIP;
+	for (int i = 0; i < meme.verts.size(); i++) {
+		meme.colors.push_back(glm::vec3(0.0f, 1.0f,0.0f));
+	}
 	meme.drawMode = GL_TRIANGLES;
-
 
 	assignBuffers(meme);
 	setBufferData(meme);
 
 
 	_objects.push_back(meme);
-	*/
+	
 
 	std::shared_ptr<ShoppingCartPlayer> player = _broker->get_PhysicsManager_ActiveScene_AllShoppingCartPlayers().at(0);
 	physx::PxRigidDynamic* playerDyn = player->_actor->is<physx::PxRigidDynamic>();
@@ -232,15 +237,18 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 	Geometry chassisDefault = *(_broker->get_LoadingManager_Geometry(GeometryTypes::VEHICLE_CHASSIS_GEO));
 
 	std::vector<glm::vec4> newChassisVerts;
+	std::vector<glm::vec3> newChassisColors;
 
 	for (glm::vec4 v : chassisDefault.verts) {
 		physx::PxVec3 vPhys(v.x, v.y, v.z);
 		vPhys = playerRot.rotate(vPhys);
 		vPhys += playerPos;
 		newChassisVerts.push_back(glm::vec4(vPhys.x, vPhys.y, vPhys.z, 1.0f));
+		newChassisColors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 
 	chassisDefault.verts = newChassisVerts;
+	chassisDefault.colors = newChassisColors;
 
 	chassisDefault.drawMode = GL_TRIANGLES;
 	assignBuffers(chassisDefault);
