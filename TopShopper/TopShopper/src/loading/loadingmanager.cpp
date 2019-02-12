@@ -30,7 +30,7 @@ void LoadingManager::init() {
 	std::vector<unsigned int>returnIndex;
 
 	// TODO: change this to chassis.obj later
-	loadObject("../TopShopper/resources/Objects/Earth.obj", returnVertices, returnUV, returnNormal, returnIndex);
+	loadObject("../TopShopper/resources/Objects/rect.obj", returnVertices, returnUV, returnNormal, returnIndex);
 
 	VehicleChassisGeo->verts = returnVertices;
 	VehicleChassisGeo->uvs = returnUV;

@@ -43,6 +43,8 @@ public:
 	glm::mat4 Camera(float theta, float radius, float phi);
 
 
+	//Scene* getScene() { return scene; }
+
 private:
 
 	Broker* _broker = nullptr;
@@ -52,6 +54,7 @@ private:
 	//RenderingEngine* renderingEngine;
 
 	std::vector<Geometry> _objects;
+	//Scene* scene;
 
 	
 
