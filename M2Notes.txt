@@ -1,0 +1,61 @@
+CONTROLS:
+
+If no controller plugged in, control will default to keyboard
+
+If a controller is plugged in, keyboard control will be turned off
+
+
+CONTROLLER:
+
+Right Trigger (Accelerate)
+Left Trigger (Reverse)
+Left Stick (Steer)
+X-Button (Handbrake)
+B-Button (Turbo Boost)
+
+KEYBOARD:
+
+W-Key (Accelerate)
+A-Key (Steer Left)
+D-Key (Steer Right)
+S-Key (Reverse)
+Left-Shift (Handbrake)
+Space (Turbo Boost)
+
+
+===========================
+
+Configurations:
+
+x86 (debug) - PVD is enabled
+x86 (release) - PVD is disabled
+
+NOTE:
+
+Our prototype features a drivable surface, a cart and pickups.
+Once the pickup (yellow sphere) is collected, a new one will spawn.
+
+
+Our OpenGl rendering is very basic at this moment, but the PVD scene can show a shaded scene for clarity.
+
+
+============================
+
+In case the DLLs are missing from TopShopper/bin/Win32/debug or TopShopper/bin/Win32/release,
+they can be found in x86DebugDLLs and x86ReleaseDLLs respectively.
+
+============================
+
+There is a chance that the cart will fall through the floor if that happens just reload the
+game.
+
+
+
+
+
+
+
+
+
+
+

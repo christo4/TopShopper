@@ -45,7 +45,7 @@ void RenderingManager::RenderScene(const std::vector<Geometry>& objects) {
 	int width = 1024;
 	int height = 512;
 
-	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 200.0f);
+	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 2000.0f);
 
 
 	std::shared_ptr<ShoppingCartPlayer> player = _broker->get_PhysicsManager_ActiveScene_AllShoppingCartPlayers().at(0);
@@ -65,7 +65,7 @@ void RenderingManager::RenderScene(const std::vector<Geometry>& objects) {
 	//physx::PxVec3 offset(20 * glm::cos(angle), 10, 20 * glm::sin(angle));
 	//physx::PxVec3 cameraPos = playerPos + offset;
 
-	physx::PxVec3 testVec(0, 5, -10);
+	physx::PxVec3 testVec(0, 50, -50);
 	testVec = playerRot.rotate(testVec);
 
 	glm::mat4 View = glm::lookAt(
