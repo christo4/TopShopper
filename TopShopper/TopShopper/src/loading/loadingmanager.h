@@ -15,7 +15,8 @@ class Geometry;
 enum GeometryTypes {
 	VEHICLE_CHASSIS_GEO,
 	VEHICLE_WHEEL_GEO,
-	GROUND_GEO
+	GROUND_GEO,
+	SPARE_CHANGE_GEO
 };
 
 

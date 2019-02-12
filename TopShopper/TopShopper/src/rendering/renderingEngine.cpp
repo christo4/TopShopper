@@ -70,16 +70,18 @@ void RenderingEngine::assignBuffers(Geometry& geometry) {
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(2);
 
-	/*glGenBuffers(1, &geometry.colorBuffer);
+	glGenBuffers(1, &geometry.colorBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
 	//Parameters in order: Index of vbo in the vao, number of primitives per element, primitive type, etc.
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);*/
+	glEnableVertexAttribArray(1);
 
+	/*
 	glGenBuffers(1, &geometry.uvBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(1);
+	*/
 
 
 }
@@ -93,11 +95,13 @@ void RenderingEngine::setBufferData(Geometry& geometry) {
 	/*glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.normals.size(), geometry.normals.data(), GL_STATIC_DRAW);*/
 
-	/*glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.colors.size(), geometry.colors.data(), GL_STATIC_DRAW);*/
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.colors.size(), geometry.colors.data(), GL_STATIC_DRAW);
 
+	/*
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * geometry.uvs.size(), geometry.uvs.data(), GL_STATIC_DRAW);
+	*/
 }
 
 void RenderingEngine::deleteBufferData(Geometry& geometry) {
