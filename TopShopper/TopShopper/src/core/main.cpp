@@ -3,32 +3,27 @@
 #include <Windows.h>
 
 int main() {
-	//load assets here
-	double prevTime = 0.0;
+	// initial loading... (slow)
 	Broker* broker = Broker::getInstance();
 	broker->initAll();
 	GLFWwindow* window = broker->get_RenderingManager_Window();
 	
-
+	// SIMILAR TO https://gafferongames.com/post/fix_your_timestep/
+	double simTime = 0.0; // total accumulation of simulated physics timesteps
+	const double fixedDeltaTime = 1.0 / 60.0;
+	double prevTime = glfwGetTime(); // needs to be set here after initialization
+	double accumulator = 0.0;
 
 	// call main loop
 	while (!glfwWindowShouldClose(window)) {
 
-		// 1. get deltaTime (time last frame took to execute)
-		// 2. get device input
-		// 3. simulate (update game state)
-		// 4. render (output)
-		// 5. sound (output)
+		double currentTime = glfwGetTime();
+		double variableDeltaTime = currentTime - prevTime;
+		prevTime = currentTime;
 
-		// new way:
-		// 1. get deltaTime
-		// 2. call Broker::getInstance()->updateAllMilliseconds(deltaTime);
-		// ~~~~~NOTE: I think that the first deltaTime could screw up some stuff
-		double currentTime = glfwGetTime(); // get new
-		double deltaTime = currentTime - prevTime; // diff
-		prevTime = currentTime; // update
+		accumulator += variableDeltaTime;
 
-		broker->updateAllMilliseconds(deltaTime);
+		broker->updateAllMilliseconds(simTime, fixedDeltaTime, variableDeltaTime, accumulator);
 
 	}
 

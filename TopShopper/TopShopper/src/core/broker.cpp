@@ -37,6 +37,26 @@ void Broker::initAll() {
 
 
 
+void Broker::updateAllMilliseconds(double& simTime, const double& fixedDeltaTime, double& variableDeltaTime, double& accumulator) {
+	
+	// ~~~~~TODO: figure out proper order to update each system
+
+	_inputManager->updateMilliseconds(variableDeltaTime); // NOTE: this needs to be done before physics updates
+	
+	while (accumulator >= fixedDeltaTime) {
+		_physicsManager->updateMilliseconds(fixedDeltaTime);
+		accumulator -= fixedDeltaTime;
+		simTime += fixedDeltaTime;
+	}
+	
+	_aiManager->updateMilliseconds(variableDeltaTime);
+	_renderingManager->updateMilliseconds(variableDeltaTime);
+	
+}
+
+
+
+/*
 void Broker::updateAllMilliseconds(double deltaTime) {
 	// ~~~~~TODO: figure out proper order to update each system
 	// ex:
@@ -53,6 +73,7 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 
 	// ~~~~~~~~~WARNING: this should be commented out when no controller is connected...
 
+	*/
 	/*
 	Gamepad * meme = _inputManager->getGamePad(1);
 
@@ -80,7 +101,7 @@ void Broker::updateAllMilliseconds(double deltaTime) {
 	system("cls");
 	*/
 	
-}
+//}
 
 
 

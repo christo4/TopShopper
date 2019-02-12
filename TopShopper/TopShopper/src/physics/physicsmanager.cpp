@@ -362,7 +362,7 @@ void PhysicsManager::switchToScene1() {
 
 	//Create a vehicle that will drive on the plane.
 	
-	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 80.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
+	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 53.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
 	vehicle1->setInputID(1);
 	physxScene->addActor(*(vehicle1->_actor));
 
