@@ -27,20 +27,26 @@ void LoadingManager::init() {
 	std::vector<glm::vec4>returnVertices;
 	std::vector<glm::vec2>returnUV;
 	std::vector<glm::vec3>returnNormal;
-	std::vector<unsigned int>returnIndex;
+	std::vector<unsigned int>vIndex;
+	std::vector<unsigned int>uvIndex;
+	std::vector<unsigned int>normalIndex;
 
 	// TODO: change this to chassis.obj later
-	loadObject("../TopShopper/resources/Objects/rect.obj", returnVertices, returnUV, returnNormal, returnIndex);
+	loadObject("../TopShopper/resources/Objects/sphere.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 
 	VehicleChassisGeo->verts = returnVertices;
 	VehicleChassisGeo->uvs = returnUV;
 	VehicleChassisGeo->normals = returnNormal;
-	VehicleChassisGeo->indices = returnIndex;
+	VehicleChassisGeo->vIndex = vIndex;
+	VehicleChassisGeo->uvIndex = uvIndex;
+	VehicleChassisGeo->normalIndex = normalIndex;
 
 	returnVertices.clear();
 	returnUV.clear();
 	returnNormal.clear();
-	returnIndex.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
 
 	//////////////////
 
@@ -48,32 +54,40 @@ void LoadingManager::init() {
 
 	// TODO: change this to ground.obj later
 	// NOTE: an .obj file requires normals! (even if we dont use them)
-	loadObject("../TopShopper/resources/Objects/groundTest.obj", returnVertices, returnUV, returnNormal, returnIndex);
+	loadObject("../TopShopper/resources/Objects/sphere.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 
 	GroundGeo->verts = returnVertices;
 	GroundGeo->uvs = returnUV;
 	GroundGeo->normals = returnNormal;
-	GroundGeo->indices = returnIndex;
+	GroundGeo->vIndex = vIndex;
+	GroundGeo->uvIndex = uvIndex;
+	GroundGeo->normalIndex = normalIndex;
 
 	returnVertices.clear();
 	returnUV.clear();
 	returnNormal.clear();
-	returnIndex.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
 
 	///////////////////
 
 
-	loadObject("../TopShopper/resources/Objects/sphere.obj", returnVertices, returnUV, returnNormal, returnIndex);
+	loadObject("../TopShopper/resources/Objects/sphere.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 
 	SpareChangeGeo->verts = returnVertices;
 	SpareChangeGeo->uvs = returnUV;
 	SpareChangeGeo->normals = returnNormal;
-	SpareChangeGeo->indices = returnIndex;
+	SpareChangeGeo->vIndex = vIndex;
+	SpareChangeGeo->uvIndex = uvIndex;
+	SpareChangeGeo->normalIndex = normalIndex;
 
 	returnVertices.clear();
 	returnUV.clear();
 	returnNormal.clear();
-	returnIndex.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
 
 
 }
@@ -85,39 +99,75 @@ void LoadingManager::updateMilliseconds(double deltaTime) {
 
 
 // TODO: change the objparser (AGAIN :( ) since this one is incredibly inneficient 
-void LoadingManager::loadObject(const char* imageName, std::vector<glm::vec4>&returnVertices, std::vector<glm::vec2>&returnUV, std::vector<glm::vec3>&returnNormal, std::vector<unsigned int>&returnIndex) {
-	
-	objl::Loader loader;
-	bool loaded = loader.LoadFile(imageName);
-	if (!loaded) {
-		std::exit(EXIT_FAILURE);
+bool LoadingManager::loadObject(const char* imageName, std::vector<glm::vec4>&returnVertices, std::vector<glm::vec2>&returnUV, std::vector<glm::vec3>&returnNormal, std::vector<unsigned int>&vIndex, std::vector<unsigned int>&uvIndex, std::vector<unsigned int>&normalIndex) {
+	//std::vector<unsigned int> vIndex;
+	//std::vector<unsigned int> uvIndex;
+	//std::vector<unsigned int> normalIndex;
+	std::vector<glm::vec3> inputVertex;
+	std::vector<glm::vec2> inputUV;
+	std::vector<glm::vec3> inputNormal;
+
+	FILE * inputFile = fopen(imageName, "r");
+	if (inputFile == NULL) {
+		return false;
+		std::exit(0);
+	}
+	while (true) {
+
+		char firstWordInLine[365];
+
+		int check = fscanf(inputFile, "%s", firstWordInLine);
+		if (check == EOF) break;
+
+		if (strcmp(firstWordInLine, "v") == 0) {
+			glm::vec3 v;
+			fscanf(inputFile, "%f %f %f\n", &v.x, &v.y, &v.z);
+			returnVertices.push_back(glm::vec4(v, 1.0f));
+		}
+		else if (strcmp(firstWordInLine, "vt") == 0) {
+			glm::vec3 uv;
+			fscanf(inputFile, "%f %f\n", &uv.x, &uv.y);
+			returnUV.push_back(uv);
+		}
+		else if (strcmp(firstWordInLine, "vn") == 0) {
+			glm::vec3 n;
+			fscanf(inputFile, "%f %f %f\n", &n.x, &n.y, &n.z);
+			returnNormal.push_back(n);
+		}
+		else if (strcmp(firstWordInLine, "f") == 0) {
+			std::string v1, v2, v3;
+			unsigned int vert1[3], vert2[3], vert3[3];
+			int matches = fscanf(inputFile, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vert1[0], &vert2[0], &vert3[0], &vert1[1], &vert2[1], &vert3[1], &vert1[2], &vert2[2], &vert3[2]);
+			if (matches == 9) {
+				vIndex.push_back(vert1[0]-1);
+				vIndex.push_back(vert1[1]-1);
+				vIndex.push_back(vert1[2]-1);
+
+				uvIndex.push_back(vert2[0]-1);
+				uvIndex.push_back(vert2[1]-1);
+				uvIndex.push_back(vert2[2]-1);
+
+				normalIndex.push_back(vert3[0]-1);
+				normalIndex.push_back(vert3[1]-1);
+				normalIndex.push_back(vert3[2]-1);
+			}
+			else {
+				//unsigned int vert1[3], vert2[3], vert3[3];
+				matches = fscanf(inputFile, "%d//%d %d//%d %d//%d\n", &vert1[0], &vert3[0], &vert1[1], &vert3[1], &vert1[2], &vert3[2]);
+				vIndex.push_back(vert1[0]-1);
+				vIndex.push_back(vert1[1]-1);
+				vIndex.push_back(vert1[2]-1);
+
+				normalIndex.push_back(vert3[0]-1);
+				normalIndex.push_back(vert3[1]-1);
+				normalIndex.push_back(vert3[2]-1);
+			}
+			
+		}
 	}
 
-	// NOTE: loader.LoadedVertices will have size = number of faces (f-lines)
-	// thus, there will be duplicated pos/uv/norm data and the indices will just be 0, 1, 2, ..., indices.size()-1
-	for (Vertex v : loader.LoadedVertices) {
-		glm::vec4 pos;
-		glm::vec2 uv;
-		glm::vec3 norm;
-		pos.x = v.Position.X;
-		pos.y = v.Position.Y;
-		pos.z = v.Position.Z;
-		pos.w = 1.0;
+	return true;
 
-		uv.x = v.TextureCoordinate.X;
-		uv.y = v.TextureCoordinate.Y;
-
-		norm.x = v.Normal.X;
-		norm.y = v.Normal.Y;
-		norm.z = v.Normal.Z;
-		returnVertices.push_back(pos);
-		returnUV.push_back(uv);
-		returnNormal.push_back(norm);
-	}
-	
-
-	// NOTE: this parser is stupid and should be replaced, but for now this vector is 0-indexed which is what we want
-	returnIndex = loader.LoadedIndices;
 	
 }
 

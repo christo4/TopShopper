@@ -498,7 +498,7 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	case EntityTypes::GROUND:
 	{
 		std::vector<PxVec3> groundVerts = castVectorOfGLMVec4ToVectorOfPxVec3((_broker->get_LoadingManager_Geometry(GeometryTypes::GROUND_GEO))->verts);
-		std::vector<PxU32> groundIndices = (_broker->get_LoadingManager_Geometry(GeometryTypes::GROUND_GEO))->indices;
+		std::vector<PxU32> groundIndices = (_broker->get_LoadingManager_Geometry(GeometryTypes::GROUND_GEO))->vIndex;
 		//std::reverse(std::begin(groundIndices), std::end(groundIndices)); // NO NEED TO REVERSE IN THIS CONFIGURATION< BUT MIGHT NEED THIS IN FUTURE (OR I COULD USE THE PXMESHFLAG)
 		PxFilterData groundSimFilterData(CollisionFlags::COLLISION_FLAG_GROUND, CollisionFlags::COLLISION_FLAG_GROUND_AGAINST, 0, 0);
 		PxMaterial *groundMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);

@@ -30,7 +30,7 @@ public:
 	virtual ~LoadingManager();
 	void init();
 	void updateMilliseconds(double deltaTime);
-	void loadObject(const char* imageName, std::vector<glm::vec4>&returnVertices, std::vector<glm::vec2>&returnUV, std::vector<glm::vec3>&returnNormal, std::vector<unsigned int>&returnIndex);
+	bool loadObject(const char* imageName, std::vector<glm::vec4>&returnVertices, std::vector<glm::vec2>&returnUV, std::vector<glm::vec3>&returnNormal, std::vector<unsigned int>&vIndex, std::vector<unsigned int>&uvIndex, std::vector<unsigned int>&normalIndex );
 	
 	Geometry* getGeometry(GeometryTypes type);
 

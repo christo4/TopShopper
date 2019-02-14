@@ -30,7 +30,11 @@ public:
 	std::vector<glm::vec3> colors;
 	std::vector<glm::vec2> uvs;
 
-	std::vector<unsigned int> indices; // NOTE: these indices will start from 0, rather than 1 as in a .obj file (since both OpenGL and PhysX require 0-indexing)
+	//std::vector<unsigned int> indices; // NOTE: these indices will start from 0, rather than 1 as in a .obj file (since both OpenGL and PhysX require 0-indexing)
+	std::vector<unsigned int>vIndex;
+	std::vector<unsigned int>uvIndex;
+	std::vector<unsigned int>normalIndex;
+
 
 	//Pointers to the vao and vbos associated with the geometry
 	GLuint vao;
