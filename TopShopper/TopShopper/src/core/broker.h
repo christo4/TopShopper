@@ -1,6 +1,3 @@
-
-
-
 #ifndef BROKER_H_
 #define BROKER_H_
 
@@ -19,41 +16,25 @@ public:
 	static Broker* getInstance();
 
 	void initAll(); // calls each subsystem's init function
-	//void updateAllMilliseconds(double deltaTime); // this update function will call each subsystem's update function in an appropriate order.
-	
 	void updateAllMilliseconds(double& simTime, const double& fixedDeltaTime, double& variableDeltaTime, double& accumulator); // this update function will call each subsystem's update function in an appropriate order.
 
-	
-	// have a bunch of functions that connect subsystems (e.g. physics system needs to know (read-only) audio info of an entity (expressed through sum of its components), and has to ask the broker to get that info from audioManager)
-
-	// ******NAMING SCHEME******
-	// get/set_ManagerName_dataSummary
-
-	GLFWwindow* get_RenderingManager_Window();
-
-	std::vector<std::shared_ptr<ShoppingCartPlayer>> get_PhysicsManager_ActiveScene_AllShoppingCartPlayers();
-	std::vector<std::shared_ptr<SpareChange>> get_PhysicsManager_ActiveScene_AllSpareChange();
-
-	physx::PxShape** get_PhysicsManager_AllShapes();
-	physx::PxU32 get_PhysicsManager_NbShapes();
-
-
-	Geometry* get_LoadingManager_Geometry(GeometryTypes type);
+	AIManager* getAIManager() { return _aiManager; }
+	AudioManager* getAudioManager() { return _audioManager; }
+	InputManager* getInputManager() { return _inputManager; }
+	LoadingManager* getLoadingManager() { return _loadingManager; }
+	PhysicsManager* getPhysicsManager() { return _physicsManager; }
+	RenderingManager* getRenderingManager() { return _renderingManager; }
 
 private:
 	static Broker* _instance;
 	Broker();
 
-	// ~~~~~properly init these later after implementing them and figuring out their constructors
-	//AIManager _aiManager;
-	//AudioManager _audioManager;
-	// input manager
-	// loading manager
 	AIManager *_aiManager = nullptr;
-	PhysicsManager *_physicsManager = nullptr;
-	RenderingManager *_renderingManager = nullptr;
+	AudioManager *_audioManager = nullptr;
 	InputManager * _inputManager = nullptr;
 	LoadingManager * _loadingManager = nullptr;
+	PhysicsManager *_physicsManager = nullptr;
+	RenderingManager *_renderingManager = nullptr;
 	
 };
 

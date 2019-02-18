@@ -46,18 +46,18 @@ class Broker;
 
 class InputManager {
 public:
-	InputManager(Broker* broker);
+	InputManager(Broker *broker);
 	virtual ~InputManager();
 	void init();
 	void updateMilliseconds(double deltaTime);
-	Gamepad * getGamePad(int gamePadNumber);
+	Gamepad* getGamePad(int gamePadNumber);
 	KeyboardAndMouse* getKeyboardAndMouse() { return _keyboardAndMouse; }
 private:
 	int _numGamepads;
 	int _joySticks[4] = { GLFW_JOYSTICK_1 ,GLFW_JOYSTICK_2 ,GLFW_JOYSTICK_3 ,GLFW_JOYSTICK_4 };
 	std::vector<Gamepad*> _gamePads;
-	Broker* _broker = nullptr;
-	KeyboardAndMouse* _keyboardAndMouse = new KeyboardAndMouse();
+	Broker *_broker = nullptr;
+	KeyboardAndMouse *_keyboardAndMouse = new KeyboardAndMouse();
 
 	void passAlongInputsToCarts();
 };

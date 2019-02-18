@@ -65,7 +65,7 @@ physx::PxFilterFlags CustomFilterShader
 
 class PhysicsManager {
 public:
-	PhysicsManager(Broker* broker);
+	PhysicsManager(Broker *broker);
 	virtual ~PhysicsManager();
 	void init();
 	void updateMilliseconds(double deltaTime);
@@ -92,7 +92,7 @@ public:
 
 
 private:
-	Broker* _broker = nullptr;
+	Broker *_broker = nullptr;
 
 	std::shared_ptr<GameScene> _activeScene = nullptr;
 };

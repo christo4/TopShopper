@@ -3,7 +3,9 @@
 #include "core/broker.h"
 #include "vehicle/VehicleShoppingCart.h"
 
-InputManager::InputManager(Broker * broker): _broker(broker) {
+InputManager::InputManager(Broker *broker)
+	: _broker(broker)
+{
 
 }
 
@@ -58,7 +60,7 @@ void InputManager::updateMilliseconds(double deltaTime) {
 	}
 
 	// KEYBOARD AND MOUSE INPUT...
-	GLFWwindow* window = _broker->get_RenderingManager_Window();
+	GLFWwindow *window = _broker->getRenderingManager()->getWindow();
 	_keyboardAndMouse->wKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W);
 	_keyboardAndMouse->aKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A);
 	_keyboardAndMouse->sKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S);
@@ -88,7 +90,7 @@ InputManager::~InputManager()
 
 void InputManager::passAlongInputsToCarts() {
 
-	std::vector<std::shared_ptr<ShoppingCartPlayer>> playerCarts = _broker->get_PhysicsManager_ActiveScene_AllShoppingCartPlayers();
+	std::vector<std::shared_ptr<ShoppingCartPlayer>> playerCarts = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
 
 	for (std::shared_ptr<ShoppingCartPlayer> &playerCart : playerCarts) {
 		int playerID = playerCart->getInputID();

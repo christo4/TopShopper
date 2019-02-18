@@ -4,10 +4,10 @@
 
 int main() {
 	// initial loading... (slow)
-	Broker* broker = Broker::getInstance();
+	Broker *broker = Broker::getInstance();
 	broker->initAll();
-	GLFWwindow* window = broker->get_RenderingManager_Window();
-	
+	GLFWwindow *window = broker->getRenderingManager()->getWindow();
+
 	// SIMILAR TO https://gafferongames.com/post/fix_your_timestep/
 	double simTime = 0.0; // total accumulation of simulated physics timesteps
 	const double fixedDeltaTime = 1.0 / 60.0;

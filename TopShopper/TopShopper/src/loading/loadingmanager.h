@@ -23,7 +23,7 @@ class Broker;
 
 class LoadingManager {
 public:
-	LoadingManager(Broker* broker);
+	LoadingManager(Broker *broker);
 	virtual ~LoadingManager();
 	void init();
 	void updateMilliseconds(double deltaTime);
@@ -32,7 +32,7 @@ public:
 	Geometry* getGeometry(GeometryTypes type);
 
 private:
-	Broker* _broker = nullptr;
+	Broker *_broker = nullptr;
 };
 
 

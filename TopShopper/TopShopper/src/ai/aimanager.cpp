@@ -1,7 +1,7 @@
 #include "aimanager.h"
+#include "core/broker.h"
 #include "PxPhysicsAPI.h"
 #include "objects/sparechange.h"
-#include "core/broker.h"
 
 
 using namespace physx;
@@ -10,7 +10,7 @@ using namespace physx;
 //std::vector<PxTransform> gSpawnPoints = { PxTransform(40.0f, 51.0f, 40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 51.0f, 40.0f, PxQuat(PxIdentity)), PxTransform(40.0f, 51.0f, -40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 51.0f, -40.0f, PxQuat(PxIdentity)) };
 //int gSpawnID = 0;
 
-AIManager::AIManager(Broker* broker) 
+AIManager::AIManager(Broker *broker) 
 	: _broker(broker)
 {
 

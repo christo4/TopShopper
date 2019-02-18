@@ -1,6 +1,3 @@
-
-
-
 #include "renderingmanager.h"
 #include "core/broker.h"
 #include "loading/loadingmanager.h"
@@ -14,23 +11,30 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-//#include "RenderingEngine.h"
+
+RenderingManager::RenderingManager(Broker *broker)
+	: _broker(broker)
+{
+	
+}
+
+RenderingManager::~RenderingManager() {
+
+}
 
 
-RenderingManager::RenderingManager(Broker* broker): _broker(broker){
+void RenderingManager::init() {
+	
 	openWindow();
-	//init();
 	glEnable(GL_DEPTH_TEST);
 	shaderProgram = ShaderTools::InitializeShaders();
 	if (shaderProgram == 0) {
 		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
 		return;
 	}
+
 }
 
-RenderingManager::~RenderingManager() {
-	//delete renderingEngine;
-}
 
 void RenderingManager::RenderScene(const std::vector<Geometry>& objects) {
 	//Clears the screen to a dark grey background
@@ -47,32 +51,17 @@ void RenderingManager::RenderScene(const std::vector<Geometry>& objects) {
 
 	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 2000.0f);
 
-
-	std::shared_ptr<ShoppingCartPlayer> player = _broker->get_PhysicsManager_ActiveScene_AllShoppingCartPlayers().at(0);
+	std::shared_ptr<ShoppingCartPlayer> player = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers().at(0);
 	physx::PxRigidDynamic* playerDyn = player->_actor->is<physx::PxRigidDynamic>();
 	physx::PxTransform playerTransform = playerDyn->getGlobalPose();
 	physx::PxVec3 playerPos = playerTransform.p;
 	physx::PxQuat playerRot = playerTransform.q;
 
-	
-
-	//physx::PxVec3 offsetVec(playerPos.x, playerPos.y + 10.0f, playerPos.z - 10.0f);
-	//offsetVec = playerRot.rotate(offsetVec);
-	//float angle = playerRot.getAngle();
-
-	//std::cout << angle << std::endl;
-
-	//physx::PxVec3 offset(20 * glm::cos(angle), 10, 20 * glm::sin(angle));
-	//physx::PxVec3 cameraPos = playerPos + offset;
-
 	physx::PxVec3 testVec(0, 50, -50);
 	testVec = playerRot.rotate(testVec);
 
 	glm::mat4 View = glm::lookAt(
-		//glm::vec3(offsetVec.x, offsetVec.y, offsetVec.z), // camera position rotates with player
-		//glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z), // camera position rotates with player
 		glm::vec3(playerPos.x + testVec.x, playerPos.y + testVec.y, playerPos.z + testVec.z), // camera position
-		//glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at center of cart chassis
 		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at 
 		glm::vec3(0, 1, 0)  // up vector
 	);
@@ -190,11 +179,7 @@ GLFWwindow* RenderingManager::getWindow() {
 
 
 
-void RenderingManager::init() {
-	//renderingEngine = new RenderingEngine();
-	//glm::mat4 mvp = Camera(60.0f, 5.0f, 0.0f);
-	//renderingEngine->setCamera(mvp);
-}
+
 
 glm::mat4 RenderingManager::Camera(float theta, float radius, float phi) {
 	int height;
@@ -232,11 +217,8 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 	_objects.clear();
 
 
-	
-	Geometry ground = *(_broker->get_LoadingManager_Geometry(GeometryTypes::GROUND_GEO));
+	Geometry ground = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
 
-
-	//meme.drawMode = GL_LINE_STRIP;
 	for (int i = 0; i < ground.verts.size(); i++) {
 		ground.colors.push_back(glm::vec3(0.0f, 1.0f,0.0f));
 	}
@@ -249,13 +231,13 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 	_objects.push_back(ground);
 	
 
-	std::shared_ptr<ShoppingCartPlayer> player = _broker->get_PhysicsManager_ActiveScene_AllShoppingCartPlayers().at(0);
+	std::shared_ptr<ShoppingCartPlayer> player = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers().at(0);
 	physx::PxRigidDynamic* playerDyn = player->_actor->is<physx::PxRigidDynamic>();
 	physx::PxTransform playerTransform = playerDyn->getGlobalPose();
 	physx::PxVec3 playerPos = playerTransform.p;
 	physx::PxQuat playerRot = playerTransform.q;
 
-	Geometry chassisDefault = *(_broker->get_LoadingManager_Geometry(GeometryTypes::VEHICLE_CHASSIS_GEO));
+	Geometry chassisDefault = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_CHASSIS_GEO));
 
 	std::vector<glm::vec4> newChassisVerts;
 	std::vector<glm::vec3> newChassisColors;
@@ -279,13 +261,13 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 
 
 
-	
-	std::shared_ptr<SpareChange> spareChange = _broker->get_PhysicsManager_ActiveScene_AllSpareChange().at(0);
+	std::shared_ptr<SpareChange> spareChange = _broker->getPhysicsManager()->getActiveScene()->getAllSpareChange().at(0);
+
 	physx::PxRigidDynamic* scDyn = spareChange->_actor->is<physx::PxRigidDynamic>();
 	physx::PxTransform scTransform = scDyn->getGlobalPose();
 	physx::PxVec3 scPos = scTransform.p;
 
-	Geometry scDefault = *(_broker->get_LoadingManager_Geometry(GeometryTypes::SPARE_CHANGE_GEO));
+	Geometry scDefault = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
 
 	std::vector<glm::vec4> newSCVerts;
 	std::vector<glm::vec3> newSCColors;

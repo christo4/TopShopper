@@ -88,10 +88,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\ai\aimanager.cpp" />
+    <ClCompile Include="src\audio\audiomanager.cpp" />
     <ClCompile Include="src\core\broker.cpp" />
     <ClCompile Include="src\core\main.cpp" />
     <ClCompile Include="src\core\gamescene.cpp" />
-    <ClCompile Include="src\input\Inputmanager.cpp" />
+    <ClCompile Include="src\input\inputmanager.cpp" />
     <ClCompile Include="src\loading\loadingmanager.cpp" />
     <ClCompile Include="src\objects\component.cpp" />
     <ClCompile Include="src\objects\entity.cpp" />
@@ -101,7 +102,6 @@
     <ClCompile Include="src\physics\physicsmanager.cpp" />
     <ClCompile Include="src\rendering\Geometry.cpp" />
     <ClCompile Include="src\rendering\glad.c" />
-    <ClCompile Include="src\rendering\RenderingEngine.cpp" />
     <ClCompile Include="src\rendering\renderingmanager.cpp" />
     <ClCompile Include="src\rendering\ShaderTools.cpp" />
     <ClCompile Include="src\rendering\texture.cpp" />
@@ -126,7 +126,6 @@
     <ClInclude Include="src\objects\sparechange.h" />
     <ClInclude Include="src\physics\physicsmanager.h" />
     <ClInclude Include="src\rendering\Geometry.h" />
-    <ClInclude Include="src\rendering\RenderingEngine.h" />
     <ClInclude Include="src\rendering\renderingmanager.h" />
     <ClInclude Include="src\rendering\ShaderTools.h" />
     <ClInclude Include="src\rendering\texture.h" />

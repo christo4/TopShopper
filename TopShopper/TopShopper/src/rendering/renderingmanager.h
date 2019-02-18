@@ -9,12 +9,10 @@
 
 class Broker; 
 struct GLFWwindow;
-//class RenderingEngine;
-//class Scene;
 
 class RenderingManager {
 public:
-	RenderingManager(Broker* broker);
+	RenderingManager(Broker *broker);
 	virtual ~RenderingManager();
 
 
@@ -42,21 +40,13 @@ public:
 
 	glm::mat4 Camera(float theta, float radius, float phi);
 
-
-	//Scene* getScene() { return scene; }
-
 private:
 
-	Broker* _broker = nullptr;
+	Broker *_broker = nullptr;
 
-	GLFWwindow* _window = nullptr;
-
-	//RenderingEngine* renderingEngine;
+	GLFWwindow *_window = nullptr;
 
 	std::vector<Geometry> _objects;
-	//Scene* scene;
-
-	
 
 	void openWindow();
 };

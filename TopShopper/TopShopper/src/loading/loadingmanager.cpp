@@ -21,7 +21,10 @@ Geometry* GroundGeo = new Geometry();
 Geometry* SpareChangeGeo = new Geometry();
 
 
-LoadingManager::LoadingManager(Broker* broker) {
+LoadingManager::LoadingManager(Broker *broker) 
+	: _broker(broker)
+{
+
 }
 
 LoadingManager::~LoadingManager() {
