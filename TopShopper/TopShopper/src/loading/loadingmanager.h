@@ -1,6 +1,3 @@
-
-
-
 #ifndef LOADINGMANAGER_H_
 #define LOADINGMANAGER_H_
 
@@ -39,6 +36,8 @@ private:
 };
 
 
+
+char* mystrsep(char** stringp, const char* delim);
 
 
 
