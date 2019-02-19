@@ -76,6 +76,12 @@ public:
 	std::shared_ptr<GameScene> getActiveScene() { return _activeScene; }
 
 
+	
+
+
+
+
+
 	/*
 	// MAYBE MOVE THESE INTO A SPECIAL PHYSICS COMPONENT
 	void disableShapeInContactTests(physx::PxShape *shape);
@@ -95,6 +101,14 @@ private:
 	Broker *_broker = nullptr;
 
 	std::shared_ptr<GameScene> _activeScene = nullptr;
+
+
+	physx::PxShape* createSphereCollider(physx::PxReal radius, physx::PxMaterial *material, const physx::PxFilterData& simData, const physx::PxFilterData& qryData, bool isExclusive, physx::PxShapeFlags shapeFlags);
+	physx::PxShape* createBoxCollider(physx::PxReal xSize, physx::PxReal ySize, physx::PxReal zSize, physx::PxMaterial *material, const physx::PxFilterData& simData, const physx::PxFilterData& qryData, bool isExclusive, physx::PxShapeFlags shapeFlags);
+	physx::PxShape* createTriMeshCollider(const std::vector<physx::PxVec3>& verts, const std::vector<physx::PxU32>& indices, physx::PxMaterial *material, const physx::PxFilterData& simData, const physx::PxFilterData& qryData, bool isExclusive, physx::PxShapeFlags shapeFlags);
+
+
+
 };
 
 

@@ -1,7 +1,5 @@
-
 #include "gamescene.h"
-//#include "objects/entity.h"
-
+#include "PxScene.h"
 #include "objects/shoppingcartplayer.h"
 #include "objects/sparechange.h"
 
@@ -21,7 +19,7 @@ GameScene::~GameScene() {
 
 void GameScene::addEntity(std::shared_ptr<Entity> entity) {
 	_entities.push_back(entity);
-	// ~~~~~~~~TODO: also need to add the entity's actor(s) into _physScene with .addActor
+	_physxScene->addActor(*(entity->_actor));
 }
 
 

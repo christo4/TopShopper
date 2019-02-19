@@ -89,7 +89,7 @@ CustomSimulationEventCallback gSimEventCallback;
 
 ///////////
 // TEMPORARY: for Milestone 2 only
-std::vector<PxTransform> gSpawnPoints = { PxTransform(40.0f, 1.5f, 40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 1.5f, 40.0f, PxQuat(PxIdentity)), PxTransform(40.0f, 1.5f, -40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 1.5f, -40.0f, PxQuat(PxIdentity)) };
+std::vector<PxTransform> gSpawnPoints = { PxTransform(40.0f, 2.0f, 40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 2.0f, 40.0f, PxQuat(PxIdentity)), PxTransform(40.0f, 2.0f, -40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 2.0f, -40.0f, PxQuat(PxIdentity)) };
 int gSpawnID = 0;
 
 
@@ -338,49 +338,19 @@ void PhysicsManager::switchToScene1() {
 	initFrictionPairs();
 
 
-	// NOTE: PXU32 is a typedef of UINT32
-	// ~~~~NOTE: below its calling the constructor to pass in word0, word1, word2, and word3 making up 128 bits
-	// the words can store any data that we want to pass to the filter shader
-	// The sample uses word0 = out collision flag
-	// word1 = flag combo of all flags that we can collide with
-
-
-	// GROUND:
-
-	std::shared_ptr<Ground> ground = std::dynamic_pointer_cast<Ground>(instantiateEntity(EntityTypes::GROUND, PxTransform(0.0f, 0.0f, 0.0f, PxQuat(PxIdentity)), "ground"));
-	physxScene->addActor(*(ground->_actor));
-
-
-	// IT NOW WORKS!!!
-	// WHAT IVE LEARNED!!!
-	// THE SAMPLE OBJ FILE I WAS USING HAD the faces in wrong order, I reversed the order and that worked, but 1 triangle was pass-throughable
-	// to fix this, I tried decrementing the indices by 1 (now its 0-indexed rather than 1-indexed like in the file) and that seems to have fixed it.
-	// Thus if you reverse the order of the indices (within their triplets) it flips the plane upside down and NO COLLISION OCCURS WITH THE "INSIDE" OF A TRIANGLE 
-	
-
-	// VEHICLE 1:
-
-	//Create a vehicle that will drive on the plane.
-	
-	//std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 53.0f, 0.0f, PxQuat(250.0f, PxVec3(1,0,0))), "vehicle1"));
-	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 16.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
-	vehicle1->setInputID(1);
-	physxScene->addActor(*(vehicle1->_actor));
-
-
-
-	// SPARE CHANGE 1:
-
-	//FOR TESTING COLLISION BEFORE WE AUTO SPAWN THEM (NOTE: THEIR NAMES WILL BE THE SAME BUT THAT DOESNT MATTER)
-
-	std::shared_ptr<SpareChange> spareChange1 = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, PxTransform(30.0f, 1.5f, 30.0f, PxQuat(PxIdentity)), "spareChange1"));
-	physxScene->addActor(*(spareChange1->_actor));
+	// ENTITY INIT...
 
 	_activeScene = std::make_shared<GameScene>(physxScene);
-	_activeScene->addEntity(ground);
-	_activeScene->addEntity(vehicle1);
-	_activeScene->addEntity(spareChange1);
 
+	// GROUND:
+	std::shared_ptr<Ground> ground = std::dynamic_pointer_cast<Ground>(instantiateEntity(EntityTypes::GROUND, PxTransform(0.0f, 0.0f, 0.0f, PxQuat(PxIdentity)), "ground"));
+
+	// VEHICLE 1:
+	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 16.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
+	vehicle1->setInputID(1);
+
+	// SPARE CHANGE 1: (TEMP UNTIL WE SPAWN THEM)
+	std::shared_ptr<SpareChange> spareChange1 = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, PxTransform(30.0f, 2.0f, 30.0f, PxQuat(PxIdentity)), "spareChange1"));
 }
 
 
@@ -444,16 +414,13 @@ void PhysicsManager::updateMilliseconds(double deltaTime) {
 		}
 	}
 
-	// TEMPORARY:
+	// ~~~~~~~~~~TEMPORARY:
 	// spawn a new spare change if last one was destroyed
-
 	std::vector<std::shared_ptr<SpareChange>> spareChangeVec = _activeScene->getAllSpareChange();
 	if (spareChangeVec.size() == 0) {
 		gSpawnID++;
 		if (gSpawnID >= gSpawnPoints.size()) gSpawnID = 0;
 		std::shared_ptr<SpareChange> spareChangeNEW = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, gSpawnPoints.at(gSpawnID), "spareChangeNEW"));
-		_activeScene->_physxScene->addActor(*(spareChangeNEW->_actor));
-		_activeScene->addEntity(spareChangeNEW);
 	}
 
 }
@@ -492,54 +459,153 @@ void PhysicsManager::cleanup() {
 
 
 // TODO: delete all local pointers
-// HAVE TO CHANGE THIS!!! - change std::string to const char* (since cStr returns empty..)
+
+
+
+
+
 std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, physx::PxTransform transform, const char *name) {
 
 	switch (type) {
 	case EntityTypes::GROUND:
 	{
-		std::vector<PxVec3> groundVerts = castVectorOfGLMVec4ToVectorOfPxVec3(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO)->verts);
-		std::vector<PxU32> groundIndices = _broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO)->vIndex;
-		//std::reverse(std::begin(groundIndices), std::end(groundIndices)); // NO NEED TO REVERSE IN THIS CONFIGURATION< BUT MIGHT NEED THIS IN FUTURE (OR I COULD USE THE PXMESHFLAG)
-		PxFilterData groundSimFilterData(CollisionFlags::COLLISION_FLAG_GROUND, CollisionFlags::COLLISION_FLAG_GROUND_AGAINST, 0, 0);
-		PxMaterial *groundMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.0f);
-		PxRigidStatic *groundActor = createDrivableTerrain(groundVerts, groundIndices, groundSimFilterData, groundMaterial, gPhysics, gCooking);
-		std::shared_ptr<Ground> ground = std::make_shared<Ground>(groundActor);
-		ground->_actor->setName(name);
-		(ground->_actor->is<PxRigidStatic>())->setGlobalPose(transform);
-		return ground;
+		std::vector<PxVec3> verts = castVectorOfGLMVec4ToVectorOfPxVec3(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO)->verts);
+		std::vector<PxU32> indices = _broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO)->vIndex;
+		PxMaterial *material = gPhysics->createMaterial(0.5f, 0.5f, 0.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_GROUND, CollisionFlags::COLLISION_FLAG_GROUND_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eSIMULATION_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createTriMeshCollider(verts, indices, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidStatic *actor = gPhysics->createRigidStatic(transform);
+		actor->setName(name);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		std::shared_ptr<Ground> entity = std::make_shared<Ground>(actor);
+
+		_activeScene->addEntity(entity);
+		return entity;
 	}
 	case EntityTypes::SHOPPING_CART_PLAYER:
 	{
+		// SHAPES / ACTOR...
 		VehicleShoppingCart *shoppingCartBase = new VehicleShoppingCart(gPhysics, gCooking);
-		std::shared_ptr<ShoppingCartPlayer> shoppingCartPlayer = std::make_shared<ShoppingCartPlayer>(shoppingCartBase, 0); // NOTE: an invalid input ID of 0 is placed here as a default since it must be set later
-		shoppingCartPlayer->_actor->setName(name);
-		(shoppingCartPlayer->_actor->is<PxRigidDynamic>())->setGlobalPose(transform);
-		return shoppingCartPlayer;
+		shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(transform);
+		shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setName(name);
+
+		// DEFAULT: NON-KINEMATIC DYNAMIC (GRAVITY ENABLED)
+
+		// ENTITY...
+		std::shared_ptr<ShoppingCartPlayer> entity = std::make_shared<ShoppingCartPlayer>(shoppingCartBase, 0); // NOTE: an invalid input ID of 0 is placed here as a default since it must be set later
+		
+		_activeScene->addEntity(entity);
+		return entity;
 	}
 	case EntityTypes::SPARE_CHANGE:
 	{
-		PxReal radius = 1.0f;
-		PxSphereGeometry col(radius);
-		PxFilterData simFilterData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
-		PxMaterial *mat = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
-		PxShape *shape = gPhysics->createShape(col, *mat, true, PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION);
-		PxFilterData qryFilterData;
-		setupNonDrivableSurface(qryFilterData);
-		shape->setQueryFilterData(qryFilterData);
-		shape->setSimulationFilterData(simFilterData);
-		PxRigidDynamic *actor = gPhysics->createRigidDynamic(PxTransform(0.0f, 0.0f, 0.0f, PxQuat(PxIdentity)));
-		actor->attachShape(*shape);
+		PxReal radius = 1.5f;
+		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createSphereCollider(radius, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidDynamic *actor = gPhysics->createRigidDynamic(transform);
+		actor->setName(name);
 		actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
-		std::shared_ptr<SpareChange> spareChange = std::make_shared<SpareChange>(actor);
-		spareChange->_actor->setName(name);
-		(spareChange->_actor->is<PxRigidDynamic>())->setGlobalPose(transform);
-		return spareChange;
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		std::shared_ptr<SpareChange> entity = std::make_shared<SpareChange>(actor);
+
+		_activeScene->addEntity(entity);
+		return entity;
 	}
 	default:
 		return nullptr;
 	}
 }
+
+
+
+
+
+PxShape* PhysicsManager::createSphereCollider(PxReal radius, PxMaterial *material, const PxFilterData& simData, const PxFilterData& qryData, bool isExclusive, PxShapeFlags shapeFlags) {
+	PxShape *shape = gPhysics->createShape(PxSphereGeometry(radius), *material, isExclusive, shapeFlags);
+
+	shape->setQueryFilterData(qryData);
+	shape->setSimulationFilterData(simData);
+
+	return shape;
+}
+
+PxShape* PhysicsManager::createBoxCollider(PxReal xSize, PxReal ySize, PxReal zSize, PxMaterial *material, const PxFilterData& simData, const PxFilterData& qryData, bool isExclusive, PxShapeFlags shapeFlags) {
+	PxShape *shape = gPhysics->createShape(PxBoxGeometry(xSize / 2, ySize / 2, zSize / 2), *material, isExclusive, shapeFlags);
+	
+	shape->setQueryFilterData(qryData);
+	shape->setSimulationFilterData(simData);
+	
+	return shape;
+}
+
+
+PxShape* PhysicsManager::createTriMeshCollider(const std::vector<PxVec3>& verts, const std::vector<PxU32>& indices, PxMaterial *material, const PxFilterData& simData, const PxFilterData& qryData, bool isExclusive, PxShapeFlags shapeFlags) {
+	PxTriangleMeshDesc meshDesc;
+	meshDesc.points.count = verts.size();
+	meshDesc.points.stride = sizeof(PxVec3);
+	meshDesc.points.data = verts.data(); 
+
+	meshDesc.triangles.count = indices.size() / 3;
+	meshDesc.triangles.stride = 3 * sizeof(PxU32);
+	meshDesc.triangles.data = indices.data();
+
+	PxTriangleMesh *triMesh = nullptr;
+	PxDefaultMemoryOutputStream buf;
+	if (gCooking->cookTriangleMesh(meshDesc, buf)) {
+		PxDefaultMemoryInputData id(buf.getData(), buf.getSize());
+		triMesh = gPhysics->createTriangleMesh(id);
+	}
+
+	PxShape *shape = gPhysics->createShape(PxTriangleMeshGeometry(triMesh), *material, isExclusive, shapeFlags);
+
+	shape->setQueryFilterData(qryData);
+	shape->setSimulationFilterData(simData);
+
+	return shape;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // NOTE: if you dont attach the shape to an actor it wont render (DUH!)
