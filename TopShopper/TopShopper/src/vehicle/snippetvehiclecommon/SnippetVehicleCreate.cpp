@@ -203,7 +203,8 @@ PxRigidDynamic* createVehicleActor
 	//Add the chassis shapes to the actor.
 	for(PxU32 i = 0; i < numChassisMeshes; i++)
 	{
-		PxShape* chassisShape=PxRigidActorExt::createExclusiveShape(*vehActor, PxConvexMeshGeometry(chassisConvexMeshes[i]), *chassisMaterials[i]);
+		PxConvexMeshGeometry geom(chassisConvexMeshes[i]);
+		PxShape* chassisShape=PxRigidActorExt::createExclusiveShape(*vehActor, geom, *chassisMaterials[i]);
 		chassisShape->setQueryFilterData(chassisQryFilterData);
 		chassisShape->setSimulationFilterData(chassisSimFilterData);
 		chassisShape->setLocalPose(PxTransform(PxIdentity));
@@ -220,7 +221,7 @@ void configureUserData(PxVehicleWheels* vehicle, ActorUserData* actorUserData, S
 {
 	if(actorUserData)
 	{
-		vehicle->getRigidDynamicActor()->userData = actorUserData;
+		vehicle->getRigidDynamicActor()->userData = actorUserData; // ~~~~~~~~NOTE: this gets overriden (I dont think this is ever used though)
 		actorUserData->vehicle = vehicle;
 	}
 

@@ -62,7 +62,7 @@ void LoadingManager::init() {
 
 	// TODO: change this to ground.obj later
 	// NOTE: an .obj file requires normals! (even if we dont use them)
-	loadObject("../TopShopper/resources/Objects/groundTest.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+	loadObject("../TopShopper/resources/Objects/StoreFloor.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 
 	GroundGeo->verts = returnVertices;
 	GroundGeo->uvs = returnUV;

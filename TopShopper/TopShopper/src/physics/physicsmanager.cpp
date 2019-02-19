@@ -89,7 +89,7 @@ CustomSimulationEventCallback gSimEventCallback;
 
 ///////////
 // TEMPORARY: for Milestone 2 only
-std::vector<PxTransform> gSpawnPoints = { PxTransform(40.0f, 51.0f, 40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 51.0f, 40.0f, PxQuat(PxIdentity)), PxTransform(40.0f, 51.0f, -40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 51.0f, -40.0f, PxQuat(PxIdentity)) };
+std::vector<PxTransform> gSpawnPoints = { PxTransform(40.0f, 1.5f, 40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 1.5f, 40.0f, PxQuat(PxIdentity)), PxTransform(40.0f, 1.5f, -40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 1.5f, -40.0f, PxQuat(PxIdentity)) };
 int gSpawnID = 0;
 
 
@@ -266,7 +266,7 @@ void PhysicsManager::init() {
 
 	PxTolerancesScale simScale;
 	simScale.length = 1.0f; // 1 meter by default
-	simScale.speed = 9.81f; // 9.81 m/s by default (speed reached after falling for 1 second under 9.81m/s^2 gravity)
+	simScale.speed = 98.1f; // 98.1 m/s by default (speed reached after falling for 1 second under 98.1m/s^2 gravity)
 
 	bool recordMemoryAllocations = true;
 	
@@ -308,7 +308,7 @@ void PhysicsManager::switchToScene1() {
 
 	// init vehicle stuff, create entities / add their actors into PxScene, position them at starting transforms, etc.....
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+	sceneDesc.gravity = PxVec3(0.0f, -98.1f, 0.0f);
 
 	PxU32 numWorkers = 1; // 1 thread off the main thread (~~~~~~~~MAYBE CHANGE TO 0, to run on main thread?)
 	gDispatcher = PxDefaultCpuDispatcherCreate(numWorkers);
@@ -362,7 +362,8 @@ void PhysicsManager::switchToScene1() {
 
 	//Create a vehicle that will drive on the plane.
 	
-	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 53.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
+	//std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 53.0f, 0.0f, PxQuat(250.0f, PxVec3(1,0,0))), "vehicle1"));
+	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 16.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
 	vehicle1->setInputID(1);
 	physxScene->addActor(*(vehicle1->_actor));
 
@@ -372,7 +373,7 @@ void PhysicsManager::switchToScene1() {
 
 	//FOR TESTING COLLISION BEFORE WE AUTO SPAWN THEM (NOTE: THEIR NAMES WILL BE THE SAME BUT THAT DOESNT MATTER)
 
-	std::shared_ptr<SpareChange> spareChange1 = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, PxTransform(30.0f, 51.0f, 30.0f, PxQuat(PxIdentity)), "spareChange1"));
+	std::shared_ptr<SpareChange> spareChange1 = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, PxTransform(30.0f, 1.5f, 30.0f, PxQuat(PxIdentity)), "spareChange1"));
 	physxScene->addActor(*(spareChange1->_actor));
 
 	_activeScene = std::make_shared<GameScene>(physxScene);
@@ -501,7 +502,7 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 		std::vector<PxU32> groundIndices = _broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO)->vIndex;
 		//std::reverse(std::begin(groundIndices), std::end(groundIndices)); // NO NEED TO REVERSE IN THIS CONFIGURATION< BUT MIGHT NEED THIS IN FUTURE (OR I COULD USE THE PXMESHFLAG)
 		PxFilterData groundSimFilterData(CollisionFlags::COLLISION_FLAG_GROUND, CollisionFlags::COLLISION_FLAG_GROUND_AGAINST, 0, 0);
-		PxMaterial *groundMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+		PxMaterial *groundMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.0f);
 		PxRigidStatic *groundActor = createDrivableTerrain(groundVerts, groundIndices, groundSimFilterData, groundMaterial, gPhysics, gCooking);
 		std::shared_ptr<Ground> ground = std::make_shared<Ground>(groundActor);
 		ground->_actor->setName(name);
