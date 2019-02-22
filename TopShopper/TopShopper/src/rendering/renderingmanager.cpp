@@ -12,6 +12,9 @@
 #include <GLFW/glfw3.h>
 
 
+using namespace physx;
+
+
 RenderingManager::RenderingManager(Broker *broker)
 	: _broker(broker)
 {
@@ -49,15 +52,16 @@ void RenderingManager::RenderScene(const std::vector<Geometry>& objects) {
 	int width = 1024;
 	int height = 512;
 
-	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 2000.0f);
+	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 1000.0f);
 
+	// TODO: fix the follow camera to lag behind the player, don't be blocked by walls and don't spin so much, and be panned with right stick (this changes where it is looking at)
 	std::shared_ptr<ShoppingCartPlayer> player = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers().at(0);
-	physx::PxRigidDynamic* playerDyn = player->_actor->is<physx::PxRigidDynamic>();
-	physx::PxTransform playerTransform = playerDyn->getGlobalPose();
-	physx::PxVec3 playerPos = playerTransform.p;
-	physx::PxQuat playerRot = playerTransform.q;
+	PxRigidDynamic* playerDyn = player->_actor->is<PxRigidDynamic>();
+	PxTransform playerTransform = playerDyn->getGlobalPose();
+	PxVec3 playerPos = playerTransform.p;
+	PxQuat playerRot = playerTransform.q;
 
-	physx::PxVec3 testVec(0, 50, -50);
+	PxVec3 testVec(0, 20, -30);
 	testVec = playerRot.rotate(testVec);
 
 	glm::mat4 View = glm::lookAt(
@@ -231,78 +235,63 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	_objects.clear();
 
 
-	Geometry ground = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
+	// render all entities...
+	for (const std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
+		PxRigidActor *actor = entity->_actor->is<PxRigidActor>();
+		PxTransform transform = actor->getGlobalPose();
+		PxVec3 pos = transform.p;
+		PxQuat rot = transform.q;
+		EntityTypes tag = entity->getTag();
 
-	for (int i = 0; i < ground.verts.size(); i++) {
-		ground.colors.push_back(glm::vec3(0.0f, 1.0f,0.0f));
-	}
-	ground.drawMode = GL_TRIANGLES;
+		Geometry geo;
 
-	assignBuffers(ground);
-	setBufferData(ground);
+		switch (tag) {
+		case EntityTypes::GROUND:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
+			for (int i = 0; i < geo.verts.size(); i++) {
+				geo.colors.push_back(glm::vec3(0.85f, 0.85f, 0.85f));
+			}
+			break;
+		}
+		case EntityTypes::SHOPPING_CART_PLAYER:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_CHASSIS_GEO));
+			for (int i = 0; i < geo.verts.size(); i++) {
+				geo.colors.push_back(glm::vec3(0.2f, 0.65f, 0.95f));
+			}
+			break;
+		}
+		case EntityTypes::SPARE_CHANGE:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
+			for (int i = 0; i < geo.verts.size(); i++) {
+				geo.colors.push_back(glm::vec3(0.95f, 0.65f, 0.2f));
+			}
+			break;
+		}
+		default:
+			continue;
+		}
 
+		std::vector<glm::vec4> shiftedVerts;
 
-	_objects.push_back(ground);
-	
+		for (glm::vec4 v : geo.verts) {
+			physx::PxVec3 vPhys(v.x, v.y, v.z);
+			vPhys = rot.rotate(vPhys);
+			vPhys += pos;
+			shiftedVerts.push_back(glm::vec4(vPhys.x, vPhys.y, vPhys.z, 1.0f));
+		}
 
-	std::shared_ptr<ShoppingCartPlayer> player = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers().at(0);
-	physx::PxRigidDynamic* playerDyn = player->_actor->is<physx::PxRigidDynamic>();
-	physx::PxTransform playerTransform = playerDyn->getGlobalPose();
-	physx::PxVec3 playerPos = playerTransform.p;
-	physx::PxQuat playerRot = playerTransform.q;
+		geo.verts = shiftedVerts;
 
-	Geometry chassisDefault = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_CHASSIS_GEO));
+		geo.drawMode = GL_TRIANGLES;
 
-	std::vector<glm::vec4> newChassisVerts;
-	std::vector<glm::vec3> newChassisColors;
-
-	for (glm::vec4 v : chassisDefault.verts) {
-		physx::PxVec3 vPhys(v.x, v.y, v.z);
-		vPhys = playerRot.rotate(vPhys);
-		vPhys += playerPos;
-		newChassisVerts.push_back(glm::vec4(vPhys.x, vPhys.y, vPhys.z, 1.0f));
-		newChassisColors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-	}
-
-	chassisDefault.verts = newChassisVerts;
-	chassisDefault.colors = newChassisColors;
-
-	chassisDefault.drawMode = GL_TRIANGLES;
-	assignBuffers(chassisDefault);
-	setBufferData(chassisDefault);
-
-	_objects.push_back(chassisDefault);
-
-
-
-	std::shared_ptr<SpareChange> spareChange = _broker->getPhysicsManager()->getActiveScene()->getAllSpareChange().at(0);
-
-	physx::PxRigidDynamic* scDyn = spareChange->_actor->is<physx::PxRigidDynamic>();
-	physx::PxTransform scTransform = scDyn->getGlobalPose();
-	physx::PxVec3 scPos = scTransform.p;
-
-	Geometry scDefault = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-
-	std::vector<glm::vec4> newSCVerts;
-	std::vector<glm::vec3> newSCColors;
-
-	// TODO: change later to use an actual detailed mesh and accoutn for rotation
-	for (glm::vec4 v : scDefault.verts) {
-		physx::PxVec3 vPhys(v.x, v.y, v.z);
-		vPhys += scPos;
-		newSCVerts.push_back(glm::vec4(vPhys.x, vPhys.y, vPhys.z, 1.0f));
-		newSCColors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+		assignBuffers(geo);
+		setBufferData(geo);
+		_objects.push_back(geo);
 	}
 
-	scDefault.verts = newSCVerts;
-	scDefault.colors = newSCColors;
-
-	scDefault.drawMode = GL_TRIANGLES;
-	assignBuffers(scDefault);
-	setBufferData(scDefault);
-
-	_objects.push_back(scDefault);
-	
 
 
 	RenderScene(_objects);
