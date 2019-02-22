@@ -42,6 +42,7 @@ public:
 	GLuint normalBuffer;
 	GLuint uvBuffer;
 	GLuint colorBuffer;
+	GLuint indexBuffer;
 
 	//Draw mode for how OpenGL interprets primitives
 	GLuint drawMode;

@@ -75,7 +75,17 @@ void RenderingManager::RenderScene(const std::vector<Geometry>& objects) {
 
 	for (const Geometry& g : objects) {
 		glBindVertexArray(g.vao);
-		glDrawArrays(g.drawMode, 0, g.verts.size());
+		//glDrawArrays(g.drawMode, 0, g.verts.size());
+		// Index buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g.indexBuffer);
+
+		// Draw the triangles !
+		glDrawElements(
+			GL_TRIANGLES,      // mode
+			g.vIndex.size(),    // count
+			GL_UNSIGNED_INT,   // type
+			(void*)0           // element array buffer offset
+		);
 		// reset state to default (no shader or geometry bound)
 		glBindVertexArray(0);
 	}
@@ -110,14 +120,7 @@ void RenderingManager::assignBuffers(Geometry& geometry) {
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
 	//Parameters in order: Index of vbo in the vao, number of primitives per element, primitive type, etc.
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);
-
-	/*
-	glGenBuffers(1, &geometry.uvBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);
-	*/
+	glEnableVertexAttribArray(1);	
 
 
 }
@@ -133,17 +136,18 @@ void RenderingManager::setBufferData(Geometry& geometry) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.colors.size(), geometry.colors.data(), GL_STATIC_DRAW);
-	/*
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * geometry.uvs.size(), geometry.uvs.data(), GL_STATIC_DRAW);
-	*/
+	
+	glGenBuffers(1, &geometry.indexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.indexBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * geometry.vIndex.size(), geometry.vIndex.data(), GL_STATIC_DRAW);
+	
 }
 
 void RenderingManager::deleteBufferData(Geometry& geometry) {
 	glDeleteBuffers(1, &geometry.vertexBuffer);
 	glDeleteBuffers(1, &geometry.normalBuffer);
 	glDeleteBuffers(1, &geometry.colorBuffer);
-	glDeleteBuffers(1, &geometry.uvBuffer);
+	glDeleteBuffers(1, &geometry.indexBuffer);
 	glDeleteVertexArrays(1, &geometry.vao);
 }
 
