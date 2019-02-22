@@ -257,14 +257,14 @@ void VehicleShoppingCart::clearRawInputDataController() {
 }
 
 
-void VehicleShoppingCart::smoothAndFeedInputs(double deltaTime) {
+void VehicleShoppingCart::smoothAndFeedInputs(double fixedDeltaTime) {
 	// Update the control inputs for the vehicle...
 
 	if (_isKeyAndMouseControlled) { // if key controlled...
-		PxVehicleDrive4WSmoothDigitalRawInputsAndSetAnalogInputs(gKeySmoothingData, gSteerVsForwardSpeedTable, _rawInputData, deltaTime, getIsAirborne(), *_vehicle4W);
+		PxVehicleDrive4WSmoothDigitalRawInputsAndSetAnalogInputs(gKeySmoothingData, gSteerVsForwardSpeedTable, _rawInputData, fixedDeltaTime, getIsAirborne(), *_vehicle4W);
 	}
 	else { // if controller controlled...
-		PxVehicleDrive4WSmoothAnalogRawInputsAndSetAnalogInputs(gPadSmoothingData, gSteerVsForwardSpeedTable, _rawInputData, deltaTime, getIsAirborne(), *_vehicle4W);
+		PxVehicleDrive4WSmoothAnalogRawInputsAndSetAnalogInputs(gPadSmoothingData, gSteerVsForwardSpeedTable, _rawInputData, fixedDeltaTime, getIsAirborne(), *_vehicle4W);
 	}
 }
 

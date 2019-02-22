@@ -19,7 +19,7 @@ void InputManager::init(){
 
 
 //updates the states of each of the gamepad structs in the gamepads array when called
-void InputManager::updateMilliseconds(double deltaTime) {
+void InputManager::updateSeconds(double variableDeltaTime) {
 
 	glfwPollEvents(); // NOTE: I MOVED THIS HERE FROM THE RENDERING CODE SINCE IT DIDNT WORK OTHERWISE
 

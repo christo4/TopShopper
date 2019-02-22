@@ -17,7 +17,7 @@ public:
 
 
 	void init();
-	void updateMilliseconds(double deltaTime);
+	void updateSeconds(double variableDeltaTime);
 	void cleanup();
 
 	//Renders each object

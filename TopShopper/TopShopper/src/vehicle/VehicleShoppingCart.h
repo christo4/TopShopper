@@ -25,7 +25,7 @@ class VehicleShoppingCart {
 		void clearRawInputDataKeyboard();
 		void clearRawInputDataController();
 
-		void smoothAndFeedInputs(double deltaTime);
+		void smoothAndFeedInputs(double fixedDeltaTime);
 
 	private:
 		physx::PxVehicleDrive4WRawInputData _rawInputData;

@@ -209,13 +209,13 @@ glm::mat4 RenderingManager::Camera(float theta, float radius, float phi) {
 }
 
 
-void RenderingManager::updateMilliseconds(double deltaTime) {
+void RenderingManager::updateSeconds(double variableDeltaTime) {
 	// call LATEUPDATE() for all behaviour scripts...
 	for (std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
 		std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
 		if (comp != nullptr) {
 			std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
-			script->lateUpdate(deltaTime);
+			script->lateUpdate(variableDeltaTime);
 		}
 	}
 

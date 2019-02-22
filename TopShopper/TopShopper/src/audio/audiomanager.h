@@ -8,7 +8,7 @@ public:
 	AudioManager(Broker *broker);
 	virtual ~AudioManager();
 	void init();
-	void updateMilliseconds(double deltaTime);
+	void updateSeconds(double variableDeltaTime);
 private:
 	Broker *_broker = nullptr;
 };

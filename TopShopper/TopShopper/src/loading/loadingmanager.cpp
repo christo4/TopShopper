@@ -96,7 +96,7 @@ void LoadingManager::init() {
 
 }
 
-void LoadingManager::updateMilliseconds(double deltaTime) {
+void LoadingManager::updateSeconds(double variableDeltaTime) {
 
 }
 

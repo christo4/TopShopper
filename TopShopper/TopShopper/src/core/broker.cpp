@@ -37,32 +37,37 @@ void Broker::initAll() {
 
 
 
-void Broker::updateAllMilliseconds(double& simTime, const double& fixedDeltaTime, double& variableDeltaTime, double& accumulator) {
+void Broker::updateAllSeconds(double& simTime, const double& fixedDeltaTime, double& variableDeltaTime, double& accumulator) {
 	
-	_loadingManager->updateMilliseconds(variableDeltaTime); // useless right now, but if we want dynamic loading it could go first
-	_inputManager->updateMilliseconds(variableDeltaTime); // NOTE: this needs to be done before physics updates
+	_loadingManager->updateSeconds(variableDeltaTime); // useless right now, but if we want dynamic loading it could go first
+	_inputManager->updateSeconds(variableDeltaTime); // NOTE: this needs to be done before physics updates
 	
 	while (accumulator >= fixedDeltaTime) {
-		_physicsManager->updateMilliseconds(fixedDeltaTime);
+		_physicsManager->updateSeconds(fixedDeltaTime);
 		accumulator -= fixedDeltaTime;
 		simTime += fixedDeltaTime;
 	}
 	
-	_aiManager->updateMilliseconds(variableDeltaTime);
-	_renderingManager->updateMilliseconds(variableDeltaTime);
-	_audioManager->updateMilliseconds(variableDeltaTime);
+	_aiManager->updateSeconds(variableDeltaTime);
+	_renderingManager->updateSeconds(variableDeltaTime);
+	_audioManager->updateSeconds(variableDeltaTime);
 	
 
 	// CLEANUP ENTITIES FLAGGED TO BE DESTROYED...
+	std::vector<std::shared_ptr<Entity>> destroyedEntities;
 	for (std::shared_ptr<Entity> &entity : _physicsManager->getActiveScene()->_entities) {
 		if (entity->getDestroyFlag()) {
-			std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
-			if (comp != nullptr) {
-				std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
-				script->onDestroy();
-			}
-			_physicsManager->getActiveScene()->removeEntity(entity);
+			destroyedEntities.push_back(entity);
 		}
+	}
+
+	for (std::shared_ptr<Entity> &entity : destroyedEntities) {
+		std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
+		if (comp != nullptr) {
+			std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
+			script->onDestroy();
+		}
+		_physicsManager->getActiveScene()->removeEntity(entity);
 	}
 
 }

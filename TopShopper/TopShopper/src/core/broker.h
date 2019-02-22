@@ -16,7 +16,7 @@ public:
 	static Broker* getInstance();
 
 	void initAll(); // calls each subsystem's init function
-	void updateAllMilliseconds(double& simTime, const double& fixedDeltaTime, double& variableDeltaTime, double& accumulator); // this update function will call each subsystem's update function in an appropriate order.
+	void updateAllSeconds(double& simTime, const double& fixedDeltaTime, double& variableDeltaTime, double& accumulator); // this update function will call each subsystem's update function in an appropriate order.
 
 	AIManager* getAIManager() { return _aiManager; }
 	AudioManager* getAudioManager() { return _audioManager; }

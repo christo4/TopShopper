@@ -17,6 +17,6 @@ void AudioManager::init() {
 
 }
 
-void AudioManager::updateMilliseconds(double deltaTime) {
+void AudioManager::updateSeconds(double variableDeltaTime) {
 
 }

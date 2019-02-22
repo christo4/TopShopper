@@ -86,8 +86,8 @@ CustomSimulationEventCallback gSimEventCallback;
 
 ///////////
 // TEMPORARY: for Milestone 2 only
-std::vector<PxTransform> gSpawnPoints = { PxTransform(40.0f, 2.0f, 40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 2.0f, 40.0f, PxQuat(PxIdentity)), PxTransform(40.0f, 2.0f, -40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 2.0f, -40.0f, PxQuat(PxIdentity)) };
-int gSpawnID = 0;
+//std::vector<PxTransform> gSpawnPoints = { PxTransform(40.0f, 2.0f, 40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 2.0f, 40.0f, PxQuat(PxIdentity)), PxTransform(40.0f, 2.0f, -40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 2.0f, -40.0f, PxQuat(PxIdentity)) };
+//int gSpawnID = 0;
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -416,19 +416,18 @@ void PhysicsManager::switchToScene1() {
 	player1Script->_inputID = 1;
 
 	// SPARE CHANGE 1: (TEMP UNTIL WE SPAWN THEM)
-	std::shared_ptr<SpareChange> spareChange1 = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, PxTransform(30.0f, 2.0f, 30.0f, PxQuat(PxIdentity)), "spareChange1"));
+	//std::shared_ptr<SpareChange> spareChange1 = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, PxTransform(30.0f, 2.0f, 30.0f, PxQuat(PxIdentity)), "spareChange1"));
 }
 
 
 
-// ASIDE: if we want a fixed timestep like Unity then pass in say 1/30 or 1/60 but then we need to change UpdateAll() to only call physcismanager.init() when the deltaTimes accumulate enough
-void PhysicsManager::updateMilliseconds(double deltaTime) {
+void PhysicsManager::updateSeconds(double fixedDeltaTime) {
 	// call FIXEDUPDATE() for all behaviour scripts...
 	for (std::shared_ptr<Entity> &entity : _activeScene->_entities) {
 		std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
 		if (comp != nullptr) {
 			std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
-			script->fixedUpdate(deltaTime);
+			script->fixedUpdate(fixedDeltaTime);
 		}
 	}
 
@@ -456,7 +455,7 @@ void PhysicsManager::updateMilliseconds(double deltaTime) {
 	//PxVehicleWheelQueryResult vehicleQueryResults[1] = { {wheelQueryResults, gVehicle4W->mWheelsSimData.getNbWheels()} };
 	// ~~~~~~~~~~~~~HACK FOR NOW... change to NBVEHICLES tomorrow...
 	PxVehicleWheelQueryResult vehicleQueryResults[1] = { {wheelQueryResults, 4} };
-	PxVehicleUpdates(deltaTime, grav, *gFrictionPairs, shoppingCartPlayers.size(), vehiclesVector.data(), vehicleQueryResults);
+	PxVehicleUpdates(fixedDeltaTime, grav, *gFrictionPairs, shoppingCartPlayers.size(), vehiclesVector.data(), vehicleQueryResults);
 
 	//Work out if the vehicle is in the air.
 	//gIsVehicleInAir = gVehicle4W->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]);
@@ -470,7 +469,7 @@ void PhysicsManager::updateMilliseconds(double deltaTime) {
 
 
 	// Scene update...
-	_activeScene->_physxScene->simulate(deltaTime);
+	_activeScene->_physxScene->simulate(fixedDeltaTime);
 	_activeScene->_physxScene->fetchResults(true); // wait for results to come in before moving on to next system
 
 
@@ -480,12 +479,12 @@ void PhysicsManager::updateMilliseconds(double deltaTime) {
 
 	// ~~~~~~~~~~TEMPORARY:
 	// spawn a new spare change if last one was destroyed
-	std::vector<std::shared_ptr<SpareChange>> spareChangeVec = _activeScene->getAllSpareChange();
-	if (spareChangeVec.size() == 0) {
-		gSpawnID++;
-		if (gSpawnID >= gSpawnPoints.size()) gSpawnID = 0;
-		std::shared_ptr<SpareChange> spareChangeNEW = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, gSpawnPoints.at(gSpawnID), "spareChangeNEW"));
-	}
+	//std::vector<std::shared_ptr<SpareChange>> spareChangeVec = _activeScene->getAllSpareChange();
+	//if (spareChangeVec.size() == 0) {
+		//gSpawnID++;
+		//if (gSpawnID >= gSpawnPoints.size()) gSpawnID = 0;
+		//std::shared_ptr<SpareChange> spareChangeNEW = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, gSpawnPoints.at(gSpawnID), "spareChangeNEW"));
+	//}
 
 }
 

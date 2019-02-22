@@ -74,7 +74,7 @@ public:
 	PhysicsManager(Broker *broker);
 	virtual ~PhysicsManager();
 	void init();
-	void updateMilliseconds(double deltaTime);
+	void updateSeconds(double fixedDeltaTime);
 	void cleanup();
 
 	std::shared_ptr<Entity> instantiateEntity(EntityTypes type, physx::PxTransform transform, const char *name);

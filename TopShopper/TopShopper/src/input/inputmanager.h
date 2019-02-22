@@ -49,7 +49,7 @@ public:
 	InputManager(Broker *broker);
 	virtual ~InputManager();
 	void init();
-	void updateMilliseconds(double deltaTime);
+	void updateSeconds(double variableDeltaTime);
 	Gamepad* getGamePad(int gamePadNumber); // 1, 2, 3, or 4
 	KeyboardAndMouse* getKeyboardAndMouse() { return _keyboardAndMouse; }
 private:

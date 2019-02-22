@@ -26,7 +26,7 @@ public:
 	LoadingManager(Broker *broker);
 	virtual ~LoadingManager();
 	void init();
-	void updateMilliseconds(double deltaTime);
+	void updateSeconds(double variableDeltaTime);
 	bool loadObject(const char* imageName, std::vector<glm::vec4>&returnVertices, std::vector<glm::vec2>&returnUV, std::vector<glm::vec3>&returnNormal, std::vector<unsigned int>&vIndex, std::vector<unsigned int>&uvIndex, std::vector<unsigned int>&normalIndex );
 	
 	Geometry* getGeometry(GeometryTypes type);
