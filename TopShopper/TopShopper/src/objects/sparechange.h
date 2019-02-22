@@ -12,8 +12,6 @@ class SpareChange : public Entity {
 		SpareChange(physx::PxRigidDynamic *actor);
 		virtual ~SpareChange();
 
-		void updatePhysics(double deltaTime) override;
-
 	private:
 
 };

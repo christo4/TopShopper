@@ -12,11 +12,7 @@ class Ground : public Entity {
 		Ground(physx::PxRigidStatic *actor);
 		virtual ~Ground();
 
-		void updatePhysics(double deltaTime) override;
-
-
 	private:
-
 
 };
 

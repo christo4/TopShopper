@@ -6,9 +6,6 @@
 
 using namespace physx;
 
-// TEMPORARY: for Milestone 2 only
-//std::vector<PxTransform> gSpawnPoints = { PxTransform(40.0f, 51.0f, 40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 51.0f, 40.0f, PxQuat(PxIdentity)), PxTransform(40.0f, 51.0f, -40.0f, PxQuat(PxIdentity)), PxTransform(-40.0f, 51.0f, -40.0f, PxQuat(PxIdentity)) };
-//int gSpawnID = 0;
 
 AIManager::AIManager(Broker *broker) 
 	: _broker(broker)
@@ -25,5 +22,12 @@ void AIManager::init() {
 }
 
 void AIManager::updateMilliseconds(double deltaTime) {
-
+	// call UPDATE() for all behaviour scripts...
+	for (std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
+		std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
+		if (comp != nullptr) {
+			std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
+			script->update(deltaTime);
+		}
+	}
 }

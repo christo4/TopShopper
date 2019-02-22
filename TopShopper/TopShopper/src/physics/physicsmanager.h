@@ -50,16 +50,22 @@ enum CollisionFlags {
 	COLLISION_FLAG_PICKUP_AGAINST				= COLLISION_FLAG_GROUND | COLLISION_FLAG_WHEEL | COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE | COLLISION_FLAG_PICKUP
 };
 
-physx::PxFilterFlags VehicleFilterShader
-(physx::PxFilterObjectAttributes attributes0, physx::PxFilterData filterData0,
- physx::PxFilterObjectAttributes attributes1, physx::PxFilterData filterData1,
- physx::PxPairFlags& pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize);
 
 
 physx::PxFilterFlags CustomFilterShader
 (physx::PxFilterObjectAttributes attributes0, physx::PxFilterData filterData0,
 	physx::PxFilterObjectAttributes attributes1, physx::PxFilterData filterData1,
 	physx::PxPairFlags& pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize);
+
+class CustomSimulationEventCallback : public physx::PxSimulationEventCallback {
+public:
+	void onAdvance(const physx::PxRigidBody *const *bodyBuffer, const physx::PxTransform *poseBuffer, const physx::PxU32 count) override;
+	void onConstraintBreak(physx::PxConstraintInfo *constraints, physx::PxU32 count) override;
+	void onContact(const physx::PxContactPairHeader &pairHeader, const physx::PxContactPair *pairs, physx::PxU32 nbPairs) override;
+	void onSleep(physx::PxActor **actors, physx::PxU32 count) override;
+	void onTrigger(physx::PxTriggerPair *pairs, physx::PxU32 count) override;
+	void onWake(physx::PxActor **actors, physx::PxU32 count) override;
+};
 
 
 
@@ -77,10 +83,6 @@ public:
 
 
 	
-
-
-
-
 
 	/*
 	// MAYBE MOVE THESE INTO A SPECIAL PHYSICS COMPONENT
@@ -115,15 +117,7 @@ private:
 
 
 
-class CustomSimulationEventCallback : public physx::PxSimulationEventCallback {
-	public:
-		void onAdvance(const physx::PxRigidBody *const *bodyBuffer, const physx::PxTransform *poseBuffer, const physx::PxU32 count) override;
-		void onConstraintBreak(physx::PxConstraintInfo *constraints, physx::PxU32 count) override;
-		void onContact(const physx::PxContactPairHeader &pairHeader, const physx::PxContactPair *pairs, physx::PxU32 nbPairs) override;
-		void onSleep(physx::PxActor **actors, physx::PxU32 count) override;
-		void onTrigger(physx::PxTriggerPair *pairs, physx::PxU32 count) override;
-		void onWake(physx::PxActor **actors, physx::PxU32 count) override;
-};
+
 
 
 

@@ -21,11 +21,10 @@ Entity::~Entity() {
 // just adds in a component with default values
 void Entity::addComponent(ComponentTypes componentType) {
 	// input safety check...
-	if (componentType == ComponentTypes::NUMBER_OF_COMPONENT_TYPES) { // this is a nonsense call
-		return;
-	}
+	if (componentType == ComponentTypes::NUMBER_OF_COMPONENT_TYPES) return; // NONSENSE!
+	if (componentType == ComponentTypes::BEHAVIOUR_SCRIPT) return; // NONSENSE!
 
-	int index = componentType; // enum -> int
+	int index = (componentType == ComponentTypes::PICKUP_SCRIPT | componentType == ComponentTypes::PLAYER_SCRIPT) ? ComponentTypes::BEHAVIOUR_SCRIPT : componentType;
 
 	// block adding an existing component type
 	if (_components.at(index) != nullptr) {
@@ -34,54 +33,46 @@ void Entity::addComponent(ComponentTypes componentType) {
 
 	// otherwise, just create a default version of the component type and store in the array
 	switch (componentType) {
-		case ComponentTypes::AUDIO_LISTENER:
-			_components.at(index) == std::make_shared<AudioListener>();
+		//case ComponentTypes::AUDIO_LISTENER:
+			//_components.at(index) = std::make_shared<AudioListener>(this);
+			//break;
+		//case ComponentTypes::AUDIO_SOURCE:
+			//_components.at(index) = std::make_shared<AudioSource>(this);
+			//break;
+		//case ComponentTypes::CAMERA:
+			//_components.at(index) = std::make_shared<Camera>(this);
+			//break;
+		//case ComponentTypes::MESH:
+			//_components.at(index) = std::make_shared<Mesh>(this);
+			//break;
+		//case ComponentTypes::NAV_MESH_AGENT:
+			//_components.at(index) = std::make_shared<NavMeshAgent>(this);
+			//break;
+		case ComponentTypes::PICKUP_SCRIPT:
+			_components.at(index) = std::make_shared<PickupScript>(this);
 			break;
-		case ComponentTypes::AUDIO_SOURCE:
-			_components.at(index) == std::make_shared<AudioSource>();
-			break;
-		case ComponentTypes::CAMERA:
-			_components.at(index) == std::make_shared<Camera>();
-			break;
-		case ComponentTypes::MESH:
-			_components.at(index) == std::make_shared<Mesh>();
-			break;
-		case ComponentTypes::NAV_MESH_AGENT:
-			_components.at(index) == std::make_shared<NavMeshAgent>();
+		case ComponentTypes::PLAYER_SCRIPT:
+			_components.at(index) = std::make_shared<PlayerScript>(this);
 			break;
 	}
 
-}
-
-
-void Entity::removeComponent(ComponentTypes componentType) {
-	// input safety check...
-	if (componentType == ComponentTypes::NUMBER_OF_COMPONENT_TYPES) { // this is a nonsense call
-		return;
-	}
-
-	int index = componentType; // enum -> int
-
-	// check if this component type is attached to the entity...
-	if (_components.at(index) == nullptr) {
-		return; // nothing to remove
-	}
-
-	// get here if type is attached, so we simply remove it (cleanup and reset that element in array to null)
-	_components.at(index) = nullptr;
 }
 
 
 std::shared_ptr<Component> Entity::getComponent(ComponentTypes componentType) {
 	// input safety check...
-	if (componentType == ComponentTypes::NUMBER_OF_COMPONENT_TYPES) { // this is a nonsense call
-		return nullptr;
+	if (componentType == ComponentTypes::NUMBER_OF_COMPONENT_TYPES) return nullptr; // NONSENSE!
+
+	int index = (componentType == ComponentTypes::PICKUP_SCRIPT | componentType == ComponentTypes::PLAYER_SCRIPT) ? ComponentTypes::BEHAVIOUR_SCRIPT : componentType;
+
+	if (componentType == ComponentTypes::PICKUP_SCRIPT | componentType == ComponentTypes::PLAYER_SCRIPT) {
+		return (_components.at(index) != nullptr && _components.at(index)->_tag == componentType ? _components.at(index) : nullptr);
+	}
+	else {
+		return _components.at(index); // either a shared_ptr (if attached) or nullptr (if not attached)
 	}
 
-	int index = componentType; // enum -> int
-	return _components.at(index); // either a shared_ptr (if attached) or nullptr (if not attached)
 }
-
 
 
 void Entity::destroy() {

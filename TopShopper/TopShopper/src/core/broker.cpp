@@ -52,6 +52,19 @@ void Broker::updateAllMilliseconds(double& simTime, const double& fixedDeltaTime
 	_renderingManager->updateMilliseconds(variableDeltaTime);
 	_audioManager->updateMilliseconds(variableDeltaTime);
 	
+
+	// CLEANUP ENTITIES FLAGGED TO BE DESTROYED...
+	for (std::shared_ptr<Entity> &entity : _physicsManager->getActiveScene()->_entities) {
+		if (entity->getDestroyFlag()) {
+			std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
+			if (comp != nullptr) {
+				std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
+				script->onDestroy();
+			}
+			_physicsManager->getActiveScene()->removeEntity(entity);
+		}
+	}
+
 }
 
 

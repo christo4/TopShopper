@@ -1,2 +1,92 @@
 #include "component.h"
+#include "entity.h"
+#include "shoppingcartplayer.h"
+#include "vehicle/VehicleShoppingCart.h"
+#include "core/broker.h"
+#include <iostream>
 
+using namespace physx;
+
+////////////////////////////
+Component::Component(Entity *entity, ComponentTypes tag) : _entity(entity), _tag(tag) {}
+
+
+////////////////////////////
+BehaviourScript::BehaviourScript(Entity *entity, ComponentTypes tag) : Component(entity, tag) {}
+
+
+////////////////////////////
+PickupScript::PickupScript(Entity *entity) : BehaviourScript(entity, ComponentTypes::PICKUP_SCRIPT) {}
+
+void PickupScript::onSpawn() {}
+void PickupScript::fixedUpdate(double fixedDeltaTime) {}
+void PickupScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
+void PickupScript::onCollisionExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
+
+void PickupScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity) {
+	if (otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+		ShoppingCartPlayer *player = static_cast<ShoppingCartPlayer*>(otherEntity);
+		std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
+		playerScript->addPoints(_points);
+		// TODO: also check off shopping list box if necessary
+		std::cout << "COMPONENT.CPP | PICKUP WAS PICKED UP!" << std::endl;
+		std::cout << "PLAYER POINTS = " << playerScript->_points << std::endl;
+		_entity->destroy(); // destroy this pickup
+	}
+}
+
+void PickupScript::onTriggerExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity) {}
+void PickupScript::update(double variableDeltaTime) {}
+void PickupScript::lateUpdate(double variableDeltaTime) {}
+void PickupScript::onDestroy() {}
+
+
+////////////////////////////
+PlayerScript::PlayerScript(Entity *entity) : BehaviourScript(entity, ComponentTypes::PLAYER_SCRIPT) {}
+
+void PlayerScript::onSpawn() {}
+
+void PlayerScript::fixedUpdate(double fixedDeltaTime) {
+	ShoppingCartPlayer *player = dynamic_cast<ShoppingCartPlayer*>(_entity);
+	if (player != nullptr) {
+		Gamepad *pad = Broker::getInstance()->getInputManager()->getGamePad(_inputID);
+		if (pad != nullptr) {
+			PxReal accel = glm::clamp(((pad->rightTrigger + 1) / 2), 0.0f, 1.0f);
+			PxReal reverse = glm::clamp(((pad->leftTrigger + 1) / 2), 0.0f, 1.0f);
+			PxReal handbrake = pad->xButton ? 1.0f : 0.0f;
+			PxReal steer = glm::clamp(pad->leftStickX *-1, -1.0f, 1.0f); // must be negated otherwise steering is backwards
+			bool turboButtonPressed = pad->bButton; // this function doesnt work as intended yet...
+
+			player->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
+		}
+		else {
+			if (_inputID == 1) {
+				KeyboardAndMouse *kam = Broker::getInstance()->getInputManager()->getKeyboardAndMouse();
+				bool accelKeyPressed = kam->wKey;
+				bool reverseKeyPressed = kam->sKey;
+				bool handbrakeKeyPressed = kam->leftShiftKey;
+				bool steerLeftKeyPressed = kam->dKey; // NOTE: the steer keys have to be reversed here
+				bool steerRightKeyPressed = kam->aKey;
+				bool turboKeyPressed = kam->spaceKey;
+
+				player->_shoppingCartBase->processRawInputDataKeyboard(accelKeyPressed, reverseKeyPressed, handbrakeKeyPressed, steerLeftKeyPressed, steerRightKeyPressed, turboKeyPressed);
+			}
+		}
+
+		player->_shoppingCartBase->smoothAndFeedInputs(fixedDeltaTime);
+	}
+}
+
+void PlayerScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
+void PlayerScript::onCollisionExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
+void PlayerScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity) {}
+void PlayerScript::onTriggerExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity) {}
+void PlayerScript::update(double variableDeltaTime) {}
+void PlayerScript::lateUpdate(double variableDeltaTime) {}
+void PlayerScript::onDestroy() {}
+
+void PlayerScript::addPoints(int gain) { _points += gain; }
+void PlayerScript::subPoints(int loss) {
+	_points -= loss;
+	if (_points < 0) _points = 0; // clamp
+}

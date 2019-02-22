@@ -1,5 +1,5 @@
 #include "VehicleShoppingCart.h"
-#include "physics/physicsmanager.h" // ~~~~~~~I can have this here since i'm in .cpp (no cyclic dependencies!!!)
+#include "physics/physicsmanager.h"
 
 
 using namespace physx;
@@ -257,8 +257,7 @@ void VehicleShoppingCart::clearRawInputDataController() {
 }
 
 
-void VehicleShoppingCart::updatePhysics(double deltaTime) {
-
+void VehicleShoppingCart::smoothAndFeedInputs(double deltaTime) {
 	// Update the control inputs for the vehicle...
 
 	if (_isKeyAndMouseControlled) { // if key controlled...
@@ -267,5 +266,8 @@ void VehicleShoppingCart::updatePhysics(double deltaTime) {
 	else { // if controller controlled...
 		PxVehicleDrive4WSmoothAnalogRawInputsAndSetAnalogInputs(gPadSmoothingData, gSteerVsForwardSpeedTable, _rawInputData, deltaTime, getIsAirborne(), *_vehicle4W);
 	}
-
 }
+
+
+
+

@@ -1,7 +1,6 @@
 //TODO: can maybe include a callback of some kind which detects the connecting and disconnecting of controllers in real time.
 #include "inputmanager.h"
 #include "core/broker.h"
-#include "vehicle/VehicleShoppingCart.h"
 
 InputManager::InputManager(Broker *broker)
 	: _broker(broker)
@@ -68,59 +67,17 @@ void InputManager::updateMilliseconds(double deltaTime) {
 	_keyboardAndMouse->leftShiftKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT_SHIFT);
 	_keyboardAndMouse->spaceKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE);
 
-	// now that our gamepads/keyboard/mouse have been updated, we pass the input along to update the control state of every player cart...
-
-	passAlongInputsToCarts();
-
 }
 
 //returns a pointer to the structure representing the gamepad number given as a parameter (1,2,3,4)
-Gamepad * InputManager::getGamePad(int gamePadNumber) {
+Gamepad* InputManager::getGamePad(int gamePadNumber) {
 	if (gamePadNumber <= _numGamepads && gamePadNumber > 0) {
 		return _gamePads[gamePadNumber-1];
 	}
-	return NULL;
+	return nullptr;
 }
 
 
-InputManager::~InputManager()
-{
-}
-
-
-void InputManager::passAlongInputsToCarts() {
-
-	std::vector<std::shared_ptr<ShoppingCartPlayer>> playerCarts = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
-
-	for (std::shared_ptr<ShoppingCartPlayer> &playerCart : playerCarts) {
-		int playerID = playerCart->getInputID();
-
-		if (_numGamepads < 1) { // Keyboard/Mouse enabled (single player)
-			if (playerID != 1) continue;
-
-			bool accelKeyPressed = _keyboardAndMouse->wKey;
-			bool reverseKeyPressed = _keyboardAndMouse->sKey;
-			bool handbrakeKeyPressed = _keyboardAndMouse->leftShiftKey;
-			bool steerLeftKeyPressed = _keyboardAndMouse->dKey; // NOTE: the steer keys have to be reversed here
-			bool steerRightKeyPressed = _keyboardAndMouse->aKey;
-			bool turboKeyPressed = _keyboardAndMouse->spaceKey;
-
-			playerCart->_shoppingCartBase->processRawInputDataKeyboard(accelKeyPressed, reverseKeyPressed, handbrakeKeyPressed, steerLeftKeyPressed, steerRightKeyPressed, turboKeyPressed);
-			break;
-		}
-		else { // Gamepads enabled
-			// ~~~~~~~~~I can either do no error checking here or leave it be and a wrongly set ID will cause an indexoutofbounds error
-			Gamepad *pad = getGamePad(playerID);
-			// now read inputs from this gamepad and pass it along to cart's processInput methods that will then change movement behaviour for next physics step
-
-			physx::PxReal accel = glm::clamp(((pad->rightTrigger + 1) / 2), 0.0f, 1.0f);
-			physx::PxReal reverse = glm::clamp(((pad->leftTrigger + 1) / 2), 0.0f, 1.0f);
-			physx::PxReal handbrake = pad->xButton ? 1.0f : 0.0f;
-			physx::PxReal steer = glm::clamp(pad->leftStickX *-1, -1.0f, 1.0f); // must be negated otherwise steering is backwards
-			bool turboButtonPressed = pad->bButton; // this function doesnt work as intended yet...
-
-			playerCart->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
-		}
-	}
+InputManager::~InputManager() {
 
 }

@@ -1,19 +1,15 @@
 #include "loadingmanager.h"
 #include <iostream>
-//#define _CRT_SECURE_NO_WARNINGS // this shouldnt be necessary since I already defined it in properties>c++>preprocessor
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "rendering/Geometry.h"
-#include "OBJ_Loader.h"
 
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
 
 
-
-using namespace objl;
 
 Geometry* VehicleChassisGeo = new Geometry();
 Geometry* VehicleWheelGeo = new Geometry();

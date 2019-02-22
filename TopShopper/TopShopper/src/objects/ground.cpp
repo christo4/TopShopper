@@ -9,15 +9,10 @@ Ground::Ground(PxRigidStatic *actor)
 {
 	_actor->userData = this;
 
-	addComponent(ComponentTypes::MESH);
+	//addComponent(ComponentTypes::MESH);
 }
 
 
 Ground::~Ground() {
-
-}
-
-
-void Ground::updatePhysics(double deltaTime) {
 
 }

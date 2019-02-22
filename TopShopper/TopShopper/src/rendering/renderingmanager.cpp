@@ -210,6 +210,16 @@ glm::mat4 RenderingManager::Camera(float theta, float radius, float phi) {
 
 
 void RenderingManager::updateMilliseconds(double deltaTime) {
+	// call LATEUPDATE() for all behaviour scripts...
+	for (std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
+		std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
+		if (comp != nullptr) {
+			std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
+			script->lateUpdate(deltaTime);
+		}
+	}
+
+
 	for (Geometry& geoDel : _objects) {
 		deleteBufferData(geoDel);
 	}
@@ -290,82 +300,6 @@ void RenderingManager::updateMilliseconds(double deltaTime) {
 	_objects.push_back(scDefault);
 	
 
-
-
-
-
-
-
-
-	// VERY POOR FOR NOW...
-	//for (Geometry& geoDel : _objects) {
-		//deleteBufferData(geoDel);
-	//}
-
-	//_objects.clear();
-
-	/*
-	physx::PxShape** shapes = _broker->get_PhysicsManager_AllShapes();
-	physx::PxU32 nbShapes = _broker->get_PhysicsManager_NbShapes();
-
-	
-	Geometry  meme = *(_broker->get_LoadingManager_Geometry(GeometryTypes::GROUND_GEO));
-
-
-	//meme.drawMode = GL_LINE_STRIP;
-	meme.drawMode = GL_TRIANGLES;
-
-
-	assignBuffers(meme);
-	setBufferData(meme);
-
-
-	_objects.push_back(meme);
-	
-	
-	for (physx::PxU32 i = 0; i < nbShapes; i++) {
-		physx::PxGeometryHolder holder = shapes[i]->getGeometry();
-
-		*/
-		/*
-		if (holder.getType() == physx::PxGeometryType::eTRIANGLEMESH) {
-			const physx::PxTriangleMeshGeometry& triGeom = holder.triangleMesh();
-			const physx::PxTriangleMesh& mesh = *triGeom.triangleMesh;
-			const physx::PxVec3* vertexBuffer = mesh.getVertices();
-			const physx::PxU32 nbVerts = mesh.getNbVertices();
-			Geometry newGeo;
-			std::vector<glm::vec4> verts;
-			for (int j = 0; j < nbVerts; j++) {
-				verts.push_back(glm::vec4(vertexBuffer[j].x, vertexBuffer[j].y, vertexBuffer[j].z, 1.0f));
-			}
-			newGeo.verts = verts;
-			newGeo.drawMode = GL_TRIANGLES;
-			assignBuffers(newGeo);
-			//setBufferData(newGeo);
-			_objects.push_back(newGeo);
-		}
-		*/
-	/*
-		if (holder.getType() == physx::PxGeometryType::eCONVEXMESH) {
-			physx::PxConvexMesh* mesh = holder.convexMesh().convexMesh;
-			const physx::PxVec3* vertexes = mesh->getVertices();
-			physx::PxU32 nbVerts = mesh->getNbVertices();
-			//std::cout << nbVerts << "\n";
-			Geometry newGeo;
-			for (int j = 0; j < nbVerts; j++) {
-				float teststt = vertexes[j].x;
-				std::cout << teststt << std::endl;
-				//std::cout << vertexes[j].x << std::endl;
-				newGeo.verts.push_back(glm::vec4(vertexes[j].x, vertexes[j].y, vertexes[j].z, 1.0f));
-			}
-			newGeo.drawMode = GL_TRIANGLES;
-
-			//assignBuffers(newGeo);
-			//setBufferData(newGeo);
-			//_objects.push_back(newGeo);
-		}
-	}
-	*/
 
 	RenderScene(_objects);
 	glfwSwapBuffers(_window);

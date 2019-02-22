@@ -50,7 +50,7 @@ public:
 	virtual ~InputManager();
 	void init();
 	void updateMilliseconds(double deltaTime);
-	Gamepad* getGamePad(int gamePadNumber);
+	Gamepad* getGamePad(int gamePadNumber); // 1, 2, 3, or 4
 	KeyboardAndMouse* getKeyboardAndMouse() { return _keyboardAndMouse; }
 private:
 	int _numGamepads;
@@ -59,7 +59,7 @@ private:
 	Broker *_broker = nullptr;
 	KeyboardAndMouse *_keyboardAndMouse = new KeyboardAndMouse();
 
-	void passAlongInputsToCarts();
+	//void passAlongInputsToCarts();
 };
 
 #endif // INPUTMANAGER_H_

@@ -66,6 +66,7 @@ enum EntityTypes {
 	// ENVIRONMENT...
 	GROUND,								// COMPONENTS = MESH
 	WALL,								// COMPONENTS = MESH
+	OBSTACLE,							// COMPONENTS = MESH
 	RAMP,								// COMPONENTS = MESH
 	TURBO_PAD,							// COMPONENTS = AUDIO_SOURCE, MESH
 	WET_FLOOR_PATCH,					// COMPONENTS = AUDIO_SOURCE, MESH
@@ -97,13 +98,9 @@ class Entity {
 		physx::PxActor *_actor = nullptr;
 
 		void addComponent(ComponentTypes componentType); // only adds a component with default values to entity. These values can be overwritten afterwords through getComponent and public field changing or getters/setters
-		void removeComponent(ComponentTypes componentType);
 		std::shared_ptr<Component> getComponent(ComponentTypes componentType);
 
-		virtual void updatePhysics(double deltaTime)=0;
-
 		EntityTypes getTag() { return _tag; }
-
 		bool getDestroyFlag() { return _destroyFlag; }
 
 		void destroy();

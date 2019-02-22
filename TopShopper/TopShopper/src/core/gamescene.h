@@ -25,7 +25,7 @@ class GameScene {
 		physx::PxScene *_physxScene = nullptr;
 
 		void addEntity(std::shared_ptr<Entity> entity);
-		// ~~~~~~~~also have remove entity - by name? or maybe by pointer
+		void removeEntity(std::shared_ptr<Entity> entity);
 
 		std::vector<std::shared_ptr<ShoppingCartPlayer>> getAllShoppingCartPlayers();
 

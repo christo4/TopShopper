@@ -3,6 +3,8 @@
 #include "objects/shoppingcartplayer.h"
 #include "objects/sparechange.h"
 
+#include <iostream>
+
 using namespace physx;
 
 
@@ -21,6 +23,22 @@ void GameScene::addEntity(std::shared_ptr<Entity> entity) {
 	_entities.push_back(entity);
 	_physxScene->addActor(*(entity->_actor));
 }
+
+
+void GameScene::removeEntity(std::shared_ptr<Entity> entity) {
+	for (int i = 0; i < _entities.size(); i++) {
+		if (_entities.at(i) == entity) { // if both pointers point to same address...
+			_physxScene->removeActor(*(entity->_actor));
+			_entities.erase(_entities.begin() + i);
+			break;
+		}
+	}
+}
+
+
+
+
+
 
 
 
