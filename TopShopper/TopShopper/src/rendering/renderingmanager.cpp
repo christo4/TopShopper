@@ -246,19 +246,91 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		Geometry geo;
 
 		switch (tag) {
-		case EntityTypes::GROUND:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
-			for (int i = 0; i < geo.verts.size(); i++) {
-				geo.colors.push_back(glm::vec3(0.85f, 0.85f, 0.85f));
-			}
-			break;
-		}
 		case EntityTypes::SHOPPING_CART_PLAYER:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_CHASSIS_GEO));
 			for (int i = 0; i < geo.verts.size(); i++) {
 				geo.colors.push_back(glm::vec3(0.2f, 0.65f, 0.95f));
+			}
+			break;
+		}
+		case EntityTypes::GROUND:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
+			for (int i = 0; i < geo.verts.size(); i++) {
+				geo.colors.push_back(glm::vec3(0.5f, 0.5f, 0.5f));
+			}
+			break;
+		}
+		case EntityTypes::MILK:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
+			for (int i = 0; i < geo.verts.size(); i++) {
+				geo.colors.push_back(glm::vec3(0.9f, 0.9f, 0.9f));
+			}
+			break;
+		}
+		case EntityTypes::WATER:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
+			for (int i = 0; i < geo.verts.size(); i++) {
+				geo.colors.push_back(glm::vec3(0.0f, 0.25f, 0.9f));
+			}
+			break;
+		}
+		case EntityTypes::COLA:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
+			for (int i = 0; i < geo.verts.size(); i++) {
+				geo.colors.push_back(glm::vec3(0.45f, 0.25f, 0.1f));
+			}
+			break;
+		}
+		case EntityTypes::APPLE:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
+			for (int i = 0; i < geo.verts.size(); i++) {
+				geo.colors.push_back(glm::vec3(0.95f, 0.15f, 0.2f));
+			}
+			break;
+		}
+		case EntityTypes::WATERMELON:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
+			for (int i = 0; i < geo.verts.size(); i++) {
+				geo.colors.push_back(glm::vec3(0.95f, 0.15f, 0.85f));
+			}
+			break;
+		}
+		case EntityTypes::BANANA:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
+			for (int i = 0; i < geo.verts.size(); i++) {
+				geo.colors.push_back(glm::vec3(0.95f, 0.85f, 0.15f));
+			}
+			break;
+		}
+		case EntityTypes::CARROT:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
+			for (int i = 0; i < geo.verts.size(); i++) {
+				geo.colors.push_back(glm::vec3(0.95f, 0.35f, 0.0f));
+			}
+			break;
+		}
+		case EntityTypes::EGGPLANT:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
+			for (int i = 0; i < geo.verts.size(); i++) {
+				geo.colors.push_back(glm::vec3(0.45f, 0.0f, 0.95f));
+			}
+			break;
+		}
+		case EntityTypes::BROCCOLI:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
+			for (int i = 0; i < geo.verts.size(); i++) {
+				geo.colors.push_back(glm::vec3(0.05f, 0.5f, 0.2f));
 			}
 			break;
 		}

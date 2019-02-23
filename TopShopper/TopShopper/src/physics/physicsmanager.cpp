@@ -57,6 +57,7 @@
 #include "rendering/Geometry.h"
 
 
+
 using namespace physx;
 using namespace snippetvehicle;
 
@@ -529,6 +530,19 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	std::shared_ptr<Entity> entity;
 
 	switch (type) {
+	case EntityTypes::SHOPPING_CART_PLAYER:
+	{
+		// SHAPES / ACTOR...
+		VehicleShoppingCart *shoppingCartBase = new VehicleShoppingCart(gPhysics, gCooking);
+		shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(transform);
+		shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setName(name);
+
+		// DEFAULT: NON-KINEMATIC DYNAMIC (GRAVITY ENABLED)
+
+		// ENTITY...
+		entity = std::make_shared<ShoppingCartPlayer>(shoppingCartBase);
+		break;
+	}
 	case EntityTypes::GROUND:
 	{
 		std::vector<PxVec3> verts = castVectorOfGLMVec4ToVectorOfPxVec3(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO)->verts);
@@ -553,17 +567,220 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 		entity = std::make_shared<Ground>(actor);
 		break;
 	}
-	case EntityTypes::SHOPPING_CART_PLAYER:
+	case EntityTypes::MILK:
 	{
-		// SHAPES / ACTOR...
-		VehicleShoppingCart *shoppingCartBase = new VehicleShoppingCart(gPhysics, gCooking);
-		shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setGlobalPose(transform);
-		shoppingCartBase->_vehicle4W->getRigidDynamicActor()->setName(name);
+		PxReal radius = 1.5f;
+		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION;
 
-		// DEFAULT: NON-KINEMATIC DYNAMIC (GRAVITY ENABLED)
+		// SHAPE...
+		PxShape *shape = createSphereCollider(radius, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidDynamic *actor = gPhysics->createRigidDynamic(transform);
+		actor->setName(name);
+		actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+
+		actor->attachShape(*shape);
 
 		// ENTITY...
-		entity = std::make_shared<ShoppingCartPlayer>(shoppingCartBase);
+		entity = std::make_shared<Milk>(actor);
+		break;
+	}
+	case EntityTypes::WATER:
+	{
+		PxReal radius = 1.5f;
+		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createSphereCollider(radius, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidDynamic *actor = gPhysics->createRigidDynamic(transform);
+		actor->setName(name);
+		actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Water>(actor);
+		break;
+	}
+	case EntityTypes::COLA:
+	{
+		PxReal radius = 1.5f;
+		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createSphereCollider(radius, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidDynamic *actor = gPhysics->createRigidDynamic(transform);
+		actor->setName(name);
+		actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Cola>(actor);
+		break;
+	}
+	case EntityTypes::APPLE:
+	{
+		PxReal radius = 1.5f;
+		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createSphereCollider(radius, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidDynamic *actor = gPhysics->createRigidDynamic(transform);
+		actor->setName(name);
+		actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Apple>(actor);
+		break;
+	}
+	case EntityTypes::WATERMELON:
+	{
+		PxReal radius = 1.5f;
+		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createSphereCollider(radius, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidDynamic *actor = gPhysics->createRigidDynamic(transform);
+		actor->setName(name);
+		actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Watermelon>(actor);
+		break;
+	}
+	case EntityTypes::BANANA:
+	{
+		PxReal radius = 1.5f;
+		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createSphereCollider(radius, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidDynamic *actor = gPhysics->createRigidDynamic(transform);
+		actor->setName(name);
+		actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Banana>(actor);
+		break;
+	}
+	case EntityTypes::CARROT:
+	{
+		PxReal radius = 1.5f;
+		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createSphereCollider(radius, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidDynamic *actor = gPhysics->createRigidDynamic(transform);
+		actor->setName(name);
+		actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Carrot>(actor);
+		break;
+	}
+	case EntityTypes::EGGPLANT:
+	{
+		PxReal radius = 1.5f;
+		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createSphereCollider(radius, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidDynamic *actor = gPhysics->createRigidDynamic(transform);
+		actor->setName(name);
+		actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Eggplant>(actor);
+		break;
+	}
+	case EntityTypes::BROCCOLI:
+	{
+		PxReal radius = 1.5f;
+		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createSphereCollider(radius, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidDynamic *actor = gPhysics->createRigidDynamic(transform);
+		actor->setName(name);
+		actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Broccoli>(actor);
 		break;
 	}
 	case EntityTypes::SPARE_CHANGE:

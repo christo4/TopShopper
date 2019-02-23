@@ -3,10 +3,20 @@
 
 #include "PxPhysicsAPI.h"
 #include <memory>
+#include "core/gamescene.h"
+
 #include "objects/shoppingcartplayer.h"
 #include "objects/ground.h"
+#include "objects/milk.h"
+#include "objects/water.h"
+#include "objects/cola.h"
+#include "objects/apple.h"
+#include "objects/watermelon.h"
+#include "objects/banana.h"
+#include "objects/carrot.h"
+#include "objects/eggplant.h"
+#include "objects/broccoli.h"
 #include "objects/sparechange.h"
-#include "core/gamescene.h"
 
 class Broker;
 
