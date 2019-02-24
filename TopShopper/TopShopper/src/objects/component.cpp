@@ -4,6 +4,8 @@
 #include "vehicle/VehicleShoppingCart.h"
 #include "core/broker.h"
 #include <iostream>
+#include <cstdlib>
+
 
 using namespace physx;
 
@@ -27,8 +29,8 @@ void PickupScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape *ot
 	if (otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
 		ShoppingCartPlayer *player = static_cast<ShoppingCartPlayer*>(otherEntity);
 		std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
-		playerScript->addPoints(_points);
-		// TODO: also check off shopping list box if necessary
+		playerScript->addPoints(_points); // increase player points by this pickup's value
+		playerScript->pickedUpItem(_entity->getTag()); // tell player that this type of pickup was picked up
 		std::cout << "COMPONENT.CPP | PICKUP WAS PICKED UP!" << std::endl;
 		std::cout << "PLAYER POINTS = " << playerScript->_points << std::endl;
 		_entity->destroy(); // destroy this pickup
@@ -44,7 +46,9 @@ void PickupScript::onDestroy() {}
 ////////////////////////////
 PlayerScript::PlayerScript(Entity *entity) : BehaviourScript(entity, ComponentTypes::PLAYER_SCRIPT) {}
 
-void PlayerScript::onSpawn() {}
+void PlayerScript::onSpawn() {
+	generateNewShoppingList();
+}
 
 void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 	ShoppingCartPlayer *player = dynamic_cast<ShoppingCartPlayer*>(_entity);
@@ -89,4 +93,49 @@ void PlayerScript::addPoints(int gain) { _points += gain; }
 void PlayerScript::subPoints(int loss) {
 	_points -= loss;
 	if (_points < 0) _points = 0; // clamp
+}
+
+void PlayerScript::generateNewShoppingList() {
+	_shoppingList_Flags.at(0) = false;
+	_shoppingList_Flags.at(1) = false;
+	_shoppingList_Flags.at(2) = false;
+
+	int rng = rand() % 3;
+	if (rng == 0) _shoppingList_Types.at(0) = EntityTypes::MILK;
+	else if (rng == 1) _shoppingList_Types.at(0) = EntityTypes::WATER;
+	else _shoppingList_Types.at(0) = EntityTypes::COLA;
+
+	rng = rand() % 3;
+	if (rng == 0) _shoppingList_Types.at(1) = EntityTypes::APPLE;
+	else if (rng == 1) _shoppingList_Types.at(1) = EntityTypes::WATERMELON;
+	else _shoppingList_Types.at(1) = EntityTypes::BANANA;
+
+	rng = rand() % 3;
+	if (rng == 0) _shoppingList_Types.at(2) = EntityTypes::CARROT;
+	else if (rng == 1) _shoppingList_Types.at(2) = EntityTypes::EGGPLANT;
+	else _shoppingList_Types.at(2) = EntityTypes::BROCCOLI;
+
+
+	std::cout << "COMPONENT.CPP | NEW SHOPPING LIST!" << std::endl;
+	std::cout << _shoppingList_Types.at(0) << "|" << _shoppingList_Types.at(1) << "|" << _shoppingList_Types.at(2) << std::endl;
+
+}
+
+
+void PlayerScript::pickedUpItem(EntityTypes pickupType) {
+	for (int i = 0; i < 3; i++) { // loop through shopping list...
+		if (_shoppingList_Types.at(i) == pickupType) { // if we just picked up item on our list...
+			_shoppingList_Flags.at(i) = true; // flag that it has been picked up
+			
+			// now check if all 3 items on list have been collected...
+			for (bool flag : _shoppingList_Flags) {
+				if (!flag) return;
+			}
+			// get here if all 3 are true...
+			addPoints(SHOPPING_LIST_COMPLETED_POINTS); // add bonus points for completing your list
+			generateNewShoppingList();
+
+			break;
+		}
+	}
 }

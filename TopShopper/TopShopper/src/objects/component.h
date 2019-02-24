@@ -140,11 +140,17 @@ struct PlayerScript : BehaviourScript {
 	int _inputID = -1; // 1, 2, 3, or 4 (unique)
 	int _points = 0; // amount of points this player has
 	// NOTE: maybe init this array with a special NONE enum value?
-	std::array<EntityTypes, 3> _shoppingList_Names; // e.g. MILK, APPLE, CARROT
+	std::array<EntityTypes, 3> _shoppingList_Types; // e.g. MILK, APPLE, CARROT
 	std::array<bool, 3> _shoppingList_Flags; // e.g. MILK=false, APPLE=true, CARROT=true
 
 	void addPoints(int gain);
 	void subPoints(int loss);
+
+	void generateNewShoppingList();
+
+	void pickedUpItem(EntityTypes pickupType);
+
+	static const int SHOPPING_LIST_COMPLETED_POINTS = 50;
 
 };
 
