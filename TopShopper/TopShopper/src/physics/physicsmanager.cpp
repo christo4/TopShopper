@@ -416,8 +416,12 @@ void PhysicsManager::switchToScene1() {
 	std::shared_ptr<PlayerScript> player1Script = std::static_pointer_cast<PlayerScript>(vehicle1->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	player1Script->_inputID = 1;
 
-	// SPARE CHANGE 1: (TEMP UNTIL WE SPAWN THEM)
-	//std::shared_ptr<SpareChange> spareChange1 = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, PxTransform(30.0f, 2.0f, 30.0f, PxQuat(PxIdentity)), "spareChange1"));
+	// VEHICLE 2: (COMMENT OUT WHEN 2 CONTROLLERS ARE NOT PLUGGED IN)
+	// FOR TEST PURPOSES - BASHING
+	std::shared_ptr<ShoppingCartPlayer> vehicle2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(20.0f, 5.0f, 70.0f, PxQuat(PxIdentity)), "vehicle2"));
+	std::shared_ptr<PlayerScript> player2Script = std::static_pointer_cast<PlayerScript>(vehicle2->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	player2Script->_inputID = 2;
+
 }
 
 
@@ -434,58 +438,41 @@ void PhysicsManager::updateSeconds(double fixedDeltaTime) {
 
 	// FURTHER VEHICLE UPDATES...
 
-	// ~~~~~~~TODO: change NBVehicles to account for bots and dumbcarts in future
+	// TODO: account for bots/obstacle carts in future...
 	
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> shoppingCartPlayers = _activeScene->getAllShoppingCartPlayers();
 
 	//Raycasts...
-	
 	std::vector<PxVehicleWheels*> vehiclesVector;
 	for (std::shared_ptr<ShoppingCartPlayer> &shoppingCartPlayer : shoppingCartPlayers) {
 		vehiclesVector.push_back(shoppingCartPlayer->_shoppingCartBase->_vehicle4W);
 	}
 
-	PxRaycastQueryResult *raycastResults = gVehicleSceneQueryData->getRaycastQueryResultBuffer(0);
+	PxRaycastQueryResult *raycastResults = gVehicleSceneQueryData->getRaycastQueryResultBuffer(0); // ONLY 1 buffer set up ID = 0
 	const PxU32 raycastResultsSize = gVehicleSceneQueryData->getQueryResultBufferSize();
 	PxVehicleSuspensionRaycasts(gBatchQuery, vehiclesVector.size(), vehiclesVector.data(), raycastResultsSize, raycastResults);
 
-
 	//Vehicle update...
 	const PxVec3 grav = _activeScene->_physxScene->getGravity();
-	PxWheelQueryResult wheelQueryResults[PX_MAX_NB_WHEELS]; // ~~~~~~~~~~~~~~maybe this should be 4???
-	//PxVehicleWheelQueryResult vehicleQueryResults[1] = { {wheelQueryResults, gVehicle4W->mWheelsSimData.getNbWheels()} };
-	// ~~~~~~~~~~~~~HACK FOR NOW... change to NBVEHICLES tomorrow...
-	PxVehicleWheelQueryResult vehicleQueryResults[1] = { {wheelQueryResults, 4} };
-	PxVehicleUpdates(fixedDeltaTime, grav, *gFrictionPairs, shoppingCartPlayers.size(), vehiclesVector.data(), vehicleQueryResults);
+	std::vector<PxWheelQueryResult> wheelQueryResults;
+	wheelQueryResults.resize(vehiclesVector.size()*PX_MAX_NB_WHEELS); // have a slot for every possible wheel of each vehicle in order
 
-	//Work out if the vehicle is in the air.
-	//gIsVehicleInAir = gVehicle4W->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]);
-	
-
-	// ~~~~~~~~~~~~~HACK FOR NOW... change to for int i = 0 and then queryresults[i] tomorrow...
-	// Update isAirborne flags for each vehicle...
-	for (std::shared_ptr<ShoppingCartPlayer> &shoppingCartPlayer : shoppingCartPlayers) {
-		shoppingCartPlayer->_shoppingCartBase->setIsAirborne(shoppingCartPlayer->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]));
+	std::vector<PxVehicleWheelQueryResult> vehicleQueryResults;
+	for (int i = 0; i < vehiclesVector.size(); i++) {
+		vehicleQueryResults.push_back({ &wheelQueryResults[i*PX_MAX_NB_WHEELS], vehiclesVector[i]->mWheelsSimData.getNbWheels() });
 	}
+
+	PxVehicleUpdates(fixedDeltaTime, grav, *gFrictionPairs, vehiclesVector.size(), vehiclesVector.data(), vehicleQueryResults.data());
+
+	for (int i = 0; i < vehiclesVector.size(); i++) {
+		shoppingCartPlayers.at(i)->_shoppingCartBase->setIsAirborne(vehiclesVector.at(i)->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults.at(i)));
+	}
+
 
 
 	// Scene update...
 	_activeScene->_physxScene->simulate(fixedDeltaTime);
 	_activeScene->_physxScene->fetchResults(true); // wait for results to come in before moving on to next system
-
-
-
-
-
-
-	// ~~~~~~~~~~TEMPORARY:
-	// spawn a new spare change if last one was destroyed
-	//std::vector<std::shared_ptr<SpareChange>> spareChangeVec = _activeScene->getAllSpareChange();
-	//if (spareChangeVec.size() == 0) {
-		//gSpawnID++;
-		//if (gSpawnID >= gSpawnPoints.size()) gSpawnID = 0;
-		//std::shared_ptr<SpareChange> spareChangeNEW = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, gSpawnPoints.at(gSpawnID), "spareChangeNEW"));
-	//}
 
 }
 
