@@ -24,6 +24,10 @@ public:
 	Geometry();
 	virtual ~Geometry();
 
+
+	glm::mat4 model;
+
+
 	//Data structures for storing vertices, normals colors and uvs
 	std::vector<glm::vec4> verts;
 	std::vector<glm::vec3> normals;

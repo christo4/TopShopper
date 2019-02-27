@@ -39,7 +39,7 @@ void RenderingManager::init() {
 }
 
 
-void RenderingManager::RenderScene(const std::vector<Geometry>& objects) {
+void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 	//Clears the screen to a dark grey background
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -49,8 +49,9 @@ void RenderingManager::RenderScene(const std::vector<Geometry>& objects) {
 	glUseProgram(shaderProgram);
 
 	float fov = 60.0f;
-	int width = 1024;
-	int height = 512;
+	int width;
+	int height;
+	glfwGetWindowSize(_window, &width, &height);
 
 	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 1000.0f);
 
@@ -70,32 +71,30 @@ void RenderingManager::RenderScene(const std::vector<Geometry>& objects) {
 		glm::vec3(0, 1, 0)  // up vector
 	);
 
-	glm::mat4 Model = glm::mat4(1.0f);
-	glm::mat4 mvp = Projection * View * Model;
+	//glm::mat4 Model = glm::mat4(1.0f);
+	
 
 	GLuint MatrixID = glGetUniformLocation(shaderProgram, "MVP");
-	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+	
 
 
-	for (const Geometry& g : objects) {
+	for (Geometry& g : objects) {
+
+
+		glm::mat4 mvp = Projection * View * g.model;
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+
 		glBindVertexArray(g.vao);
-		//glDrawArrays(g.drawMode, 0, g.verts.size());
-		// Index buffer
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g.indexBuffer);
+		assignBuffers(g);
+		setBufferData(g);
 
-		// Draw the triangles !
-		glDrawElements(
-			GL_TRIANGLES,      // mode
-			g.vIndex.size(),    // count
-			GL_UNSIGNED_INT,   // type
-			(void*)0           // element array buffer offset
-		);
-		// reset state to default (no shader or geometry bound)
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g.indexBuffer);
+		glDrawElements(GL_TRIANGLES,g.vIndex.size(), GL_UNSIGNED_INT, (void*)0);
 		glBindVertexArray(0);
 	}
-	glUseProgram(0); //unbind the shader
+	glUseProgram(0); 
 
-	// check for an report any OpenGL errors
+
 	CheckGLErrors();
 }
 
@@ -111,7 +110,6 @@ void RenderingManager::assignBuffers(Geometry& geometry) {
 	//Constant 1 means 1 vbo is being generated
 	glGenBuffers(1, &geometry.vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
-	//Parameters in order: Index of vbo in the vao, number of primitives per element, primitive type, etc.
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(0);
 
@@ -122,7 +120,6 @@ void RenderingManager::assignBuffers(Geometry& geometry) {
 
 	glGenBuffers(1, &geometry.colorBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
-	//Parameters in order: Index of vbo in the vao, number of primitives per element, primitive type, etc.
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(1);	
 
@@ -188,35 +185,6 @@ GLFWwindow* RenderingManager::getWindow() {
 
 
 
-
-glm::mat4 RenderingManager::Camera(float theta, float radius, float phi) {
-	int height;
-	int width;
-	glfwGetWindowSize(_window, &width, &height);
-	//float fov = 60.0f;
-
-	glm::mat4 Projection = glm::perspective(glm::radians(theta), (float)width / (float)height, 0.1f, 200.0f);
-
-
-	float x, y, z;
-
-	theta *= 3.14f / 180.f;
-	x = float(radius * sin(theta) * sin(phi));
-	y = float(radius * cos(theta));
-	z = float(radius * cos(phi) * sin(theta));
-
-	glm::mat4 View = glm::lookAt(
-		glm::vec3(x, y, z), // Camera is at (4,3,3), in World Space
-		glm::vec3(0, 0, 0), // and looks at the origin
-		glm::vec3(0, 1, 0)  // up vector
-	);
-
-	glm::mat4 Model = glm::mat4(1.0f);
-	glm::mat4 mvp = Projection * View * Model;
-	return mvp;
-}
-
-
 void RenderingManager::updateSeconds(double variableDeltaTime) {
 	// call LATEUPDATE() for all behaviour scripts...
 	for (std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
@@ -233,14 +201,11 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	}
 
 	_objects.clear();
-
-
-	// render all entities...
 	for (const std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
 		PxRigidActor *actor = entity->_actor->is<PxRigidActor>();
 		PxTransform transform = actor->getGlobalPose();
 		PxVec3 pos = transform.p;
-		PxQuat rot = transform.q;
+		const PxQuat rot = transform.q;
 		EntityTypes tag = entity->getTag();
 
 		Geometry geo;
@@ -254,14 +219,20 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 			}
 			break;
 		}
+		
+	
 		case EntityTypes::GROUND:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
+			
 			for (int i = 0; i < geo.verts.size(); i++) {
 				geo.colors.push_back(glm::vec3(0.5f, 0.5f, 0.5f));
 			}
 			break;
 		}
+	
+		
+		
 		case EntityTypes::MILK:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
@@ -326,6 +297,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 			}
 			break;
 		}
+		
 		case EntityTypes::BROCCOLI:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
@@ -334,6 +306,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 			}
 			break;
 		}
+			
 		case EntityTypes::SPARE_CHANGE:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
@@ -342,33 +315,44 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 			}
 			break;
 		}
+		
+	
 		default:
 			continue;
 		}
 
-		std::vector<glm::vec4> shiftedVerts;
 
+		std::vector<glm::vec4> shiftedVerts;
+		glm::mat4 model;
+
+
+		PxMat44 rotation = PxMat44(rot);
+		PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos);
+		PxMat44	pxModel = translation * rotation;
+		
+		model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+							glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+							glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+							glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+		geo.model = model;
+		
+		/*
 		for (glm::vec4 v : geo.verts) {
 			physx::PxVec3 vPhys(v.x, v.y, v.z);
-			vPhys = rot.rotate(vPhys);
-			vPhys += pos;
+			vPhys = pxModel.transform(vPhys);
 			shiftedVerts.push_back(glm::vec4(vPhys.x, vPhys.y, vPhys.z, 1.0f));
 		}
+		*/
 
-		geo.verts = shiftedVerts;
 
+		//geo.verts = shiftedVerts;
 		geo.drawMode = GL_TRIANGLES;
-
-		assignBuffers(geo);
-		setBufferData(geo);
 		_objects.push_back(geo);
 	}
 
-
-
 	RenderScene(_objects);
 	glfwSwapBuffers(_window);
-	
 }
 
 
