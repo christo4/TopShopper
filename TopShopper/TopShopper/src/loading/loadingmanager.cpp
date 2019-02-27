@@ -52,6 +52,9 @@ void LoadingManager::init() {
 	uvIndex.clear();
 	normalIndex.clear();
 
+
+
+
 	//////////////////
 
 	// GROUND GEOMETRY:
@@ -67,6 +70,13 @@ void LoadingManager::init() {
 	GroundGeo->uvIndex = uvIndex;
 	GroundGeo->normalIndex = normalIndex;
 
+
+
+
+	for (unsigned int i = 0; i < returnVertices.size(); i++) {
+		GroundGeo->colors.push_back(glm::vec3(0.5f, 0.5f, 0.5f));
+	}
+
 	returnVertices.clear();
 	returnUV.clear();
 	returnNormal.clear();
@@ -74,7 +84,7 @@ void LoadingManager::init() {
 	uvIndex.clear();
 	normalIndex.clear();
 
-	///////////////////
+
 
 
 	loadObject("../TopShopper/resources/Objects/sphere.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);

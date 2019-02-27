@@ -27,7 +27,6 @@ RenderingManager::~RenderingManager() {
 
 
 void RenderingManager::init() {
-	
 	openWindow();
 	glEnable(GL_DEPTH_TEST);
 	shaderProgram = ShaderTools::InitializeShaders();
@@ -35,7 +34,6 @@ void RenderingManager::init() {
 		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
 		return;
 	}
-
 }
 
 
@@ -200,7 +198,13 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		deleteBufferData(geoDel);
 	}
 
+	//TODO: fix this method for loading the ground
+	Geometry groundMeme;
+	groundMeme = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
+
 	_objects.clear();
+	_objects.push_back(groundMeme);
+
 	for (const std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
 		PxRigidActor *actor = entity->_actor->is<PxRigidActor>();
 		PxTransform transform = actor->getGlobalPose();
@@ -219,19 +223,6 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 			}
 			break;
 		}
-		
-	
-		case EntityTypes::GROUND:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
-			
-			for (int i = 0; i < geo.verts.size(); i++) {
-				geo.colors.push_back(glm::vec3(0.5f, 0.5f, 0.5f));
-			}
-			break;
-		}
-	
-		
 		
 		case EntityTypes::MILK:
 		{
@@ -337,16 +328,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 
 		geo.model = model;
 		
-		/*
-		for (glm::vec4 v : geo.verts) {
-			physx::PxVec3 vPhys(v.x, v.y, v.z);
-			vPhys = pxModel.transform(vPhys);
-			shiftedVerts.push_back(glm::vec4(vPhys.x, vPhys.y, vPhys.z, 1.0f));
-		}
-		*/
 
-
-		//geo.verts = shiftedVerts;
 		geo.drawMode = GL_TRIANGLES;
 		_objects.push_back(geo);
 	}
