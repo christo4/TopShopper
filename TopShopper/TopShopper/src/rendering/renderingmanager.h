@@ -21,7 +21,7 @@ public:
 	void cleanup();
 
 	//Renders each object
-	void RenderScene(const std::vector<Geometry>& objects);
+	void RenderScene(std::vector<Geometry>& objects);
 
 	//Create vao and vbos for objects
 	static void assignBuffers(Geometry& geometry);
