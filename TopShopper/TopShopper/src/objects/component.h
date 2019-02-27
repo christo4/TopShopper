@@ -152,6 +152,8 @@ struct PlayerScript : BehaviourScript {
 
 	static const int SHOPPING_LIST_COMPLETED_POINTS = 50;
 
+	void bashed();
+
 };
 
 

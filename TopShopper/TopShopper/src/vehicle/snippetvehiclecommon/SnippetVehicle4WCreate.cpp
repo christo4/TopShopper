@@ -235,6 +235,11 @@ PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehicle4WDesc, PxPhysics* p
 		PxConvexMesh* chassisConvexMeshes[1] = {chassisConvexMesh};
 		PxMaterial* chassisMaterials[1] = {vehicle4WDesc.chassisMaterial};
 
+		//BASH MESH... (extension of chassis front)
+		PxConvexMesh *bashConvexMesh = createBashMesh(chassisDims, *physics, *cooking);
+		//PxConvexMesh* bashConvexMeshes[1] = {bashConvexMesh};
+		//PxMaterial* bashMaterials[1] = {vehicle4WDesc.chassisMaterial};
+
 		//Rigid body data.
 		PxVehicleChassisData rigidBodyData;
 		rigidBodyData.mMOI = vehicle4WDesc.chassisMOI;
@@ -245,7 +250,7 @@ PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehicle4WDesc, PxPhysics* p
 			(rigidBodyData,
 			wheelMaterials, wheelConvexMeshes, numWheels, wheelSimFilterData,
 			chassisMaterials, chassisConvexMeshes, 1, chassisSimFilterData,
-			*physics);
+			*physics, bashConvexMesh);
 	}
 
 	//Set up the sim data for the wheels.

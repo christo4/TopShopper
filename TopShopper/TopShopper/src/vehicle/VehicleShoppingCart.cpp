@@ -1,6 +1,8 @@
 #include "VehicleShoppingCart.h"
 #include "physics/physicsmanager.h"
 
+#include <iostream>
+
 
 using namespace physx;
 using namespace snippetvehicle;
@@ -159,6 +161,7 @@ void VehicleShoppingCart::processRawInputDataKeyboard(const bool accelKeyPressed
 
 	// TURBO KEY OVERRIDES ACCELKEY/REVERSEKEY (It does not override handbrake however)
 	if (turboKeyPressed) {
+		_isTurboing = true;
 		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
 		isAccelerating = false;
 		PxQuat quat = _vehicle4W->getRigidDynamicActor()->getGlobalPose().q;
@@ -168,17 +171,21 @@ void VehicleShoppingCart::processRawInputDataKeyboard(const bool accelKeyPressed
 		_vehicle4W->getRigidDynamicActor()->setLinearVelocity(forward); // NOTE: maybe set a high acceleration instead? (also maybe make it so that cart has to be grounded to boost)
 	}
 	else if (accelKeyPressed && reverseKeyPressed) {
+		_isTurboing = false;
 		isAccelerating = false;
 	}
 	else if (accelKeyPressed) {
+		_isTurboing = false;
 		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
 		isAccelerating = true;
 	}
 	else if (reverseKeyPressed) {
+		_isTurboing = false;
 		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eREVERSE);
 		isAccelerating = true;
 	}
 	else {
+		_isTurboing = false;
 		isAccelerating = false;
 	}
 	
@@ -218,6 +225,7 @@ void VehicleShoppingCart::processRawInputDataController(const PxReal accel, cons
 
 	// TURBO BUTTON OVERRIDES TRIGGERS (It does not override handbrake however)
 	if (turboButtonPressed) {
+		_isTurboing = true;
 		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
 		netAccel = 0.0f;
 		PxQuat quat = _vehicle4W->getRigidDynamicActor()->getGlobalPose().q;
@@ -227,10 +235,12 @@ void VehicleShoppingCart::processRawInputDataController(const PxReal accel, cons
 		_vehicle4W->getRigidDynamicActor()->setLinearVelocity(forward); // NOTE: maybe set a high acceleration instead? (also maybe make it so that cart has to be grounded to boost)
 	}
 	else if (accel >= reverse) {
+		_isTurboing = false;
 		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
 		netAccel = accel - reverse;
 	}
 	else {
+		_isTurboing = false;
 		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eREVERSE);
 		netAccel = reverse - accel;
 	}
@@ -269,5 +279,17 @@ void VehicleShoppingCart::smoothAndFeedInputs(double fixedDeltaTime) {
 }
 
 
+void VehicleShoppingCart::setBashProtected() {
+	_isBashProtected = true;
+	_bashProtectionTimer = 5.0;
+	std::cout << "BASH PROTECTED FOR 5 Seconds" << std::endl;
+}
 
 
+void VehicleShoppingCart::tickBashProtectionTimer(double fixedDeltaTime) {
+	_bashProtectionTimer -= fixedDeltaTime;
+	if (_bashProtectionTimer <= 0.0) {
+		_isBashProtected = false;
+		std::cout << "BASH PROTECTION LIFTED" << std::endl;
+	}
+}

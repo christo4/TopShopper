@@ -6,6 +6,15 @@
 
 
 
+//enum VehicleStates {
+	//NORMAL,
+	//TURBO,
+	//TURBO_STUCK,
+
+//};
+
+
+
 class VehicleShoppingCart {
 	public:
 		VehicleShoppingCart(physx::PxPhysics *physics, physx::PxCooking *cooking);
@@ -27,6 +36,12 @@ class VehicleShoppingCart {
 
 		void smoothAndFeedInputs(double fixedDeltaTime);
 
+		bool IsTurboing() { return _isTurboing; }
+		bool IsBashProtected() { return _isBashProtected; }
+
+		void setBashProtected();
+		void tickBashProtectionTimer(double fixedDeltaTime);
+
 	private:
 		physx::PxVehicleDrive4WRawInputData _rawInputData;
 		bool _isAirborne;
@@ -34,6 +49,13 @@ class VehicleShoppingCart {
 		// ***NOTE: only 1 of the process methods should be called in a frame (exclusively key/M or gamepad controlled)
 		// This flag will then be used to select which smoothing data / setting method to use
 		bool _isKeyAndMouseControlled = true; // if false then isGamePadControlled 
+
+
+		bool _isTurboing = false;
+		bool _isBashProtected = false;
+		double _bashProtectionTimer = -1.0;
+
+		//double _stateTimer = DBL_MAX; // use DBL_MAX for practically infinite timer
 
 };
 

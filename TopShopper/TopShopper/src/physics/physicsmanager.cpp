@@ -91,6 +91,11 @@ CustomSimulationEventCallback gSimEventCallback;
 //int gSpawnID = 0;
 
 
+
+std::vector<ContactCollision> gContactCollisions;
+std::vector<TriggerCollision> gTriggerCollisions;
+
+
 /////////////////////////////////////////////////////////////////////////////
 // FRICTION STUFF...
 
@@ -208,7 +213,9 @@ void CustomSimulationEventCallback::onContact(const PxContactPairHeader &pairHea
 			if (entity0Comp != nullptr) {
 				std::shared_ptr<BehaviourScript> entity0Script = std::static_pointer_cast<BehaviourScript>(entity0Comp);
 				// 2. if so call onCollisionEnter(PxShape* localShape = shape0, PxShape* otherShape = shape1, collision stuff)
-				entity0Script->onCollisionEnter(shape0, shape1, entity1, contacts, nbContacts);
+				//entity0Script->onCollisionEnter(shape0, shape1, entity1, contacts, nbContacts);
+				ContactCollision collision(ContactCollision::ContactCollisionTypes::ENTER, entity0Script, shape0, shape1, entity1, contacts, nbContacts);
+				gContactCollisions.push_back(collision);
 			}
 
 			// 3. check if entity1 has a BehaviourScript (will be assigned as a childScript)
@@ -216,7 +223,9 @@ void CustomSimulationEventCallback::onContact(const PxContactPairHeader &pairHea
 			if (entity1Comp != nullptr) {
 				std::shared_ptr<BehaviourScript> entity1Script = std::static_pointer_cast<BehaviourScript>(entity1Comp);
 				// 4. if so call onCollisionEnter(PxShape* localShape = shape1, PxShape* otherShape = shape0, collision stuff to figure out)
-				entity1Script->onCollisionEnter(shape1, shape0, entity0, contacts, nbContacts);
+				//entity1Script->onCollisionEnter(shape1, shape0, entity0, contacts, nbContacts);
+				ContactCollision collision(ContactCollision::ContactCollisionTypes::ENTER, entity1Script, shape1, shape0, entity0, contacts, nbContacts);
+				gContactCollisions.push_back(collision);
 			}
 		}
 		else if (pairs[i].flags & PxContactPairFlag::eACTOR_PAIR_LOST_TOUCH) {
@@ -225,7 +234,9 @@ void CustomSimulationEventCallback::onContact(const PxContactPairHeader &pairHea
 			if (entity0Comp != nullptr) {
 				std::shared_ptr<BehaviourScript> entity0Script = std::static_pointer_cast<BehaviourScript>(entity0Comp);
 				// 2. if so call onCollisionExit(PxShape* localShape = shape0, PxShape* otherShape = shape1, collision stuff to figure out)
-				entity0Script->onCollisionExit(shape0, shape1, entity1, contacts, nbContacts);
+				//entity0Script->onCollisionExit(shape0, shape1, entity1, contacts, nbContacts);
+				ContactCollision collision(ContactCollision::ContactCollisionTypes::EXIT, entity0Script, shape0, shape1, entity1, contacts, nbContacts);
+				gContactCollisions.push_back(collision);
 			}
 
 			// 3. check if entity1 has a BehaviourScript (will be assigned as a childScript)
@@ -233,7 +244,9 @@ void CustomSimulationEventCallback::onContact(const PxContactPairHeader &pairHea
 			if (entity1Comp != nullptr) {
 				std::shared_ptr<BehaviourScript> entity1Script = std::static_pointer_cast<BehaviourScript>(entity1Comp);
 				// 4. if so call onCollisionExit(PxShape* localShape = shape1, PxShape* otherShape = shape0, collision stuff to figure out)
-				entity1Script->onCollisionExit(shape1, shape0, entity0, contacts, nbContacts);
+				//entity1Script->onCollisionExit(shape1, shape0, entity0, contacts, nbContacts);
+				ContactCollision collision(ContactCollision::ContactCollisionTypes::EXIT, entity1Script, shape1, shape0, entity0, contacts, nbContacts);
+				gContactCollisions.push_back(collision);
 			}
 		}
 	}
@@ -281,7 +294,9 @@ void CustomSimulationEventCallback::onTrigger(PxTriggerPair *pairs, PxU32 count)
 			if (triggerComp != nullptr) {
 				std::shared_ptr<BehaviourScript> triggerScript = std::static_pointer_cast<BehaviourScript>(triggerComp);
 				// 2. if so call onTriggerEnter(PxShape* localShape = triggerShape, PxShape* otherShape, Entity *otherEntity)
-				triggerScript->onTriggerEnter(pairs[i].triggerShape, pairs[i].otherShape, otherEntity);
+				//triggerScript->onTriggerEnter(pairs[i].triggerShape, pairs[i].otherShape, otherEntity);
+				TriggerCollision collision(TriggerCollision::TriggerCollisionTypes::ENTER, triggerScript, pairs[i].triggerShape, pairs[i].otherShape, otherEntity);
+				gTriggerCollisions.push_back(collision);
 			}
 		}
 		else if (pairs[i].status == PxPairFlag::eNOTIFY_TOUCH_LOST) {
@@ -290,7 +305,9 @@ void CustomSimulationEventCallback::onTrigger(PxTriggerPair *pairs, PxU32 count)
 			if (triggerComp != nullptr) {
 				std::shared_ptr<BehaviourScript> triggerScript = std::static_pointer_cast<BehaviourScript>(triggerComp);
 				// 2. if so call onTriggerExit(PxShape* localShape = triggerShape, PxShape* otherShape, Entity *otherEntity)
-				triggerScript->onTriggerExit(pairs[i].triggerShape, pairs[i].otherShape, otherEntity);
+				//triggerScript->onTriggerExit(pairs[i].triggerShape, pairs[i].otherShape, otherEntity);
+				TriggerCollision collision(TriggerCollision::TriggerCollisionTypes::EXIT, triggerScript, pairs[i].triggerShape, pairs[i].otherShape, otherEntity);
+				gTriggerCollisions.push_back(collision);
 			}	
 		}
 		else {
@@ -416,8 +433,12 @@ void PhysicsManager::switchToScene1() {
 	std::shared_ptr<PlayerScript> player1Script = std::static_pointer_cast<PlayerScript>(vehicle1->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	player1Script->_inputID = 1;
 
-	// SPARE CHANGE 1: (TEMP UNTIL WE SPAWN THEM)
-	//std::shared_ptr<SpareChange> spareChange1 = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, PxTransform(30.0f, 2.0f, 30.0f, PxQuat(PxIdentity)), "spareChange1"));
+	// VEHICLE 2: (COMMENT OUT WHEN 2 CONTROLLERS ARE NOT PLUGGED IN)
+	// FOR TEST PURPOSES - BASHING
+	std::shared_ptr<ShoppingCartPlayer> vehicle2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(20.0f, 5.0f, 70.0f, PxQuat(PxIdentity)), "vehicle2"));
+	std::shared_ptr<PlayerScript> player2Script = std::static_pointer_cast<PlayerScript>(vehicle2->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	player2Script->_inputID = 2;
+
 }
 
 
@@ -434,58 +455,64 @@ void PhysicsManager::updateSeconds(double fixedDeltaTime) {
 
 	// FURTHER VEHICLE UPDATES...
 
-	// ~~~~~~~TODO: change NBVehicles to account for bots and dumbcarts in future
+	// TODO: account for bots/obstacle carts in future...
 	
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> shoppingCartPlayers = _activeScene->getAllShoppingCartPlayers();
 
 	//Raycasts...
-	
 	std::vector<PxVehicleWheels*> vehiclesVector;
 	for (std::shared_ptr<ShoppingCartPlayer> &shoppingCartPlayer : shoppingCartPlayers) {
 		vehiclesVector.push_back(shoppingCartPlayer->_shoppingCartBase->_vehicle4W);
 	}
 
-	PxRaycastQueryResult *raycastResults = gVehicleSceneQueryData->getRaycastQueryResultBuffer(0);
+	PxRaycastQueryResult *raycastResults = gVehicleSceneQueryData->getRaycastQueryResultBuffer(0); // ONLY 1 buffer set up ID = 0
 	const PxU32 raycastResultsSize = gVehicleSceneQueryData->getQueryResultBufferSize();
 	PxVehicleSuspensionRaycasts(gBatchQuery, vehiclesVector.size(), vehiclesVector.data(), raycastResultsSize, raycastResults);
 
-
 	//Vehicle update...
 	const PxVec3 grav = _activeScene->_physxScene->getGravity();
-	PxWheelQueryResult wheelQueryResults[PX_MAX_NB_WHEELS]; // ~~~~~~~~~~~~~~maybe this should be 4???
-	//PxVehicleWheelQueryResult vehicleQueryResults[1] = { {wheelQueryResults, gVehicle4W->mWheelsSimData.getNbWheels()} };
-	// ~~~~~~~~~~~~~HACK FOR NOW... change to NBVEHICLES tomorrow...
-	PxVehicleWheelQueryResult vehicleQueryResults[1] = { {wheelQueryResults, 4} };
-	PxVehicleUpdates(fixedDeltaTime, grav, *gFrictionPairs, shoppingCartPlayers.size(), vehiclesVector.data(), vehicleQueryResults);
+	std::vector<PxWheelQueryResult> wheelQueryResults;
+	wheelQueryResults.resize(vehiclesVector.size()*PX_MAX_NB_WHEELS); // have a slot for every possible wheel of each vehicle in order
 
-	//Work out if the vehicle is in the air.
-	//gIsVehicleInAir = gVehicle4W->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]);
-	
-
-	// ~~~~~~~~~~~~~HACK FOR NOW... change to for int i = 0 and then queryresults[i] tomorrow...
-	// Update isAirborne flags for each vehicle...
-	for (std::shared_ptr<ShoppingCartPlayer> &shoppingCartPlayer : shoppingCartPlayers) {
-		shoppingCartPlayer->_shoppingCartBase->setIsAirborne(shoppingCartPlayer->_shoppingCartBase->_vehicle4W->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]));
+	std::vector<PxVehicleWheelQueryResult> vehicleQueryResults;
+	for (int i = 0; i < vehiclesVector.size(); i++) {
+		vehicleQueryResults.push_back({ &wheelQueryResults[i*PX_MAX_NB_WHEELS], vehiclesVector[i]->mWheelsSimData.getNbWheels() });
 	}
 
+	PxVehicleUpdates(fixedDeltaTime, grav, *gFrictionPairs, vehiclesVector.size(), vehiclesVector.data(), vehicleQueryResults.data());
+
+	for (int i = 0; i < vehiclesVector.size(); i++) {
+		shoppingCartPlayers.at(i)->_shoppingCartBase->setIsAirborne(vehiclesVector.at(i)->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults.at(i)));
+	}
+
+
+
+	// clear collision vectors...
+	gContactCollisions.clear();
+	gTriggerCollisions.clear();
 
 	// Scene update...
 	_activeScene->_physxScene->simulate(fixedDeltaTime);
 	_activeScene->_physxScene->fetchResults(true); // wait for results to come in before moving on to next system
 
+	// now that fetchResults() has cached all collision events in the 2 vectors, call the proper events
+	for (ContactCollision &collision : gContactCollisions) {
+		if (collision._collisionType == ContactCollision::ContactCollisionTypes::ENTER) {
+			collision._caller->onCollisionEnter(collision._localShape, collision._otherShape, collision._otherEntity, collision._contacts, collision._nbContacts);
+		}
+		else {
+			collision._caller->onCollisionExit(collision._localShape, collision._otherShape, collision._otherEntity, collision._contacts, collision._nbContacts);
+		}
+	}
 
-
-
-
-
-	// ~~~~~~~~~~TEMPORARY:
-	// spawn a new spare change if last one was destroyed
-	//std::vector<std::shared_ptr<SpareChange>> spareChangeVec = _activeScene->getAllSpareChange();
-	//if (spareChangeVec.size() == 0) {
-		//gSpawnID++;
-		//if (gSpawnID >= gSpawnPoints.size()) gSpawnID = 0;
-		//std::shared_ptr<SpareChange> spareChangeNEW = std::dynamic_pointer_cast<SpareChange>(instantiateEntity(EntityTypes::SPARE_CHANGE, gSpawnPoints.at(gSpawnID), "spareChangeNEW"));
-	//}
+	for (TriggerCollision &collision : gTriggerCollisions) {
+		if (collision._collisionType == TriggerCollision::TriggerCollisionTypes::ENTER) {
+			collision._caller->onTriggerEnter(collision._localShape, collision._otherShape, collision._otherEntity);
+		}
+		else {
+			collision._caller->onTriggerExit(collision._localShape, collision._otherShape, collision._otherEntity);
+		}
+	}
 
 }
 
