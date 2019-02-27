@@ -91,6 +91,11 @@ CustomSimulationEventCallback gSimEventCallback;
 //int gSpawnID = 0;
 
 
+
+std::vector<ContactCollision> gContactCollisions;
+std::vector<TriggerCollision> gTriggerCollisions;
+
+
 /////////////////////////////////////////////////////////////////////////////
 // FRICTION STUFF...
 
@@ -208,7 +213,9 @@ void CustomSimulationEventCallback::onContact(const PxContactPairHeader &pairHea
 			if (entity0Comp != nullptr) {
 				std::shared_ptr<BehaviourScript> entity0Script = std::static_pointer_cast<BehaviourScript>(entity0Comp);
 				// 2. if so call onCollisionEnter(PxShape* localShape = shape0, PxShape* otherShape = shape1, collision stuff)
-				entity0Script->onCollisionEnter(shape0, shape1, entity1, contacts, nbContacts);
+				//entity0Script->onCollisionEnter(shape0, shape1, entity1, contacts, nbContacts);
+				ContactCollision collision(ContactCollision::ContactCollisionTypes::ENTER, entity0Script, shape0, shape1, entity1, contacts, nbContacts);
+				gContactCollisions.push_back(collision);
 			}
 
 			// 3. check if entity1 has a BehaviourScript (will be assigned as a childScript)
@@ -216,7 +223,9 @@ void CustomSimulationEventCallback::onContact(const PxContactPairHeader &pairHea
 			if (entity1Comp != nullptr) {
 				std::shared_ptr<BehaviourScript> entity1Script = std::static_pointer_cast<BehaviourScript>(entity1Comp);
 				// 4. if so call onCollisionEnter(PxShape* localShape = shape1, PxShape* otherShape = shape0, collision stuff to figure out)
-				entity1Script->onCollisionEnter(shape1, shape0, entity0, contacts, nbContacts);
+				//entity1Script->onCollisionEnter(shape1, shape0, entity0, contacts, nbContacts);
+				ContactCollision collision(ContactCollision::ContactCollisionTypes::ENTER, entity1Script, shape1, shape0, entity0, contacts, nbContacts);
+				gContactCollisions.push_back(collision);
 			}
 		}
 		else if (pairs[i].flags & PxContactPairFlag::eACTOR_PAIR_LOST_TOUCH) {
@@ -225,7 +234,9 @@ void CustomSimulationEventCallback::onContact(const PxContactPairHeader &pairHea
 			if (entity0Comp != nullptr) {
 				std::shared_ptr<BehaviourScript> entity0Script = std::static_pointer_cast<BehaviourScript>(entity0Comp);
 				// 2. if so call onCollisionExit(PxShape* localShape = shape0, PxShape* otherShape = shape1, collision stuff to figure out)
-				entity0Script->onCollisionExit(shape0, shape1, entity1, contacts, nbContacts);
+				//entity0Script->onCollisionExit(shape0, shape1, entity1, contacts, nbContacts);
+				ContactCollision collision(ContactCollision::ContactCollisionTypes::EXIT, entity0Script, shape0, shape1, entity1, contacts, nbContacts);
+				gContactCollisions.push_back(collision);
 			}
 
 			// 3. check if entity1 has a BehaviourScript (will be assigned as a childScript)
@@ -233,7 +244,9 @@ void CustomSimulationEventCallback::onContact(const PxContactPairHeader &pairHea
 			if (entity1Comp != nullptr) {
 				std::shared_ptr<BehaviourScript> entity1Script = std::static_pointer_cast<BehaviourScript>(entity1Comp);
 				// 4. if so call onCollisionExit(PxShape* localShape = shape1, PxShape* otherShape = shape0, collision stuff to figure out)
-				entity1Script->onCollisionExit(shape1, shape0, entity0, contacts, nbContacts);
+				//entity1Script->onCollisionExit(shape1, shape0, entity0, contacts, nbContacts);
+				ContactCollision collision(ContactCollision::ContactCollisionTypes::EXIT, entity1Script, shape1, shape0, entity0, contacts, nbContacts);
+				gContactCollisions.push_back(collision);
 			}
 		}
 	}
@@ -281,7 +294,9 @@ void CustomSimulationEventCallback::onTrigger(PxTriggerPair *pairs, PxU32 count)
 			if (triggerComp != nullptr) {
 				std::shared_ptr<BehaviourScript> triggerScript = std::static_pointer_cast<BehaviourScript>(triggerComp);
 				// 2. if so call onTriggerEnter(PxShape* localShape = triggerShape, PxShape* otherShape, Entity *otherEntity)
-				triggerScript->onTriggerEnter(pairs[i].triggerShape, pairs[i].otherShape, otherEntity);
+				//triggerScript->onTriggerEnter(pairs[i].triggerShape, pairs[i].otherShape, otherEntity);
+				TriggerCollision collision(TriggerCollision::TriggerCollisionTypes::ENTER, triggerScript, pairs[i].triggerShape, pairs[i].otherShape, otherEntity);
+				gTriggerCollisions.push_back(collision);
 			}
 		}
 		else if (pairs[i].status == PxPairFlag::eNOTIFY_TOUCH_LOST) {
@@ -290,7 +305,9 @@ void CustomSimulationEventCallback::onTrigger(PxTriggerPair *pairs, PxU32 count)
 			if (triggerComp != nullptr) {
 				std::shared_ptr<BehaviourScript> triggerScript = std::static_pointer_cast<BehaviourScript>(triggerComp);
 				// 2. if so call onTriggerExit(PxShape* localShape = triggerShape, PxShape* otherShape, Entity *otherEntity)
-				triggerScript->onTriggerExit(pairs[i].triggerShape, pairs[i].otherShape, otherEntity);
+				//triggerScript->onTriggerExit(pairs[i].triggerShape, pairs[i].otherShape, otherEntity);
+				TriggerCollision collision(TriggerCollision::TriggerCollisionTypes::EXIT, triggerScript, pairs[i].triggerShape, pairs[i].otherShape, otherEntity);
+				gTriggerCollisions.push_back(collision);
 			}	
 		}
 		else {
@@ -470,9 +487,32 @@ void PhysicsManager::updateSeconds(double fixedDeltaTime) {
 
 
 
+	// clear collision vectors...
+	gContactCollisions.clear();
+	gTriggerCollisions.clear();
+
 	// Scene update...
 	_activeScene->_physxScene->simulate(fixedDeltaTime);
 	_activeScene->_physxScene->fetchResults(true); // wait for results to come in before moving on to next system
+
+	// now that fetchResults() has cached all collision events in the 2 vectors, call the proper events
+	for (ContactCollision &collision : gContactCollisions) {
+		if (collision._collisionType == ContactCollision::ContactCollisionTypes::ENTER) {
+			collision._caller->onCollisionEnter(collision._localShape, collision._otherShape, collision._otherEntity, collision._contacts, collision._nbContacts);
+		}
+		else {
+			collision._caller->onCollisionExit(collision._localShape, collision._otherShape, collision._otherEntity, collision._contacts, collision._nbContacts);
+		}
+	}
+
+	for (TriggerCollision &collision : gTriggerCollisions) {
+		if (collision._collisionType == TriggerCollision::TriggerCollisionTypes::ENTER) {
+			collision._caller->onTriggerEnter(collision._localShape, collision._otherShape, collision._otherEntity);
+		}
+		else {
+			collision._caller->onTriggerExit(collision._localShape, collision._otherShape, collision._otherEntity);
+		}
+	}
 
 }
 

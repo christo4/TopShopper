@@ -79,6 +79,59 @@ public:
 
 
 
+
+struct ContactCollision {
+
+	enum ContactCollisionTypes {
+		ENTER,
+		EXIT
+	};
+
+	ContactCollision(ContactCollisionTypes collisionType, std::shared_ptr<BehaviourScript> caller, physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) 
+		: _collisionType(collisionType), _caller(caller), _localShape(localShape), _otherShape(otherShape), _otherEntity(otherEntity), _contacts(contacts), _nbContacts(nbContacts)
+	{
+
+	}
+	
+	ContactCollisionTypes _collisionType;
+	std::shared_ptr<BehaviourScript> _caller = nullptr;
+	physx::PxShape *_localShape = nullptr;
+	physx::PxShape *_otherShape = nullptr;
+	Entity *_otherEntity = nullptr;
+	physx::PxContactPairPoint *_contacts = nullptr;
+	physx::PxU32 _nbContacts;
+
+};
+
+
+
+struct TriggerCollision {
+
+	enum TriggerCollisionTypes {
+		ENTER,
+		EXIT
+	};
+
+	TriggerCollision(TriggerCollisionTypes collisionType, std::shared_ptr<BehaviourScript> caller, physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity)
+		: _collisionType(collisionType), _caller(caller), _localShape(localShape), _otherShape(otherShape), _otherEntity(otherEntity)
+	{
+
+	}
+
+	TriggerCollisionTypes _collisionType;
+	std::shared_ptr<BehaviourScript> _caller = nullptr;
+	physx::PxShape *_localShape = nullptr;
+	physx::PxShape *_otherShape = nullptr;
+	Entity *_otherEntity = nullptr;
+
+};
+
+
+
+
+
+
+
 class PhysicsManager {
 public:
 	PhysicsManager(Broker *broker);

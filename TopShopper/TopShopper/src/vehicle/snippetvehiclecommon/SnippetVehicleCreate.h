@@ -120,6 +120,8 @@ PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehDesc, PxPhysics* physics
 
 PxConvexMesh* createChassisMesh(const PxVec3 dims, PxPhysics& physics, PxCooking& cooking);
 
+PxConvexMesh* createBashMesh(const PxVec3 dims, PxPhysics& physics, PxCooking& cooking);
+
 PxConvexMesh* createWheelMesh(const PxF32 width, const PxF32 radius, PxPhysics& physics, PxCooking& cooking);
 
 ////////////////////////////////////////////////
@@ -134,7 +136,7 @@ PxRigidDynamic* createVehicleActor
 (const PxVehicleChassisData& chassisData,
  PxMaterial** wheelMaterials, PxConvexMesh** wheelConvexMeshes, const PxU32 numWheels, const PxFilterData& wheelSimFilterData,
  PxMaterial** chassisMaterials, PxConvexMesh** chassisConvexMeshes, const PxU32 numChassisMeshes, const PxFilterData& chassisSimFilterData,
- PxPhysics& physics);
+ PxPhysics& physics, PxConvexMesh *bashConvexMesh);
 
 void configureUserData(PxVehicleWheels* vehicle, ActorUserData* actorUserData, ShapeUserData* shapeUserDatas);
 

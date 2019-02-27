@@ -36,6 +36,12 @@ class VehicleShoppingCart {
 
 		void smoothAndFeedInputs(double fixedDeltaTime);
 
+		bool IsTurboing() { return _isTurboing; }
+		bool IsBashProtected() { return _isBashProtected; }
+
+		void setBashProtected();
+		void tickBashProtectionTimer(double fixedDeltaTime);
+
 	private:
 		physx::PxVehicleDrive4WRawInputData _rawInputData;
 		bool _isAirborne;
@@ -45,8 +51,11 @@ class VehicleShoppingCart {
 		bool _isKeyAndMouseControlled = true; // if false then isGamePadControlled 
 
 
+		bool _isTurboing = false;
+		bool _isBashProtected = false;
+		double _bashProtectionTimer = -1.0;
 
-		double _stateTimer = DBL_MAX; // use DBL_MAX for practically infinite timer
+		//double _stateTimer = DBL_MAX; // use DBL_MAX for practically infinite timer
 
 };
 

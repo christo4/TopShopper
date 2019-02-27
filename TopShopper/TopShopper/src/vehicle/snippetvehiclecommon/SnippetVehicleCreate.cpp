@@ -157,6 +157,26 @@ PxConvexMesh* createChassisMesh(const PxVec3 dims, PxPhysics& physics, PxCooking
 	return createConvexMesh(verts,8,physics,cooking);
 }
 
+PxConvexMesh* createBashMesh(const PxVec3 dims, PxPhysics& physics, PxCooking& cooking) 
+{
+	const PxF32 x = dims.x*0.5f;
+	const PxF32 y = dims.y*0.5f;
+	const PxF32 z = dims.z*0.5f;
+	PxVec3 verts[8] =
+	{
+		PxVec3(x,y,z),
+		PxVec3(x,y,z+0.1f),
+		PxVec3(x,-y,z+0.1f),
+		PxVec3(x,-y,z),
+		PxVec3(-x,y,z),
+		PxVec3(-x,y,z+0.1f),
+		PxVec3(-x,-y,z+0.1f),
+		PxVec3(-x,-y,z)
+	};
+
+	return createConvexMesh(verts, 8, physics, cooking);
+}
+
 PxConvexMesh* createWheelMesh(const PxF32 width, const PxF32 radius, PxPhysics& physics, PxCooking& cooking)
 {
 	PxVec3 points[2*16];
@@ -177,7 +197,7 @@ PxRigidDynamic* createVehicleActor
 (const PxVehicleChassisData& chassisData,
  PxMaterial** wheelMaterials, PxConvexMesh** wheelConvexMeshes, const PxU32 numWheels, const PxFilterData& wheelSimFilterData,
  PxMaterial** chassisMaterials, PxConvexMesh** chassisConvexMeshes, const PxU32 numChassisMeshes, const PxFilterData& chassisSimFilterData,
- PxPhysics& physics)
+ PxPhysics& physics, PxConvexMesh *bashConvexMesh)
 {
 	//We need a rigid body actor for the vehicle.
 	//Don't forget to add the actor to the scene after setting up the associated vehicle.
@@ -209,6 +229,13 @@ PxRigidDynamic* createVehicleActor
 		chassisShape->setSimulationFilterData(chassisSimFilterData);
 		chassisShape->setLocalPose(PxTransform(PxIdentity));
 	}
+
+	//Add the bash mesh as a trigger collider...
+	PxConvexMeshGeometry bashGeom(bashConvexMesh);
+	PxShape *bashShape = PxRigidActorExt::createExclusiveShape(*vehActor, bashGeom, *chassisMaterials[0], PxShapeFlag::eVISUALIZATION | PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE);
+	bashShape->setQueryFilterData(chassisQryFilterData);
+	bashShape->setSimulationFilterData(chassisSimFilterData);
+	bashShape->setLocalPose(PxTransform(PxIdentity));
 
 	vehActor->setMass(chassisData.mMass);
 	vehActor->setMassSpaceInertiaTensor(chassisData.mMOI);
