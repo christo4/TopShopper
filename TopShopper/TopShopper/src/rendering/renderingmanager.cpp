@@ -72,22 +72,31 @@ void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 	//glm::mat4 Model = glm::mat4(1.0f);
 	
 
-	GLuint MatrixID = glGetUniformLocation(shaderProgram, "MVP");
+	GLuint ModelID = glGetUniformLocation(shaderProgram, "Model");
+	GLuint ViewID = glGetUniformLocation(shaderProgram, "View");
+	GLuint ProjectionID = glGetUniformLocation(shaderProgram, "Projection");
+	GLuint colorID = glGetUniformLocation(shaderProgram, "ColorMeme");
+
 	
 
 
 	for (Geometry& g : objects) {
-
-
-		glm::mat4 mvp = Projection * View * g.model;
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+		
+		glUniform3f(colorID, g.color.x, g.color.y, g.color.z);
+		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
+		glUniformMatrix4fv(ViewID, 1, GL_FALSE, &View[0][0]);
+		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &Projection[0][0]);
 
 		glBindVertexArray(g.vao);
 		assignBuffers(g);
 		setBufferData(g);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g.indexBuffer);
-		glDrawElements(GL_TRIANGLES,g.vIndex.size(), GL_UNSIGNED_INT, (void*)0);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g.indexBuffer);
+		//glDrawElements(GL_TRIANGLES,g.vIndex.size(), GL_UNSIGNED_INT, (void*)0);
+
+		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
+
+
 		glBindVertexArray(0);
 	}
 	glUseProgram(0); 
@@ -111,15 +120,17 @@ void RenderingManager::assignBuffers(Geometry& geometry) {
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(0);
 
+	glGenBuffers(1, &geometry.colorBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(1);
+
 	glGenBuffers(1, &geometry.normalBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(2);
 
-	glGenBuffers(1, &geometry.colorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);	
+
 
 
 }
@@ -130,16 +141,18 @@ void RenderingManager::setBufferData(Geometry& geometry) {
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * geometry.verts.size(), geometry.verts.data(), GL_STATIC_DRAW);
 
-	/*glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.normals.size(), geometry.normals.data(), GL_STATIC_DRAW);*/
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.normals.size(), geometry.normals.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.colors.size(), geometry.colors.data(), GL_STATIC_DRAW);
-	
+
+
+	/*
 	glGenBuffers(1, &geometry.indexBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.indexBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * geometry.vIndex.size(), geometry.vIndex.data(), GL_STATIC_DRAW);
-	
+	*/
 }
 
 void RenderingManager::deleteBufferData(Geometry& geometry) {
@@ -199,11 +212,15 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	}
 
 	//TODO: fix this method for loading the ground
+
+	/*
 	Geometry groundMeme;
-	groundMeme = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
+	groundMeme = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX));
+	groundMeme.color = glm::vec3(0.5f, 0.5f, 0.5f);
+	groundMeme.model = glm::mat4(1.0f);
+	*/
 
 	_objects.clear();
-	_objects.push_back(groundMeme);
 
 	for (const std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
 		PxRigidActor *actor = entity->_actor->is<PxRigidActor>();
@@ -217,95 +234,85 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		switch (tag) {
 		case EntityTypes::SHOPPING_CART_PLAYER:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_CHASSIS_GEO));
-			for (int i = 0; i < geo.verts.size(); i++) {
-				geo.colors.push_back(glm::vec3(0.2f, 0.65f, 0.95f));
-			}
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_CHASSIS_GEO_NO_INDEX));
+			geo.color = glm::vec3(0.2f, 0.65f, 0.95f);
+			break;
+		}
+	
+		case EntityTypes::GROUND:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.color = glm::vec3(0.5f, 0.5f, 0.5f);
 			break;
 		}
 		
 		case EntityTypes::MILK:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
-			for (int i = 0; i < geo.verts.size(); i++) {
-				geo.colors.push_back(glm::vec3(0.9f, 0.9f, 0.9f));
-			}
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.color = glm::vec3(0.9f, 0.9f, 0.9f);
 			break;
 		}
 		case EntityTypes::WATER:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
-			for (int i = 0; i < geo.verts.size(); i++) {
-				geo.colors.push_back(glm::vec3(0.0f, 0.25f, 0.9f));
-			}
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.color = glm::vec3(0.0f, 0.25f, 0.9f);
 			break;
 		}
 		case EntityTypes::COLA:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
-			for (int i = 0; i < geo.verts.size(); i++) {
-				geo.colors.push_back(glm::vec3(0.45f, 0.25f, 0.1f));
-			}
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.color = glm::vec3(0.45f, 0.25f, 0.1f);
 			break;
 		}
 		case EntityTypes::APPLE:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
-			for (int i = 0; i < geo.verts.size(); i++) {
-				geo.colors.push_back(glm::vec3(0.95f, 0.15f, 0.2f));
-			}
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.color = glm::vec3(0.95f, 0.15f, 0.2f);
 			break;
 		}
 		case EntityTypes::WATERMELON:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
-			for (int i = 0; i < geo.verts.size(); i++) {
-				geo.colors.push_back(glm::vec3(0.95f, 0.15f, 0.85f));
-			}
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.color = glm::vec3(0.95f, 0.15f, 0.85f);
 			break;
 		}
 		case EntityTypes::BANANA:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
-			for (int i = 0; i < geo.verts.size(); i++) {
-				geo.colors.push_back(glm::vec3(0.95f, 0.85f, 0.15f));
-			}
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.color = glm::vec3(0.95f, 0.85f, 0.15f);
 			break;
 		}
 		case EntityTypes::CARROT:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
-			for (int i = 0; i < geo.verts.size(); i++) {
-				geo.colors.push_back(glm::vec3(0.95f, 0.35f, 0.0f));
-			}
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.color = glm::vec3(0.95f, 0.35f, 0.0f);
 			break;
 		}
 		case EntityTypes::EGGPLANT:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
-			for (int i = 0; i < geo.verts.size(); i++) {
-				geo.colors.push_back(glm::vec3(0.45f, 0.0f, 0.95f));
-			}
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.color = glm::vec3(0.45f, 0.0f, 0.95f);
 			break;
 		}
 		
 		case EntityTypes::BROCCOLI:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO)); // TODO: change this to use specific mesh
-			for (int i = 0; i < geo.verts.size(); i++) {
-				geo.colors.push_back(glm::vec3(0.05f, 0.5f, 0.2f));
-			}
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.color = glm::vec3(0.05f, 0.5f, 0.2f);
 			break;
 		}
-			
+		
+
+		
+
 		case EntityTypes::SPARE_CHANGE:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			for (int i = 0; i < geo.verts.size(); i++) {
-				geo.colors.push_back(glm::vec3(0.95f, 0.65f, 0.2f));
-			}
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX));
+			geo.color = glm::vec3(0.95f, 0.65f, 0.2f);
 			break;
 		}
+
+		
 		
 	
 		default:
@@ -313,7 +320,6 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		}
 
 
-		std::vector<glm::vec4> shiftedVerts;
 		glm::mat4 model;
 
 
@@ -358,8 +364,8 @@ void RenderingManager::openWindow() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	int width = 1024;
-	int height = 512;
+	int width = 1920;
+	int height = 1080;
 	_window = glfwCreateWindow(width, height, "Top Shopper", 0, 0);
 	if (!_window) {
 		std::cout << "Program failed to create GLFW window, TERMINATING" << std::endl;
