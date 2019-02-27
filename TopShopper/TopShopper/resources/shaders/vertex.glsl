@@ -10,19 +10,27 @@
 // InitializeGeometry() function of the main program
 layout(location = 0) in vec4 VertexPosition;
 layout(location = 1) in vec3 VertexColor;
+layout(location = 2) in vec3 VertexNormal;
 
-uniform mat4 MVP;
+uniform mat4 Model;
+uniform mat4 View;
+uniform mat4 Projection;
+uniform vec3 ColorMeme;
+
 
 // output to be interpolated between vertices and passed to the fragment stage
 out vec3 color;
-out float z;
+out vec3 Normal;
+out vec3 FragPos;
 
 void main()
 {
     // assign vertex position without modification
-    gl_Position =  MVP * VertexPosition;
+    gl_Position =  Projection* View * Model * VertexPosition;
 
     // assign output colour to be interpolated
-    color = VertexColor;
-	z = VertexPosition[1];
+    color = ColorMeme;
+	//Normal = vec3(Model * vec4(VertexNormal, 1.0f));
+	Normal = VertexNormal;
+	FragPos = vec3(Model * VertexPosition);
 }

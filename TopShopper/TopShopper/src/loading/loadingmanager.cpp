@@ -16,6 +16,11 @@ Geometry* VehicleWheelGeo = new Geometry();
 Geometry* GroundGeo = new Geometry();
 Geometry* SpareChangeGeo = new Geometry();
 
+Geometry* VehicleChassisGeoNoIndex = new Geometry();
+Geometry* VehicleWheelGeoNoIndex = new Geometry();
+Geometry* GroundGeoNoIndex = new Geometry();
+Geometry* SpareChangeGeoNoIndex = new Geometry();
+
 
 LoadingManager::LoadingManager(Broker *broker) 
 	: _broker(broker)
@@ -37,13 +42,30 @@ void LoadingManager::init() {
 
 	// TODO: change this to chassis.obj later
 	loadObject("../TopShopper/resources/Objects/rect.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
-
+	
+	
 	VehicleChassisGeo->verts = returnVertices;
 	VehicleChassisGeo->uvs = returnUV;
 	VehicleChassisGeo->normals = returnNormal;
 	VehicleChassisGeo->vIndex = vIndex;
 	VehicleChassisGeo->uvIndex = uvIndex;
 	VehicleChassisGeo->normalIndex = normalIndex;
+	
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		VehicleChassisGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		VehicleChassisGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		VehicleChassisGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
 
 	returnVertices.clear();
 	returnUV.clear();
@@ -62,19 +84,27 @@ void LoadingManager::init() {
 	// TODO: change this to ground.obj later
 	// NOTE: an .obj file requires normals! (even if we dont use them)
 	loadObject("../TopShopper/resources/Objects/StoreFloor.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+	
 
+	
 	GroundGeo->verts = returnVertices;
 	GroundGeo->uvs = returnUV;
 	GroundGeo->normals = returnNormal;
 	GroundGeo->vIndex = vIndex;
 	GroundGeo->uvIndex = uvIndex;
 	GroundGeo->normalIndex = normalIndex;
+	
 
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		GroundGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
 
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		GroundGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
 
-
-	for (unsigned int i = 0; i < returnVertices.size(); i++) {
-		GroundGeo->colors.push_back(glm::vec3(0.5f, 0.5f, 0.5f));
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		GroundGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
 	}
 
 	returnVertices.clear();
@@ -88,13 +118,29 @@ void LoadingManager::init() {
 
 
 	loadObject("../TopShopper/resources/Objects/sphere.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
-
+	
+	
 	SpareChangeGeo->verts = returnVertices;
 	SpareChangeGeo->uvs = returnUV;
 	SpareChangeGeo->normals = returnNormal;
 	SpareChangeGeo->vIndex = vIndex;
 	SpareChangeGeo->uvIndex = uvIndex;
 	SpareChangeGeo->normalIndex = normalIndex;
+	
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		SpareChangeGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		SpareChangeGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		SpareChangeGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
 
 	returnVertices.clear();
 	returnUV.clear();
@@ -211,6 +257,14 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return GroundGeo;
 	case GeometryTypes::SPARE_CHANGE_GEO:
 		return SpareChangeGeo;
+	case GeometryTypes::VEHICLE_CHASSIS_GEO_NO_INDEX:
+		return VehicleChassisGeoNoIndex;
+	case GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX:
+		return VehicleWheelGeoNoIndex;
+	case GeometryTypes::GROUND_GEO_NO_INDEX:
+		return GroundGeoNoIndex;
+	case GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX:
+		return SpareChangeGeoNoIndex;
 	default:
 		return nullptr;
 	}
