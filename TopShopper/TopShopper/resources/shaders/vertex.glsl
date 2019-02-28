@@ -16,12 +16,14 @@ uniform mat4 Model;
 uniform mat4 View;
 uniform mat4 Projection;
 uniform vec3 ColorMeme;
+uniform vec3 CameraPos;
 
 
 // output to be interpolated between vertices and passed to the fragment stage
 out vec3 color;
 out vec3 Normal;
 out vec3 FragPos;
+out vec3 look;
 
 void main()
 {
@@ -30,7 +32,8 @@ void main()
 
     // assign output colour to be interpolated
     color = ColorMeme;
-	//Normal = vec3(Model * vec4(VertexNormal, 1.0f));
+	//Normal = mat3(transpose(inverse(Model))) * VertexNormal;
 	Normal = VertexNormal;
 	FragPos = vec3(Model * VertexPosition);
+	look = CameraPos;
 }

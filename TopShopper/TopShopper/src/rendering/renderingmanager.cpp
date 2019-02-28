@@ -62,9 +62,9 @@ void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 
 	PxVec3 testVec(0, 20, -30);
 	testVec = playerRot.rotate(testVec);
-
+	glm::vec3 cameraPosition = glm::vec3(playerPos.x + testVec.x, playerPos.y + testVec.y, playerPos.z + testVec.z);
 	glm::mat4 View = glm::lookAt(
-		glm::vec3(playerPos.x + testVec.x, playerPos.y + testVec.y, playerPos.z + testVec.z), // camera position
+		glm::vec3(cameraPosition), // camera position
 		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at 
 		glm::vec3(0, 1, 0)  // up vector
 	);
@@ -76,12 +76,14 @@ void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 	GLuint ViewID = glGetUniformLocation(shaderProgram, "View");
 	GLuint ProjectionID = glGetUniformLocation(shaderProgram, "Projection");
 	GLuint colorID = glGetUniformLocation(shaderProgram, "ColorMeme");
+	GLuint cameraID = glGetUniformLocation(shaderProgram, "CameraPos");
 
 	
 
 
 	for (Geometry& g : objects) {
 		
+		glUniform3f(cameraID, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 		glUniform3f(colorID, g.color.x, g.color.y, g.color.z);
 		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
 		glUniformMatrix4fv(ViewID, 1, GL_FALSE, &View[0][0]);
@@ -159,7 +161,7 @@ void RenderingManager::deleteBufferData(Geometry& geometry) {
 	glDeleteBuffers(1, &geometry.vertexBuffer);
 	glDeleteBuffers(1, &geometry.normalBuffer);
 	glDeleteBuffers(1, &geometry.colorBuffer);
-	glDeleteBuffers(1, &geometry.indexBuffer);
+	//glDeleteBuffers(1, &geometry.indexBuffer);
 	glDeleteVertexArrays(1, &geometry.vao);
 }
 
@@ -235,6 +237,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		case EntityTypes::SHOPPING_CART_PLAYER:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_CHASSIS_GEO_NO_INDEX));
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_CHASSIS_GEO));
 			geo.color = glm::vec3(0.2f, 0.65f, 0.95f);
 			break;
 		}
@@ -242,6 +245,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		case EntityTypes::GROUND:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
 			geo.color = glm::vec3(0.5f, 0.5f, 0.5f);
 			break;
 		}
@@ -249,48 +253,56 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		case EntityTypes::MILK:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
 			geo.color = glm::vec3(0.9f, 0.9f, 0.9f);
 			break;
 		}
 		case EntityTypes::WATER:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
 			geo.color = glm::vec3(0.0f, 0.25f, 0.9f);
 			break;
 		}
 		case EntityTypes::COLA:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
 			geo.color = glm::vec3(0.45f, 0.25f, 0.1f);
 			break;
 		}
 		case EntityTypes::APPLE:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
 			geo.color = glm::vec3(0.95f, 0.15f, 0.2f);
 			break;
 		}
 		case EntityTypes::WATERMELON:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
 			geo.color = glm::vec3(0.95f, 0.15f, 0.85f);
 			break;
 		}
 		case EntityTypes::BANANA:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
 			geo.color = glm::vec3(0.95f, 0.85f, 0.15f);
 			break;
 		}
 		case EntityTypes::CARROT:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
 			geo.color = glm::vec3(0.95f, 0.35f, 0.0f);
 			break;
 		}
 		case EntityTypes::EGGPLANT:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
 			geo.color = glm::vec3(0.45f, 0.0f, 0.95f);
 			break;
 		}
@@ -298,6 +310,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		case EntityTypes::BROCCOLI:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
 			geo.color = glm::vec3(0.05f, 0.5f, 0.2f);
 			break;
 		}
@@ -308,6 +321,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		case EntityTypes::SPARE_CHANGE:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX));
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
 			geo.color = glm::vec3(0.95f, 0.65f, 0.2f);
 			break;
 		}

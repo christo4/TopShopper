@@ -10,6 +10,7 @@
 in vec3 color;
 in vec3 Normal;
 in vec3 FragPos;
+in vec3 look;
 
 // first output is mapped to the framebuffer's colour index by default
 out vec4 FragmentColour;
@@ -18,18 +19,27 @@ uniform sampler2D imageTexture;
 
 void main(void)
 {
+	float specularStrength = 0.7;
 
+	//AMBIENT
 	vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
-	float ambientStrength = 0.9;
+	float ambientStrength = 0.4;
 	vec3 ambient = ambientStrength * lightColor;
 
 	vec3 norm = normalize(Normal);
 	vec3 lightDir = normalize(vec3(0.0f, 30.0f, 0.0f) - FragPos);
-
+	
+	//DIFFUSE
 	float diff = max(dot(norm, lightDir), 0.0);
 	vec3 diffuse = diff * lightColor;
-	vec3 result = (ambient + diffuse) * color;
 
+	//SPECULAR
+	vec3 viewDir = normalize(look - FragPos);
+	vec3 reflectDir = reflect(-lightDir, Normal);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8);
+	vec3 specular = specularStrength * spec * lightColor;  
+
+	vec3 result = (ambient + diffuse + specular) * color;
 	FragmentColour = vec4(result, 1.0);
     //FragmentColour = texture(imageTexture, uv);
 }
