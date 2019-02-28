@@ -117,7 +117,7 @@ void LoadingManager::init() {
 
 
 
-	loadObject("../TopShopper/resources/Objects/sphere.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 	
 	
 	SpareChangeGeo->verts = returnVertices;
