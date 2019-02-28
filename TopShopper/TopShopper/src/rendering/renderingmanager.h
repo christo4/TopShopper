@@ -39,6 +39,7 @@ public:
 	void QueryGLVersion();
 
 	glm::mat4 Camera(float theta, float radius, float phi);
+	void push3DObjects();
 
 private:
 

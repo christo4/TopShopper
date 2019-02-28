@@ -213,17 +213,15 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		deleteBufferData(geoDel);
 	}
 
-	//TODO: fix this method for loading the ground
-
-	/*
-	Geometry groundMeme;
-	groundMeme = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX));
-	groundMeme.color = glm::vec3(0.5f, 0.5f, 0.5f);
-	groundMeme.model = glm::mat4(1.0f);
-	*/
-
 	_objects.clear();
 
+	push3DObjects();
+
+	
+	glfwSwapBuffers(_window);
+}
+
+void RenderingManager::push3DObjects() {
 	for (const std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
 		PxRigidActor *actor = entity->_actor->is<PxRigidActor>();
 		PxTransform transform = actor->getGlobalPose();
@@ -241,7 +239,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 			geo.color = glm::vec3(0.2f, 0.65f, 0.95f);
 			break;
 		}
-	
+
 		case EntityTypes::GROUND:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX)); // TODO: change this to use specific mesh
@@ -249,7 +247,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 			geo.color = glm::vec3(0.5f, 0.5f, 0.5f);
 			break;
 		}
-		
+
 		case EntityTypes::MILK:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
@@ -306,7 +304,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 			geo.color = glm::vec3(0.45f, 0.0f, 0.95f);
 			break;
 		}
-		
+
 		case EntityTypes::BROCCOLI:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
@@ -314,9 +312,6 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 			geo.color = glm::vec3(0.05f, 0.5f, 0.2f);
 			break;
 		}
-		
-
-		
 
 		case EntityTypes::SPARE_CHANGE:
 		{
@@ -326,9 +321,9 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 			break;
 		}
 
-		
-		
-	
+
+
+
 		default:
 			continue;
 		}
@@ -340,24 +335,21 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		PxMat44 rotation = PxMat44(rot);
 		PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos);
 		PxMat44	pxModel = translation * rotation;
-		
+
 		model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
-							glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
-							glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
-							glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+			glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+			glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+			glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
 
 		geo.model = model;
-		
+
 
 		geo.drawMode = GL_TRIANGLES;
 		_objects.push_back(geo);
 	}
 
 	RenderScene(_objects);
-	glfwSwapBuffers(_window);
 }
-
-
 
 void RenderingManager::cleanup() {
 	glfwTerminate();

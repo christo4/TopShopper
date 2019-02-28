@@ -41,7 +41,7 @@ void LoadingManager::init() {
 	std::vector<unsigned int>normalIndex;
 
 	// TODO: change this to chassis.obj later
-	loadObject("../TopShopper/resources/Objects/rect.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+	loadObject("../TopShopper/resources/Objects/ShoppingCart.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 	
 	
 	VehicleChassisGeo->verts = returnVertices;
