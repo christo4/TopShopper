@@ -58,7 +58,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)middleware\glfw\include;$(SolutionDir)middleware\glad\include;$(SolutionDir)middleware\glm-0.9.8.2;$(SolutionDir)middleware\stb;$(SolutionDir)middleware;$(SolutionDir)Physx\include;$(SolutionDir)middleware\SDL\include;$(SolutionDir)middleware\SDL2_mixer\include;$(SolutionDir)middleware\freetype;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)middleware\glfw\include;$(SolutionDir)middleware\glad\include;$(SolutionDir)middleware\glm-0.9.8.2;$(SolutionDir)middleware\stb;$(SolutionDir)middleware;$(SolutionDir)Physx\include;$(SolutionDir)middleware\SDL\include;$(SolutionDir)middleware\SDL2_mixer\include;$(SolutionDir)middleware\fonts;$(SolutionDir)middleware\fonts\freetype;$(SolutionDir)middleware\fonts\freetype\config;$(SolutionDir)middleware\fonts\freetype\internal;$(SolutionDir)middleware\fonts\freetype\internal\services;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;PVD_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -75,7 +75,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)middleware\glfw\include;$(SolutionDir)middleware\glad\include;$(SolutionDir)middleware\glm-0.9.8.2;$(SolutionDir)middleware\stb;$(SolutionDir)middleware;$(SolutionDir)Physx\include;$(SolutionDir)middleware\SDL\include;$(SolutionDir)middleware\SDL2_mixer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)middleware\glfw\include;$(SolutionDir)middleware\glad\include;$(SolutionDir)middleware\glm-0.9.8.2;$(SolutionDir)middleware\stb;$(SolutionDir)middleware;$(SolutionDir)Physx\include;$(SolutionDir)middleware\SDL\include;$(SolutionDir)middleware\SDL2_mixer\include;$(SolutionDir)middleware\fonts;$(SolutionDir)middleware\fonts\freetype;$(SolutionDir)middleware\fonts\freetype\config;$(SolutionDir)middleware\fonts\freetype\internal;$(SolutionDir)middleware\fonts\freetype\internal\services;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;GLFW_INCLUDE_NONE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
