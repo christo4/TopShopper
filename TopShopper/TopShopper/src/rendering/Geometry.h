@@ -27,6 +27,7 @@ public:
 
 	glm::mat4 model;
 	glm::vec3 color;
+	MyTexture texture;
 
 	//Data structures for storing vertices, normals colors and uvs
 	std::vector<glm::vec4> verts;

@@ -11,6 +11,7 @@ in vec3 color;
 in vec3 Normal;
 in vec3 FragPos;
 in vec3 look;
+in vec2 uv;
 
 // first output is mapped to the framebuffer's colour index by default
 out vec4 FragmentColour;
@@ -40,6 +41,6 @@ void main(void)
 	vec3 specular = specularStrength * spec * lightColor;  
 
 	vec3 result = (ambient + diffuse + specular) * color;
-	FragmentColour = vec4(result, 1.0);
-    //FragmentColour = texture(imageTexture, uv);
+	//FragmentColour = vec4(result, 1.0);
+    FragmentColour = texture(imageTexture, uv);
 }

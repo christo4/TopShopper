@@ -42,7 +42,11 @@ bool InitializeTexture(MyTexture* texture, const char* filename, GLenum target)
 	unsigned char *data = stbi_load(filename, &texture->width, &texture->height, &numComponents, 0);
 	if (data != nullptr)
 	{
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);		//Set alignment to be 1
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1); 
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+		glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 
 		texture->target = target;
 		glGenTextures(1, &texture->textureID);

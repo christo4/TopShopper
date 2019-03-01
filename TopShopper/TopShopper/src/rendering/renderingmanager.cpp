@@ -37,6 +37,15 @@ void RenderingManager::init() {
 		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
 		return;
 	}
+
+
+	MyTexture texture;
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/image4-thirsk.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(VEHICLE_CHASSIS_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/image4-thirsk.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(GROUND_GEO_NO_INDEX)->texture = texture;
+
 }
 
 
@@ -85,6 +94,11 @@ void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 
 
 	for (Geometry& g : objects) {
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(g.texture.target, g.texture.textureID);
+		GLuint uniformLocation = glGetUniformLocation(shaderProgram, "imageTexture");
+		glUniform1i(uniformLocation, 0);
 		
 		glUniform3f(cameraID, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 		glUniform3f(colorID, g.color.x, g.color.y, g.color.z);
@@ -125,17 +139,22 @@ void RenderingManager::assignBuffers(Geometry& geometry) {
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(0);
 
+	/*
 	glGenBuffers(1, &geometry.colorBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(1);
+	*/
 
 	glGenBuffers(1, &geometry.normalBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(1);
+
+	glGenBuffers(1, &geometry.uvBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(2);
-
-
 
 
 }
@@ -149,8 +168,14 @@ void RenderingManager::setBufferData(Geometry& geometry) {
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.normals.size(), geometry.normals.data(), GL_STATIC_DRAW);
 
+	/*
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.colors.size(), geometry.colors.data(), GL_STATIC_DRAW);
+	*/
+
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * geometry.uvs.size(), geometry.uvs.data(), GL_STATIC_DRAW);
+
 
 
 	/*

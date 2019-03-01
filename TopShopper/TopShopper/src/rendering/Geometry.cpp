@@ -17,4 +17,3 @@ Geometry::Geometry() : vao(0), vertexBuffer(0), normalBuffer(0), uvBuffer(0), co
 Geometry::~Geometry() {
 
 }
-
