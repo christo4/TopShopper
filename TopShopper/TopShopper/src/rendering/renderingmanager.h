@@ -33,6 +33,7 @@ public:
 
 	//Renders each object
 	void RenderScene(std::vector<Geometry>& objects);
+	void renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
 
 	//Create vao and vbos for objects
 	static void assignBuffers(Geometry& geometry);
@@ -44,6 +45,7 @@ public:
 
 	//Pointer to the current shader program being used to render
 	GLuint shaderProgram;
+	GLuint textShaderProgram;
 
 	GLFWwindow* getWindow();
 
@@ -51,7 +53,7 @@ public:
 
 	glm::mat4 Camera(float theta, float radius, float phi);
 	void push3DObjects();
-	void textToScreen();
+	//void textBuffers();
 
 	std::map<GLchar, Character> Characters;
 
@@ -64,6 +66,8 @@ private:
 	std::vector<Geometry> _objects;
 
 	void openWindow();
+
+	GLuint textVao, textVbo;
 };
 
 #endif // RENDERINGMANAGER_H_
