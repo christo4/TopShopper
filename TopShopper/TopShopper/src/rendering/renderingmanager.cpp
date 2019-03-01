@@ -11,6 +11,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "vehicle/VehicleShoppingCart.h"
+
+
 
 using namespace physx;
 
@@ -229,7 +232,7 @@ void RenderingManager::push3DObjects() {
 		const PxQuat rot = transform.q;
 		EntityTypes tag = entity->getTag();
 
-		Geometry geo;
+		Geometry geo; 
 
 		switch (tag) {
 		case EntityTypes::SHOPPING_CART_PLAYER:
@@ -237,6 +240,153 @@ void RenderingManager::push3DObjects() {
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_CHASSIS_GEO_NO_INDEX));
 			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_CHASSIS_GEO));
 			geo.color = glm::vec3(0.2f, 0.65f, 0.95f);
+
+
+			
+			//Geometry geoWheelFrontLeft = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX));
+			//Geometry geoWheelFrontRight = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX));
+			//Geometry geoWheelBackLeft = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX));
+			//Geometry geoWheelBackRight = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX));
+
+			//geoWheelFrontLeft.color = glm::vec3(0.0f, 0.0f, 0.0f);
+			//geoWheelFrontRight.color = glm::vec3(0.0f, 0.0f, 0.0f);
+			//geoWheelBackLeft.color = glm::vec3(0.0f, 0.0f, 0.0f);
+			//geoWheelBackRight.color = glm::vec3(0.0f, 0.0f, 0.0f);
+
+
+
+			// DYNAMICALLY...
+
+			std::shared_ptr<ShoppingCartPlayer> player = std::dynamic_pointer_cast<ShoppingCartPlayer>(entity);
+			const std::vector<PxShape*> &wheelShapes = player->_shoppingCartBase->_wheelShapes;
+
+			for (PxShape *wheelShape : wheelShapes) {
+
+				Geometry geoWheel = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX));
+				geoWheel.color = glm::vec3(0.0f, 0.0f, 0.0f);
+
+				glm::mat4 model;
+
+				PxQuat netRotation = rot * wheelShape->getLocalPose().q; // MUST BE IN THIS ORDER
+
+				PxMat44 rotation = PxMat44(netRotation); // compound rot (parent.rotate() and then local.rotate())
+				PxVec3 wheelOffset = wheelShape->getLocalPose().p;
+				wheelOffset = rot.rotate(wheelOffset);
+				PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos + wheelOffset);
+				PxMat44	pxModel = translation * rotation;
+
+				model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+					glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+					glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+					glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+				geoWheel.model = model;
+
+				geoWheel.drawMode = GL_TRIANGLES;
+				_objects.push_back(geoWheel);
+			}
+
+
+
+
+
+
+
+
+
+
+			// HARDCODED to get an idea of the logic, later on I will get the wheel shapes directly
+
+
+			/*
+			glm::mat4 model;
+
+			// FRONT LEFT WHEEL:
+
+			PxMat44 rotation = PxMat44(rot);
+			PxVec3 wheelOffset(0.95f, -1.0f, 1.5f);
+			wheelOffset = rot.rotate(wheelOffset);
+			PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos + wheelOffset);
+			PxMat44	pxModel = translation * rotation;
+
+			model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+				glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+				glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+				glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+			geoWheelFrontLeft.model = model;
+
+
+			geoWheelFrontLeft.drawMode = GL_TRIANGLES;
+			_objects.push_back(geoWheelFrontLeft);
+
+
+			// FRONT RIGHT WHEEL:
+
+
+			rotation = PxMat44(rot);
+			PxVec3 wheelOffset2(-0.95f, -1.0f, 1.5f);
+			wheelOffset2 = rot.rotate(wheelOffset2);
+			translation = PxMat44(PxMat33(PxIdentity), pos + wheelOffset2);
+			pxModel = translation * rotation;
+
+			model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+				glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+				glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+				glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+			geoWheelFrontRight.model = model;
+
+
+			geoWheelFrontRight.drawMode = GL_TRIANGLES;
+			_objects.push_back(geoWheelFrontRight);
+
+
+
+			// BACK LEFT WHEEL:
+
+
+			rotation = PxMat44(rot);
+			PxVec3 wheelOffset3(0.95f, -1.0f, -1.5f);
+			wheelOffset3 = rot.rotate(wheelOffset3);
+			translation = PxMat44(PxMat33(PxIdentity), pos + wheelOffset3);
+			pxModel = translation * rotation;
+
+			model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+				glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+				glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+				glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+			geoWheelBackLeft.model = model;
+
+
+			geoWheelBackLeft.drawMode = GL_TRIANGLES;
+			_objects.push_back(geoWheelBackLeft);
+
+
+
+			// BACK RIGHT WHEEL:
+
+
+			rotation = PxMat44(rot);
+			PxVec3 wheelOffset4(-0.95f, -1.0f, -1.5f);
+			wheelOffset4 = rot.rotate(wheelOffset4);
+			translation = PxMat44(PxMat33(PxIdentity), pos + wheelOffset4);
+			pxModel = translation * rotation;
+
+			model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+				glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+				glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+				glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+			geoWheelBackRight.model = model;
+
+
+			geoWheelBackRight.drawMode = GL_TRIANGLES;
+			_objects.push_back(geoWheelBackRight);
+			*/
+
+
 			break;
 		}
 

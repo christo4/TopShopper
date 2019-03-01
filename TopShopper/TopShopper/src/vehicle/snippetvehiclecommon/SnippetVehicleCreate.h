@@ -110,7 +110,7 @@ struct VehicleDesc
 	ShapeUserData* shapeUserDatas;
 };
 
-PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehDesc, PxPhysics* physics, PxCooking* cooking);
+PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehDesc, PxPhysics* physics, PxCooking* cooking, std::vector<PxShape*> &wheelShapes);
 
 //PxVehicleDriveTank* createVehicleTank(const VehicleDesc& vehDesc, PxPhysics* physics, PxCooking* cooking);
 
@@ -136,7 +136,7 @@ PxRigidDynamic* createVehicleActor
 (const PxVehicleChassisData& chassisData,
  PxMaterial** wheelMaterials, PxConvexMesh** wheelConvexMeshes, const PxU32 numWheels, const PxFilterData& wheelSimFilterData,
  PxMaterial** chassisMaterials, PxConvexMesh** chassisConvexMeshes, const PxU32 numChassisMeshes, const PxFilterData& chassisSimFilterData,
- PxPhysics& physics, PxConvexMesh *bashConvexMesh);
+ PxPhysics& physics, PxConvexMesh *bashConvexMesh, std::vector<PxShape*> &wheelShapes);
 
 void configureUserData(PxVehicleWheels* vehicle, ActorUserData* actorUserData, ShapeUserData* shapeUserDatas);
 

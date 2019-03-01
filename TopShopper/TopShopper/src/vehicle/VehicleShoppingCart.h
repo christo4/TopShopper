@@ -42,6 +42,10 @@ class VehicleShoppingCart {
 		void setBashProtected();
 		void tickBashProtectionTimer(double fixedDeltaTime);
 
+
+		std::vector<physx::PxShape*> _wheelShapes;
+
+
 	private:
 		physx::PxVehicleDrive4WRawInputData _rawInputData;
 		bool _isAirborne;

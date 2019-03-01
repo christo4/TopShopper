@@ -197,7 +197,7 @@ void setupWheelsSimulationData
 
 } //namespace fourwheel
 
-PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehicle4WDesc, PxPhysics* physics, PxCooking* cooking)
+PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehicle4WDesc, PxPhysics* physics, PxCooking* cooking, std::vector<PxShape*> &wheelShapes)
 {
 	const PxVec3 chassisDims = vehicle4WDesc.chassisDims;
 	const PxF32 wheelWidth = vehicle4WDesc.wheelWidth;
@@ -250,7 +250,7 @@ PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehicle4WDesc, PxPhysics* p
 			(rigidBodyData,
 			wheelMaterials, wheelConvexMeshes, numWheels, wheelSimFilterData,
 			chassisMaterials, chassisConvexMeshes, 1, chassisSimFilterData,
-			*physics, bashConvexMesh);
+			*physics, bashConvexMesh, wheelShapes);
 	}
 
 	//Set up the sim data for the wheels.

@@ -40,6 +40,10 @@ void LoadingManager::init() {
 	std::vector<unsigned int>uvIndex;
 	std::vector<unsigned int>normalIndex;
 
+	////////////////////
+
+	// CHASSIS GEOMETRY:
+
 	// TODO: change this to chassis.obj later
 	loadObject("../TopShopper/resources/Objects/ShoppingCart.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 	
@@ -75,6 +79,42 @@ void LoadingManager::init() {
 	normalIndex.clear();
 
 
+	//////////////////
+
+	// WHEEL GEOMETRY:
+
+	loadObject("../TopShopper/resources/Objects/Wheel.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	VehicleWheelGeo->verts = returnVertices;
+	VehicleWheelGeo->uvs = returnUV;
+	VehicleWheelGeo->normals = returnNormal;
+	VehicleWheelGeo->vIndex = vIndex;
+	VehicleWheelGeo->uvIndex = uvIndex;
+	VehicleWheelGeo->normalIndex = normalIndex;
+
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		VehicleWheelGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		VehicleWheelGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		VehicleWheelGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
 
 
 	//////////////////
@@ -115,6 +155,9 @@ void LoadingManager::init() {
 	normalIndex.clear();
 
 
+	//////////////////////
+
+	// PICKUP GEOMETRY (TEMP):
 
 
 	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);

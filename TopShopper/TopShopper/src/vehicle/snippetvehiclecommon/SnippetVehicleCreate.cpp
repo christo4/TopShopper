@@ -197,7 +197,7 @@ PxRigidDynamic* createVehicleActor
 (const PxVehicleChassisData& chassisData,
  PxMaterial** wheelMaterials, PxConvexMesh** wheelConvexMeshes, const PxU32 numWheels, const PxFilterData& wheelSimFilterData,
  PxMaterial** chassisMaterials, PxConvexMesh** chassisConvexMeshes, const PxU32 numChassisMeshes, const PxFilterData& chassisSimFilterData,
- PxPhysics& physics, PxConvexMesh *bashConvexMesh)
+ PxPhysics& physics, PxConvexMesh *bashConvexMesh, std::vector<PxShape*> &wheelShapes)
 {
 	//We need a rigid body actor for the vehicle.
 	//Don't forget to add the actor to the scene after setting up the associated vehicle.
@@ -218,6 +218,9 @@ PxRigidDynamic* createVehicleActor
 		wheelShape->setQueryFilterData(wheelQryFilterData);
 		wheelShape->setSimulationFilterData(wheelSimFilterData);
 		wheelShape->setLocalPose(PxTransform(PxIdentity));
+
+		// push all 4 wheels into a vector attached to vehicle shopping cart *or return by reference)
+		wheelShapes.push_back(wheelShape);
 	}
 
 	//Add the chassis shapes to the actor.

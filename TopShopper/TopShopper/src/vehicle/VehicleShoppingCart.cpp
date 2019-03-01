@@ -135,7 +135,7 @@ VehicleDesc initVehicleDesc(PxPhysics *physics)
 
 VehicleShoppingCart::VehicleShoppingCart(PxPhysics *physics, PxCooking *cooking) {
 	_vehicleDesc = initVehicleDesc(physics);
-	_vehicle4W = createVehicle4W(_vehicleDesc, physics, cooking);
+	_vehicle4W = createVehicle4W(_vehicleDesc, physics, cooking, _wheelShapes); // NOTE: this now inits _wheelShapes
 	_vehicle4W->getRigidDynamicActor()->setGlobalPose(PxTransform(0.0f, 0.0f, 0.0f, PxQuat(PxIdentity))); // all entities default to world origin
 	_vehicle4W->setToRestState();
 	_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
