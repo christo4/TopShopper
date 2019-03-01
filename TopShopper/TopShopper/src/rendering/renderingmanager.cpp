@@ -48,7 +48,7 @@ void RenderingManager::init() {
 
 
 	MyTexture texture;
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/image1-mandrill.png", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/yellow.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(SPARE_CHANGE_GEO_NO_INDEX)->texture = texture;
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
@@ -148,8 +148,6 @@ void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at 
 		glm::vec3(0, 1, 0)  // up vector
 	);
-
-	//glm::mat4 Model = glm::mat4(1.0f);
 	
 
 	GLuint ModelID = glGetUniformLocation(shaderProgram, "Model");
@@ -157,8 +155,6 @@ void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 	GLuint ProjectionID = glGetUniformLocation(shaderProgram, "Projection");
 	GLuint colorID = glGetUniformLocation(shaderProgram, "Color");
 	GLuint cameraID = glGetUniformLocation(shaderProgram, "CameraPos");
-
-	
 
 
 	for (Geometry& g : objects) {
@@ -179,10 +175,6 @@ void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 		setBufferData(g);
 
 		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
-
-
-		//renderText("(C) LearnOpenGL.com", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
-
 		glBindVertexArray(0);
 	}
 	
