@@ -11,8 +11,8 @@
 #include FT_FREETYPE_H
 
 //**Must include glad and GLFW in this order or it breaks**
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+//#include <glad/glad.h>
+//#include <GLFW/glfw3.h>
 
 #include "vehicle/VehicleShoppingCart.h"
 
@@ -35,8 +35,13 @@ RenderingManager::~RenderingManager() {
 void RenderingManager::init() {
 	openWindow();
 	glEnable(GL_DEPTH_TEST);
-	shaderProgram = ShaderTools::InitializeShaders();
+	shaderProgram = ShaderTools::InitializeShaders(std::string("vertex"),std::string("fragment"));
 	if (shaderProgram == 0) {
+		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
+		return;
+	}
+	textShaderProgram = ShaderTools::InitializeShaders(std::string("vertexText"), std::string("fragmentText"));
+	if (textShaderProgram == 0) {
 		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
 		return;
 	}
@@ -57,6 +62,58 @@ void RenderingManager::init() {
 
 
 
+	//Text initialization
+	FT_Library ft;
+	if (FT_Init_FreeType(&ft))
+		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+
+	FT_Face face;
+	if (FT_New_Face(ft, "../TopShopper/resources/Fonts/lora/Lora-Regular.ttf", 0, &face))
+		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+
+	FT_Set_Pixel_Sizes(face, 0, 48);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Disable byte-alignment restriction
+
+	for (GLubyte c = 0; c < 128; c++)
+	{
+		// Load character glyph 
+		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+		{
+			std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+			continue;
+		}
+		// Generate texture
+		GLuint texture;
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			GL_RED,
+			face->glyph->bitmap.width,
+			face->glyph->bitmap.rows,
+			0,
+			GL_RED,
+			GL_UNSIGNED_BYTE,
+			face->glyph->bitmap.buffer
+		);
+		// Set texture options
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		// Now store character for later use
+		Character character = {
+			texture,
+			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+			face->glyph->advance.x
+		};
+		Characters.insert(std::pair<GLchar, Character>(c, character));
+	}
+	FT_Done_Face(face);
+	FT_Done_FreeType(ft);
 }
 
 
@@ -121,119 +178,31 @@ void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 		assignBuffers(g);
 		setBufferData(g);
 
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g.indexBuffer);
-		//glDrawElements(GL_TRIANGLES,g.vIndex.size(), GL_UNSIGNED_INT, (void*)0);
-
 		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
 
 
+		//renderText("(C) LearnOpenGL.com", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
+
 		glBindVertexArray(0);
 	}
-	glUseProgram(0); 
+	
 
+	glUseProgram(textShaderProgram);
+
+	renderText("Test Text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+
+	glDeleteBuffers(1, &textVbo);
+	glDeleteVertexArrays(1, &textVao);
+
+	glUseProgram(0);
 
 	CheckGLErrors();
 }
 
 
 
-void RenderingManager::assignBuffers(Geometry& geometry) {
-	//Generate vao for the object
-	//Constant 1 means 1 vao is being generated
-	glGenVertexArrays(1, &geometry.vao);
-	glBindVertexArray(geometry.vao);
-
-	//Generate vbos for the object
-	//Constant 1 means 1 vbo is being generated
-	glGenBuffers(1, &geometry.vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(0);
-
-	/*
-	glGenBuffers(1, &geometry.colorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);
-	*/
-
-	glGenBuffers(1, &geometry.normalBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);
-
-	glGenBuffers(1, &geometry.uvBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(2);
 
 
-}
-
-void RenderingManager::setBufferData(Geometry& geometry) {
-	//Send geometry to the GPU
-	//Must be called whenever anything is updated about the object
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * geometry.verts.size(), geometry.verts.data(), GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.normals.size(), geometry.normals.data(), GL_STATIC_DRAW);
-
-	/*
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.colors.size(), geometry.colors.data(), GL_STATIC_DRAW);
-	*/
-
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * geometry.uvs.size(), geometry.uvs.data(), GL_STATIC_DRAW);
-
-
-
-	/*
-	glGenBuffers(1, &geometry.indexBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.indexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * geometry.vIndex.size(), geometry.vIndex.data(), GL_STATIC_DRAW);
-	*/
-}
-
-void RenderingManager::deleteBufferData(Geometry& geometry) {
-	glDeleteBuffers(1, &geometry.vertexBuffer);
-	glDeleteBuffers(1, &geometry.normalBuffer);
-	glDeleteBuffers(1, &geometry.uvBuffer);
-	glDeleteBuffers(1, &geometry.colorBuffer);
-	//glDeleteBuffers(1, &geometry.indexBuffer);
-	glDeleteVertexArrays(1, &geometry.vao);
-}
-
-
-bool RenderingManager::CheckGLErrors() {
-	bool error = false;
-	for (GLenum flag = glGetError(); flag != GL_NO_ERROR; flag = glGetError())
-	{
-		std::cout << "OpenGL ERROR:  ";
-		switch (flag) {
-		case GL_INVALID_ENUM:
-			std::cout << "GL_INVALID_ENUM" << std::endl; break;
-		case GL_INVALID_VALUE:
-			std::cout << "GL_INVALID_VALUE" << std::endl; break;
-		case GL_INVALID_OPERATION:
-			std::cout << "GL_INVALID_OPERATION" << std::endl; break;
-		case GL_INVALID_FRAMEBUFFER_OPERATION:
-			std::cout << "GL_INVALID_FRAMEBUFFER_OPERATION" << std::endl; break;
-		case GL_OUT_OF_MEMORY:
-			std::cout << "GL_OUT_OF_MEMORY" << std::endl; break;
-		default:
-			std::cout << "[unknown error code]" << std::endl;
-		}
-		error = true;
-	}
-	return error;
-}
-
-
-GLFWwindow* RenderingManager::getWindow() {
-	return _window;
-}
 
 
 
@@ -256,10 +225,78 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	_objects.clear();
 
 	push3DObjects();
+	RenderScene(_objects);
+
 
 	
 	glfwSwapBuffers(_window);
 }
+
+//https://learnopengl.com/In-Practice/Text-Rendering
+void RenderingManager::renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color)
+{
+	//glClear(GL_COLOR_BUFFER_BIT);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glm::mat4 projection = glm::ortho(0.0f, 1920.0f, 0.0f, 1080.0f);
+
+	glGenVertexArrays(1, &textVao);
+	glGenBuffers(1, &textVbo);
+	glBindVertexArray(textVao);
+	glBindBuffer(GL_ARRAY_BUFFER, textVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	// Activate corresponding render state	
+	
+	glUniformMatrix4fv(glGetUniformLocation(textShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	glUniform3f(glGetUniformLocation(textShaderProgram, "textColor"), color.x, color.y, color.z);
+	glActiveTexture(GL_TEXTURE0);
+	glBindVertexArray(textVao);
+
+	// Iterate through all characters
+	std::string::const_iterator c;
+	for (c = text.begin(); c != text.end(); c++)
+	{
+		Character ch = Characters[*c];
+
+		GLfloat xpos = x + ch.Bearing.x * scale;
+		GLfloat ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+
+		GLfloat w = ch.Size.x * scale;
+		GLfloat h = ch.Size.y * scale;
+		// Update VBO for each character
+		GLfloat vertices[6][4] = {
+			{ xpos,     ypos + h,   0.0, 0.0 },
+			{ xpos,     ypos,       0.0, 1.0 },
+			{ xpos + w, ypos,       1.0, 1.0 },
+
+			{ xpos,     ypos + h,   0.0, 0.0 },
+			{ xpos + w, ypos,       1.0, 1.0 },
+			{ xpos + w, ypos + h,   1.0, 0.0 }
+		};
+		// Render glyph texture over quad
+		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+		// Update content of VBO memory
+		glBindBuffer(GL_ARRAY_BUFFER, textVbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		// Render quad
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+		x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
+	}
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
+}
+
 
 void RenderingManager::push3DObjects() {
 	for (const std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
@@ -322,14 +359,6 @@ void RenderingManager::push3DObjects() {
 				geoWheel.drawMode = GL_TRIANGLES;
 				_objects.push_back(geoWheel);
 			}
-
-
-
-
-
-
-
-
 
 
 			// HARDCODED to get an idea of the logic, later on I will get the wheel shapes directly
@@ -509,8 +538,6 @@ void RenderingManager::push3DObjects() {
 		}
 
 
-
-
 		default:
 			continue;
 		}
@@ -535,13 +562,43 @@ void RenderingManager::push3DObjects() {
 		_objects.push_back(geo);
 	}
 
-	RenderScene(_objects);
+
 }
 
 void RenderingManager::cleanup() {
 	glfwTerminate();
 }
 
+
+
+bool RenderingManager::CheckGLErrors() {
+	bool error = false;
+	for (GLenum flag = glGetError(); flag != GL_NO_ERROR; flag = glGetError())
+	{
+		std::cout << "OpenGL ERROR:  ";
+		switch (flag) {
+		case GL_INVALID_ENUM:
+			std::cout << "GL_INVALID_ENUM" << std::endl; break;
+		case GL_INVALID_VALUE:
+			std::cout << "GL_INVALID_VALUE" << std::endl; break;
+		case GL_INVALID_OPERATION:
+			std::cout << "GL_INVALID_OPERATION" << std::endl; break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION:
+			std::cout << "GL_INVALID_FRAMEBUFFER_OPERATION" << std::endl; break;
+		case GL_OUT_OF_MEMORY:
+			std::cout << "GL_OUT_OF_MEMORY" << std::endl; break;
+		default:
+			std::cout << "[unknown error code]" << std::endl;
+		}
+		error = true;
+	}
+	return error;
+}
+
+
+GLFWwindow* RenderingManager::getWindow() {
+	return _window;
+}
 
 
 void RenderingManager::openWindow() {
@@ -593,3 +650,70 @@ void ErrorCallback(int error, const char* description) {
 	std::cout << description << std::endl;
 }
 
+void RenderingManager::assignBuffers(Geometry& geometry) {
+	//Generate vao for the object
+	//Constant 1 means 1 vao is being generated
+	glGenVertexArrays(1, &geometry.vao);
+	glBindVertexArray(geometry.vao);
+
+	//Generate vbos for the object
+	//Constant 1 means 1 vbo is being generated
+	glGenBuffers(1, &geometry.vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(0);
+
+	/*
+	glGenBuffers(1, &geometry.colorBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(1);
+	*/
+
+	glGenBuffers(1, &geometry.normalBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(1);
+
+	glGenBuffers(1, &geometry.uvBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(2);
+
+
+}
+
+void RenderingManager::setBufferData(Geometry& geometry) {
+	//Send geometry to the GPU
+	//Must be called whenever anything is updated about the object
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * geometry.verts.size(), geometry.verts.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.normals.size(), geometry.normals.data(), GL_STATIC_DRAW);
+
+	/*
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.colors.size(), geometry.colors.data(), GL_STATIC_DRAW);
+	*/
+
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * geometry.uvs.size(), geometry.uvs.data(), GL_STATIC_DRAW);
+
+
+
+	/*
+	glGenBuffers(1, &geometry.indexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.indexBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * geometry.vIndex.size(), geometry.vIndex.data(), GL_STATIC_DRAW);
+	*/
+}
+
+void RenderingManager::deleteBufferData(Geometry& geometry) {
+	glDeleteBuffers(1, &geometry.vertexBuffer);
+	glDeleteBuffers(1, &geometry.normalBuffer);
+	glDeleteBuffers(1, &geometry.uvBuffer);
+	glDeleteBuffers(1, &geometry.colorBuffer);
+	//glDeleteBuffers(1, &geometry.indexBuffer);
+	glDeleteVertexArrays(1, &geometry.vao);
+}

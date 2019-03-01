@@ -214,5 +214,11 @@
     <None Include="resources\shaders\vertex.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="resources\shaders\vertexText.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\shaders\fragmentText.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -86,10 +86,10 @@ GLuint ShaderTools::LinkProgram(GLuint vertexShader, GLuint fragmentShader) {
 	return programObject;
 }
 
-GLuint ShaderTools::InitializeShaders() {
+GLuint ShaderTools::InitializeShaders(std::string vertexShader, std::string fragmentShader) {
 	// load shader source from files
-	std::string vertexSource = LoadSource("../TopShopper/resources/shaders/vertex.glsl");
-	std::string fragmentSource = LoadSource("../TopShopper/resources/shaders/fragment.glsl");
+	std::string vertexSource = LoadSource("../TopShopper/resources/shaders/" + vertexShader + ".glsl");
+	std::string fragmentSource = LoadSource("../TopShopper/resources/shaders/" + fragmentShader + ".glsl");
 	if (vertexSource.empty() || fragmentSource.empty()) return false;
 
 	// compile shader source into shader objects
