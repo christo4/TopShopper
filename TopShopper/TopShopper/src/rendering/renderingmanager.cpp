@@ -41,7 +41,7 @@ void RenderingManager::init() {
 		return;
 	}
 	textShaderProgram = ShaderTools::InitializeShaders(std::string("vertexText"), std::string("fragmentText"));
-	if (shaderProgram == 0) {
+	if (textShaderProgram == 0) {
 		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
 		return;
 	}
@@ -59,6 +59,8 @@ void RenderingManager::init() {
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/background3-wood.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(GROUND_GEO_NO_INDEX)->texture = texture;
+
+
 
 	//Text initialization
 	FT_Library ft;
@@ -176,119 +178,28 @@ void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 		assignBuffers(g);
 		setBufferData(g);
 
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g.indexBuffer);
-		//glDrawElements(GL_TRIANGLES,g.vIndex.size(), GL_UNSIGNED_INT, (void*)0);
-
 		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
 
 
+		//renderText("(C) LearnOpenGL.com", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
+
 		glBindVertexArray(0);
 	}
-	glUseProgram(0); 
+	
 
+	glUseProgram(textShaderProgram);
+
+	renderText("A", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+
+	glUseProgram(0);
 
 	CheckGLErrors();
 }
 
 
 
-void RenderingManager::assignBuffers(Geometry& geometry) {
-	//Generate vao for the object
-	//Constant 1 means 1 vao is being generated
-	glGenVertexArrays(1, &geometry.vao);
-	glBindVertexArray(geometry.vao);
-
-	//Generate vbos for the object
-	//Constant 1 means 1 vbo is being generated
-	glGenBuffers(1, &geometry.vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(0);
-
-	/*
-	glGenBuffers(1, &geometry.colorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);
-	*/
-
-	glGenBuffers(1, &geometry.normalBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);
-
-	glGenBuffers(1, &geometry.uvBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(2);
 
 
-}
-
-void RenderingManager::setBufferData(Geometry& geometry) {
-	//Send geometry to the GPU
-	//Must be called whenever anything is updated about the object
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * geometry.verts.size(), geometry.verts.data(), GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.normals.size(), geometry.normals.data(), GL_STATIC_DRAW);
-
-	/*
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.colors.size(), geometry.colors.data(), GL_STATIC_DRAW);
-	*/
-
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * geometry.uvs.size(), geometry.uvs.data(), GL_STATIC_DRAW);
-
-
-
-	/*
-	glGenBuffers(1, &geometry.indexBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.indexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * geometry.vIndex.size(), geometry.vIndex.data(), GL_STATIC_DRAW);
-	*/
-}
-
-void RenderingManager::deleteBufferData(Geometry& geometry) {
-	glDeleteBuffers(1, &geometry.vertexBuffer);
-	glDeleteBuffers(1, &geometry.normalBuffer);
-	glDeleteBuffers(1, &geometry.uvBuffer);
-	glDeleteBuffers(1, &geometry.colorBuffer);
-	//glDeleteBuffers(1, &geometry.indexBuffer);
-	glDeleteVertexArrays(1, &geometry.vao);
-}
-
-
-bool RenderingManager::CheckGLErrors() {
-	bool error = false;
-	for (GLenum flag = glGetError(); flag != GL_NO_ERROR; flag = glGetError())
-	{
-		std::cout << "OpenGL ERROR:  ";
-		switch (flag) {
-		case GL_INVALID_ENUM:
-			std::cout << "GL_INVALID_ENUM" << std::endl; break;
-		case GL_INVALID_VALUE:
-			std::cout << "GL_INVALID_VALUE" << std::endl; break;
-		case GL_INVALID_OPERATION:
-			std::cout << "GL_INVALID_OPERATION" << std::endl; break;
-		case GL_INVALID_FRAMEBUFFER_OPERATION:
-			std::cout << "GL_INVALID_FRAMEBUFFER_OPERATION" << std::endl; break;
-		case GL_OUT_OF_MEMORY:
-			std::cout << "GL_OUT_OF_MEMORY" << std::endl; break;
-		default:
-			std::cout << "[unknown error code]" << std::endl;
-		}
-		error = true;
-	}
-	return error;
-}
-
-
-GLFWwindow* RenderingManager::getWindow() {
-	return _window;
-}
 
 
 
@@ -311,8 +222,8 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	_objects.clear();
 
 	push3DObjects();
-	//renderText("This is sample text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-	//renderText("(C) LearnOpenGL.com", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
+	RenderScene(_objects);
+
 
 	
 	glfwSwapBuffers(_window);
@@ -320,12 +231,12 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 
 void RenderingManager::renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color)
 {
-	glClear(GL_COLOR_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glm::mat4 projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
+	glm::mat4 projection = glm::ortho(0.0f, 1920.0f, 0.0f, 1080.0f);
 
 	glGenVertexArrays(1, &textVao);
 	glGenBuffers(1, &textVbo);
@@ -647,13 +558,43 @@ void RenderingManager::push3DObjects() {
 		_objects.push_back(geo);
 	}
 
-	RenderScene(_objects);
+
 }
 
 void RenderingManager::cleanup() {
 	glfwTerminate();
 }
 
+
+
+bool RenderingManager::CheckGLErrors() {
+	bool error = false;
+	for (GLenum flag = glGetError(); flag != GL_NO_ERROR; flag = glGetError())
+	{
+		std::cout << "OpenGL ERROR:  ";
+		switch (flag) {
+		case GL_INVALID_ENUM:
+			std::cout << "GL_INVALID_ENUM" << std::endl; break;
+		case GL_INVALID_VALUE:
+			std::cout << "GL_INVALID_VALUE" << std::endl; break;
+		case GL_INVALID_OPERATION:
+			std::cout << "GL_INVALID_OPERATION" << std::endl; break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION:
+			std::cout << "GL_INVALID_FRAMEBUFFER_OPERATION" << std::endl; break;
+		case GL_OUT_OF_MEMORY:
+			std::cout << "GL_OUT_OF_MEMORY" << std::endl; break;
+		default:
+			std::cout << "[unknown error code]" << std::endl;
+		}
+		error = true;
+	}
+	return error;
+}
+
+
+GLFWwindow* RenderingManager::getWindow() {
+	return _window;
+}
 
 
 void RenderingManager::openWindow() {
@@ -705,3 +646,70 @@ void ErrorCallback(int error, const char* description) {
 	std::cout << description << std::endl;
 }
 
+void RenderingManager::assignBuffers(Geometry& geometry) {
+	//Generate vao for the object
+	//Constant 1 means 1 vao is being generated
+	glGenVertexArrays(1, &geometry.vao);
+	glBindVertexArray(geometry.vao);
+
+	//Generate vbos for the object
+	//Constant 1 means 1 vbo is being generated
+	glGenBuffers(1, &geometry.vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(0);
+
+	/*
+	glGenBuffers(1, &geometry.colorBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(1);
+	*/
+
+	glGenBuffers(1, &geometry.normalBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(1);
+
+	glGenBuffers(1, &geometry.uvBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(2);
+
+
+}
+
+void RenderingManager::setBufferData(Geometry& geometry) {
+	//Send geometry to the GPU
+	//Must be called whenever anything is updated about the object
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * geometry.verts.size(), geometry.verts.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.normals.size(), geometry.normals.data(), GL_STATIC_DRAW);
+
+	/*
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.colors.size(), geometry.colors.data(), GL_STATIC_DRAW);
+	*/
+
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * geometry.uvs.size(), geometry.uvs.data(), GL_STATIC_DRAW);
+
+
+
+	/*
+	glGenBuffers(1, &geometry.indexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.indexBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * geometry.vIndex.size(), geometry.vIndex.data(), GL_STATIC_DRAW);
+	*/
+}
+
+void RenderingManager::deleteBufferData(Geometry& geometry) {
+	glDeleteBuffers(1, &geometry.vertexBuffer);
+	glDeleteBuffers(1, &geometry.normalBuffer);
+	glDeleteBuffers(1, &geometry.uvBuffer);
+	glDeleteBuffers(1, &geometry.colorBuffer);
+	//glDeleteBuffers(1, &geometry.indexBuffer);
+	glDeleteVertexArrays(1, &geometry.vao);
+}
