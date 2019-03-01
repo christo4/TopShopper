@@ -232,6 +232,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	glfwSwapBuffers(_window);
 }
 
+//https://learnopengl.com/In-Practice/Text-Rendering
 void RenderingManager::renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color)
 {
 	//glClear(GL_COLOR_BUFFER_BIT);
