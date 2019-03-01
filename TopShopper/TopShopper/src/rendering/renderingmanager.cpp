@@ -40,11 +40,19 @@ void RenderingManager::init() {
 
 
 	MyTexture texture;
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/image4-thirsk.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/image1-mandrill.png", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(SPARE_CHANGE_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(VEHICLE_CHASSIS_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/image4-thirsk.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/background1-asphalt.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(VEHICLE_WHEEL_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/background3-wood.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(GROUND_GEO_NO_INDEX)->texture = texture;
+
+
 
 }
 
@@ -188,6 +196,7 @@ void RenderingManager::setBufferData(Geometry& geometry) {
 void RenderingManager::deleteBufferData(Geometry& geometry) {
 	glDeleteBuffers(1, &geometry.vertexBuffer);
 	glDeleteBuffers(1, &geometry.normalBuffer);
+	glDeleteBuffers(1, &geometry.uvBuffer);
 	glDeleteBuffers(1, &geometry.colorBuffer);
 	//glDeleteBuffers(1, &geometry.indexBuffer);
 	glDeleteVertexArrays(1, &geometry.vao);
