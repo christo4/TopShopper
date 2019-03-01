@@ -189,7 +189,10 @@ void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 
 	glUseProgram(textShaderProgram);
 
-	renderText("A", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+	renderText("Test Text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+
+	glDeleteBuffers(1, &textVbo);
+	glDeleteVertexArrays(1, &textVao);
 
 	glUseProgram(0);
 
