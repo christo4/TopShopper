@@ -11,8 +11,8 @@
 #include FT_FREETYPE_H
 
 //**Must include glad and GLFW in this order or it breaks**
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+//#include <glad/glad.h>
+//#include <GLFW/glfw3.h>
 
 #include "vehicle/VehicleShoppingCart.h"
 
@@ -55,8 +55,58 @@ void RenderingManager::init() {
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/background3-wood.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(GROUND_GEO_NO_INDEX)->texture = texture;
 
+	//Text initialization
+	FT_Library ft;
+	if (FT_Init_FreeType(&ft))
+		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
 
+	FT_Face face;
+	if (FT_New_Face(ft, "../TopShopper/resources/Fonts/lora/Lora-Regular.ttf", 0, &face))
+		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 
+	FT_Set_Pixel_Sizes(face, 0, 48);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Disable byte-alignment restriction
+
+	for (GLubyte c = 0; c < 128; c++)
+	{
+		// Load character glyph 
+		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+		{
+			std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+			continue;
+		}
+		// Generate texture
+		GLuint texture;
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			GL_RED,
+			face->glyph->bitmap.width,
+			face->glyph->bitmap.rows,
+			0,
+			GL_RED,
+			GL_UNSIGNED_BYTE,
+			face->glyph->bitmap.buffer
+		);
+		// Set texture options
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		// Now store character for later use
+		Character character = {
+			texture,
+			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+			face->glyph->advance.x
+		};
+		Characters.insert(std::pair<GLchar, Character>(c, character));
+	}
+	FT_Done_Face(face);
+	FT_Done_FreeType(ft);
 }
 
 
@@ -261,6 +311,11 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	glfwSwapBuffers(_window);
 }
 
+void RenderingManager::textToScreen() {
+
+}
+
+
 void RenderingManager::push3DObjects() {
 	for (const std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
 		PxRigidActor *actor = entity->_actor->is<PxRigidActor>();
@@ -322,14 +377,6 @@ void RenderingManager::push3DObjects() {
 				geoWheel.drawMode = GL_TRIANGLES;
 				_objects.push_back(geoWheel);
 			}
-
-
-
-
-
-
-
-
 
 
 			// HARDCODED to get an idea of the logic, later on I will get the wheel shapes directly
@@ -507,8 +554,6 @@ void RenderingManager::push3DObjects() {
 			geo.color = glm::vec3(0.95f, 0.65f, 0.2f);
 			break;
 		}
-
-
 
 
 		default:
