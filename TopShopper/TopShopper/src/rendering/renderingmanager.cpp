@@ -95,7 +95,7 @@ void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 	GLuint ModelID = glGetUniformLocation(shaderProgram, "Model");
 	GLuint ViewID = glGetUniformLocation(shaderProgram, "View");
 	GLuint ProjectionID = glGetUniformLocation(shaderProgram, "Projection");
-	GLuint colorID = glGetUniformLocation(shaderProgram, "ColorMeme");
+	GLuint colorID = glGetUniformLocation(shaderProgram, "Color");
 	GLuint cameraID = glGetUniformLocation(shaderProgram, "CameraPos");
 
 	

@@ -1,9 +1,3 @@
-// ==========================================================================
-// Vertex program for barebones GLFW boilerplate
-//
-// Author:  Sonny Chan, University of Calgary
-// Date:    December 2015
-// ==========================================================================
 #version 410
 
 // interpolated colour received from vertex stage
@@ -39,8 +33,9 @@ void main(void)
 	vec3 reflectDir = reflect(-lightDir, Normal);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8);
 	vec3 specular = specularStrength * spec * lightColor;  
-
-	vec3 result = (ambient + diffuse + specular) * color;
+	
+	vec4 texelColour = texture(imageTexture, uv);
+	vec4 result = vec4((ambient + diffuse + specular), 1.0f) * texelColour;
 	//FragmentColour = vec4(result, 1.0);
-    FragmentColour = texture(imageTexture, uv);
+    FragmentColour = result;
 }
