@@ -162,53 +162,40 @@ void RenderingManager::RenderScene() {
 
 void RenderingManager::renderSprites() {
 	MyTexture texture;
-	Geometry apple;
-	InitializeTexture(&texture, "../TopShopper/resources/Sprites/Apple.png", GL_TEXTURE_2D);
-	apple.texture = texture;
+	Geometry sprite;
+	InitializeTexture(&texture, "../TopShopper/resources/Sprites/Border.png", GL_TEXTURE_2D);
+	sprite.texture = texture;
 
-	apple.verts.push_back(glm::vec4(0.9f, 0.9f, 0.0f, 1.0f));
-	apple.verts.push_back(glm::vec4(1.0f, 0.9f, 0.0f, 1.0f));
-	apple.verts.push_back(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
-	apple.verts.push_back(glm::vec4(0.9f, 0.9f, 0.0f, 1.0f));
-	apple.verts.push_back(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
-	apple.verts.push_back(glm::vec4(0.9f, 1.0f, 0.0f, 1.0f));
+	sprite.verts.push_back(glm::vec4(-0.2f, -0.85f, 0.0f, 1.0f));
+	sprite.verts.push_back(glm::vec4(0.2f, -0.85f, 0.0f, 1.0f));
+	sprite.verts.push_back(glm::vec4(0.2f, -0.65f, 0.0f, 1.0f));
+	sprite.verts.push_back(glm::vec4(-0.2f, -0.85f, 0.0f, 1.0f));
+	sprite.verts.push_back(glm::vec4(0.2f, -0.65f, 0.0f, 1.0f));
+	sprite.verts.push_back(glm::vec4(-0.2f, -0.65f, 0.0f, 1.0f));
 
-
-	apple.uvs.push_back(glm::vec2(0.0f, 0.0f));
-	apple.uvs.push_back(glm::vec2(1.0f, 0.0f));
-	apple.uvs.push_back(glm::vec2(1.0f, 1.0f));
-	apple.uvs.push_back(glm::vec2(0.0f, 0.0f));
-	apple.uvs.push_back(glm::vec2(1.0f, 1.0f));
-	apple.uvs.push_back(glm::vec2(0.0f, 1.0f));
+	sprite.uvs.push_back(glm::vec2(0.0f, 0.0f));
+	sprite.uvs.push_back(glm::vec2(1.0f, 0.0f));
+	sprite.uvs.push_back(glm::vec2(1.0f, 1.0f));
+	sprite.uvs.push_back(glm::vec2(0.0f, 0.0f));
+	sprite.uvs.push_back(glm::vec2(1.0f, 1.0f));
+	sprite.uvs.push_back(glm::vec2(0.0f, 1.0f));
 
 
 	glUseProgram(spriteShaderProgram);
-
-
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(apple.texture.target, apple.texture.textureID);
+	glBindTexture(sprite.texture.target, sprite.texture.textureID);
 	GLuint uniformLocation = glGetUniformLocation(spriteShaderProgram, "SpriteTexture"); //send sprite data to the sprite shader
 	glUniform1i(uniformLocation, 0);
 
 
-	assignSpriteBuffers(apple);
-	setSpriteBufferData(apple);
+	assignSpriteBuffers(sprite);
+	setSpriteBufferData(sprite);
 
-	glBindVertexArray(apple.vao);
-	glDrawArrays(GL_TRIANGLES, 0, apple.verts.size());
+	glBindVertexArray(sprite.vao);
+	glDrawArrays(GL_TRIANGLES, 0, sprite.verts.size());
 	glUseProgram(0);
 	glBindVertexArray(0);
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
