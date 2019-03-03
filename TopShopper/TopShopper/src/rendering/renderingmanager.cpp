@@ -115,7 +115,7 @@ void RenderingManager::RenderScene() {
 	PxVec3 playerPos = playerTransform.p;
 	PxQuat playerRot = playerTransform.q;
 
-	PxVec3 testVec(0, 20, -30);
+	PxVec3 testVec(0, 17, -30);
 	testVec = playerRot.rotate(testVec);
 	glm::vec3 cameraPosition = glm::vec3(playerPos.x + testVec.x, playerPos.y + testVec.y, playerPos.z + testVec.z);
 	glm::mat4 View = glm::lookAt(
@@ -155,7 +155,7 @@ void RenderingManager::RenderScene() {
 
 
 	renderText("Test Text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-	renderSprites();
+	//renderSprites();
 	CheckGLErrors();
 }
 
@@ -193,6 +193,10 @@ void RenderingManager::renderSprites() {
 
 	glBindVertexArray(sprite.vao);
 	glDrawArrays(GL_TRIANGLES, 0, sprite.verts.size());
+
+	deleteBufferData(sprite);
+	sprite.verts.clear();
+	sprite.uvs.clear();
 	glUseProgram(0);
 	glBindVertexArray(0);
 }
