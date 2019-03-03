@@ -166,9 +166,10 @@ struct PlayerScript : BehaviourScript {
 
 
 	// AI STUFF...
+	std::vector<physx::PxVec3> _targets; // starts empty
 
 	//std::vector<physx::PxVec3> _targets = { physx::PxVec3(0.0f, 2.0f, -80.0f), physx::PxVec3(80.0f, 2.0f, 0.0f), physx::PxVec3(0.0f, 2.0f, 80.0f), physx::PxVec3(-80.0f, 2.0f, 0.0f) }; // hardcoded test point
-	std::vector<physx::PxVec3> _targets = { physx::PxVec3(0.0f, 2.0f, 160.0f) }; // hardcoded test point
+	//std::vector<physx::PxVec3> _targets = { physx::PxVec3(0.0f, 2.0f, 160.0f) }; // hardcoded test point
 
 
 	void navigate();
