@@ -140,7 +140,7 @@ void RenderingManager::RenderScene() {
 		glUniform3f(colorID, g.color.x, g.color.y, g.color.z);
 		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
 		glUniformMatrix4fv(ViewID, 1, GL_FALSE, &View[0][0]);
-		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &Projection[0][0]);d 
+		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &Projection[0][0]); 
 
 		glBindVertexArray(g.vao);
 		assignBuffers(g);
