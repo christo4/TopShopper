@@ -24,7 +24,7 @@ using namespace physx;
 RenderingManager::RenderingManager(Broker *broker)
 	: _broker(broker)
 {
-	
+
 }
 
 RenderingManager::~RenderingManager() {
@@ -34,8 +34,10 @@ RenderingManager::~RenderingManager() {
 
 void RenderingManager::init() {
 	openWindow();
+	initTextRender();
+
 	glEnable(GL_DEPTH_TEST);
-	shaderProgram = ShaderTools::InitializeShaders(std::string("vertex"),std::string("fragment"));
+	shaderProgram = ShaderTools::InitializeShaders(std::string("vertex"), std::string("fragment"));
 	if (shaderProgram == 0) {
 		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
 		return;
@@ -45,7 +47,13 @@ void RenderingManager::init() {
 		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
 		return;
 	}
+	spriteShaderProgram = ShaderTools::InitializeShaders(std::string("vertexSprite"), std::string("fragmentSprite"));
+	if (spriteShaderProgram == 0) {
+		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
+		return;
+	}
 
+	glUseProgram(shaderProgram);
 
 	MyTexture texture;
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/yellow.jpg", GL_TEXTURE_2D);
@@ -60,71 +68,38 @@ void RenderingManager::init() {
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/background3-wood.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(GROUND_GEO_NO_INDEX)->texture = texture;
 
-
-
-	//Text initialization
-	FT_Library ft;
-	if (FT_Init_FreeType(&ft))
-		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-
-	FT_Face face;
-	if (FT_New_Face(ft, "../TopShopper/resources/Fonts/lora/Lora-Regular.ttf", 0, &face))
-		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-
-	FT_Set_Pixel_Sizes(face, 0, 48);
-
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Disable byte-alignment restriction
-
-	for (GLubyte c = 0; c < 128; c++)
-	{
-		// Load character glyph 
-		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-		{
-			std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-			continue;
-		}
-		// Generate texture
-		GLuint texture;
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			GL_RED,
-			face->glyph->bitmap.width,
-			face->glyph->bitmap.rows,
-			0,
-			GL_RED,
-			GL_UNSIGNED_BYTE,
-			face->glyph->bitmap.buffer
-		);
-		// Set texture options
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		// Now store character for later use
-		Character character = {
-			texture,
-			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			face->glyph->advance.x
-		};
-		Characters.insert(std::pair<GLchar, Character>(c, character));
-	}
-	FT_Done_Face(face);
-	FT_Done_FreeType(ft);
 }
 
 
-void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
+void RenderingManager::updateSeconds(double variableDeltaTime) {
+	// call LATEUPDATE() for all behaviour scripts...
+	for (std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
+		std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
+		if (comp != nullptr) {
+			std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
+			script->lateUpdate(variableDeltaTime);
+		}
+	}
+
+	for (Geometry& geoDel : _objects) {
+		deleteBufferData(geoDel);
+	}
+
+	_objects.clear();
+	push3DObjects();
+	RenderScene();
+	glfwSwapBuffers(_window);
+}
+
+
+void RenderingManager::RenderScene() {
 	//Clears the screen to a dark grey background
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// bind our shader program and the vertex array object containing our
 	// scene geometry, then tell OpenGL to draw our geometry
-	glUseProgram(shaderProgram);
+
 
 	float fov = 60.0f;
 	int width;
@@ -148,7 +123,7 @@ void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at 
 		glm::vec3(0, 1, 0)  // up vector
 	);
-	
+
 
 	GLuint ModelID = glGetUniformLocation(shaderProgram, "Model");
 	GLuint ViewID = glGetUniformLocation(shaderProgram, "View");
@@ -157,13 +132,14 @@ void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 	GLuint cameraID = glGetUniformLocation(shaderProgram, "CameraPos");
 
 
-	for (Geometry& g : objects) {
+	for (Geometry& g : _objects) {
+		glUseProgram(shaderProgram);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(g.texture.target, g.texture.textureID);
 		GLuint uniformLocation = glGetUniformLocation(shaderProgram, "imageTexture");
+
 		glUniform1i(uniformLocation, 0);
-		
 		glUniform3f(cameraID, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 		glUniform3f(colorID, g.color.x, g.color.y, g.color.z);
 		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
@@ -173,66 +149,86 @@ void RenderingManager::RenderScene(std::vector<Geometry>& objects) {
 		glBindVertexArray(g.vao);
 		assignBuffers(g);
 		setBufferData(g);
-
 		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
 		glBindVertexArray(0);
 	}
-	
 
-	glUseProgram(textShaderProgram);
 
 	renderText("Test Text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-
-	glDeleteBuffers(1, &textVbo);
-	glDeleteVertexArrays(1, &textVao);
-
-	glUseProgram(0);
-
+	renderSprites();
 	CheckGLErrors();
 }
 
 
+void RenderingManager::renderSprites() {
+	MyTexture texture;
+	Geometry apple;
+	InitializeTexture(&texture, "../TopShopper/resources/Sprites/Apple.png", GL_TEXTURE_2D);
+	apple.texture = texture;
+
+	apple.verts.push_back(glm::vec4(0.9f, 0.9f, 0.0f, 1.0f));
+	apple.verts.push_back(glm::vec4(1.0f, 0.9f, 0.0f, 1.0f));
+	apple.verts.push_back(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
+	apple.verts.push_back(glm::vec4(0.9f, 0.9f, 0.0f, 1.0f));
+	apple.verts.push_back(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
+	apple.verts.push_back(glm::vec4(0.9f, 1.0f, 0.0f, 1.0f));
 
 
+	apple.uvs.push_back(glm::vec2(0.0f, 0.0f));
+	apple.uvs.push_back(glm::vec2(1.0f, 0.0f));
+	apple.uvs.push_back(glm::vec2(1.0f, 1.0f));
+	apple.uvs.push_back(glm::vec2(0.0f, 0.0f));
+	apple.uvs.push_back(glm::vec2(1.0f, 1.0f));
+	apple.uvs.push_back(glm::vec2(0.0f, 1.0f));
 
 
+	glUseProgram(spriteShaderProgram);
 
 
-
-void RenderingManager::updateSeconds(double variableDeltaTime) {
-	// call LATEUPDATE() for all behaviour scripts...
-	for (std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
-		std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
-		if (comp != nullptr) {
-			std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
-			script->lateUpdate(variableDeltaTime);
-		}
-	}
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(apple.texture.target, apple.texture.textureID);
+	GLuint uniformLocation = glGetUniformLocation(spriteShaderProgram, "SpriteTexture"); //send sprite data to the sprite shader
+	glUniform1i(uniformLocation, 0);
 
 
-	for (Geometry& geoDel : _objects) {
-		deleteBufferData(geoDel);
-	}
+	assignSpriteBuffers(apple);
+	setSpriteBufferData(apple);
 
-	_objects.clear();
-
-	push3DObjects();
-	RenderScene(_objects);
-
-
-	
-	glfwSwapBuffers(_window);
+	glBindVertexArray(apple.vao);
+	glDrawArrays(GL_TRIANGLES, 0, apple.verts.size());
+	glUseProgram(0);
+	glBindVertexArray(0);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //https://learnopengl.com/In-Practice/Text-Rendering
 void RenderingManager::renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color)
 {
+	glUseProgram(textShaderProgram);
+	GLuint textVao, textVbo;
+
 	//glClear(GL_COLOR_BUFFER_BIT);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glm::mat4 projection = glm::ortho(0.0f, 1920.0f, 0.0f, 1080.0f);
+	int width;
+	int height;
+	glfwGetWindowSize(_window, &width, &height);
+
+	glm::mat4 projection = glm::ortho(0.0f, (float)width, 0.0f, (float)height);
 
 	glGenVertexArrays(1, &textVao);
 	glGenBuffers(1, &textVbo);
@@ -244,7 +240,7 @@ void RenderingManager::renderText(std::string text, GLfloat x, GLfloat y, GLfloa
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	// Activate corresponding render state	
-	
+
 	glUniformMatrix4fv(glGetUniformLocation(textShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 	glUniform3f(glGetUniformLocation(textShaderProgram, "textColor"), color.x, color.y, color.z);
 	glActiveTexture(GL_TEXTURE0);
@@ -285,6 +281,11 @@ void RenderingManager::renderText(std::string text, GLfloat x, GLfloat y, GLfloa
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	glDeleteBuffers(1, &textVbo);
+	glDeleteVertexArrays(1, &textVao);
+
+	glUseProgram(0);
+
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
 }
@@ -298,7 +299,7 @@ void RenderingManager::push3DObjects() {
 		const PxQuat rot = transform.q;
 		EntityTypes tag = entity->getTag();
 
-		Geometry geo; 
+		Geometry geo;
 
 		switch (tag) {
 		case EntityTypes::SHOPPING_CART_PLAYER:
@@ -306,22 +307,6 @@ void RenderingManager::push3DObjects() {
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_CHASSIS_GEO_NO_INDEX));
 			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_CHASSIS_GEO));
 			geo.color = glm::vec3(0.2f, 0.65f, 0.95f);
-
-
-			
-			//Geometry geoWheelFrontLeft = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX));
-			//Geometry geoWheelFrontRight = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX));
-			//Geometry geoWheelBackLeft = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX));
-			//Geometry geoWheelBackRight = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX));
-
-			//geoWheelFrontLeft.color = glm::vec3(0.0f, 0.0f, 0.0f);
-			//geoWheelFrontRight.color = glm::vec3(0.0f, 0.0f, 0.0f);
-			//geoWheelBackLeft.color = glm::vec3(0.0f, 0.0f, 0.0f);
-			//geoWheelBackRight.color = glm::vec3(0.0f, 0.0f, 0.0f);
-
-
-
-			// DYNAMICALLY...
 
 			std::shared_ptr<ShoppingCartPlayer> player = std::dynamic_pointer_cast<ShoppingCartPlayer>(entity);
 			const std::vector<PxShape*> &wheelShapes = player->_shoppingCartBase->_wheelShapes;
@@ -334,7 +319,6 @@ void RenderingManager::push3DObjects() {
 				glm::mat4 model;
 
 				PxQuat netRotation = rot * wheelShape->getLocalPose().q; // MUST BE IN THIS ORDER
-
 				PxMat44 rotation = PxMat44(netRotation); // compound rot (parent.rotate() and then local.rotate())
 				PxVec3 wheelOffset = wheelShape->getLocalPose().p;
 				wheelOffset = rot.rotate(wheelOffset);
@@ -351,103 +335,8 @@ void RenderingManager::push3DObjects() {
 				geoWheel.drawMode = GL_TRIANGLES;
 				_objects.push_back(geoWheel);
 			}
-
-
-			// HARDCODED to get an idea of the logic, later on I will get the wheel shapes directly
-
-
-			/*
-			glm::mat4 model;
-
-			// FRONT LEFT WHEEL:
-
-			PxMat44 rotation = PxMat44(rot);
-			PxVec3 wheelOffset(0.95f, -1.0f, 1.5f);
-			wheelOffset = rot.rotate(wheelOffset);
-			PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos + wheelOffset);
-			PxMat44	pxModel = translation * rotation;
-
-			model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
-				glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
-				glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
-				glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
-
-			geoWheelFrontLeft.model = model;
-
-
-			geoWheelFrontLeft.drawMode = GL_TRIANGLES;
-			_objects.push_back(geoWheelFrontLeft);
-
-
-			// FRONT RIGHT WHEEL:
-
-
-			rotation = PxMat44(rot);
-			PxVec3 wheelOffset2(-0.95f, -1.0f, 1.5f);
-			wheelOffset2 = rot.rotate(wheelOffset2);
-			translation = PxMat44(PxMat33(PxIdentity), pos + wheelOffset2);
-			pxModel = translation * rotation;
-
-			model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
-				glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
-				glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
-				glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
-
-			geoWheelFrontRight.model = model;
-
-
-			geoWheelFrontRight.drawMode = GL_TRIANGLES;
-			_objects.push_back(geoWheelFrontRight);
-
-
-
-			// BACK LEFT WHEEL:
-
-
-			rotation = PxMat44(rot);
-			PxVec3 wheelOffset3(0.95f, -1.0f, -1.5f);
-			wheelOffset3 = rot.rotate(wheelOffset3);
-			translation = PxMat44(PxMat33(PxIdentity), pos + wheelOffset3);
-			pxModel = translation * rotation;
-
-			model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
-				glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
-				glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
-				glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
-
-			geoWheelBackLeft.model = model;
-
-
-			geoWheelBackLeft.drawMode = GL_TRIANGLES;
-			_objects.push_back(geoWheelBackLeft);
-
-
-
-			// BACK RIGHT WHEEL:
-
-
-			rotation = PxMat44(rot);
-			PxVec3 wheelOffset4(-0.95f, -1.0f, -1.5f);
-			wheelOffset4 = rot.rotate(wheelOffset4);
-			translation = PxMat44(PxMat33(PxIdentity), pos + wheelOffset4);
-			pxModel = translation * rotation;
-
-			model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
-				glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
-				glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
-				glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
-
-			geoWheelBackRight.model = model;
-
-
-			geoWheelBackRight.drawMode = GL_TRIANGLES;
-			_objects.push_back(geoWheelBackRight);
-			*/
-
-
 			break;
 		}
-
 		case EntityTypes::GROUND:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX)); // TODO: change this to use specific mesh
@@ -455,7 +344,6 @@ void RenderingManager::push3DObjects() {
 			geo.color = glm::vec3(0.5f, 0.5f, 0.5f);
 			break;
 		}
-
 		case EntityTypes::MILK:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
@@ -512,7 +400,6 @@ void RenderingManager::push3DObjects() {
 			geo.color = glm::vec3(0.45f, 0.0f, 0.95f);
 			break;
 		}
-
 		case EntityTypes::BROCCOLI:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
@@ -520,7 +407,6 @@ void RenderingManager::push3DObjects() {
 			geo.color = glm::vec3(0.05f, 0.5f, 0.2f);
 			break;
 		}
-
 		case EntityTypes::SPARE_CHANGE:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX));
@@ -528,34 +414,162 @@ void RenderingManager::push3DObjects() {
 			geo.color = glm::vec3(0.95f, 0.65f, 0.2f);
 			break;
 		}
-
-
 		default:
 			continue;
 		}
 
-
 		glm::mat4 model;
-
-
 		PxMat44 rotation = PxMat44(rot);
 		PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos);
 		PxMat44	pxModel = translation * rotation;
-
 		model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
 			glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
 			glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
 			glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
 
 		geo.model = model;
-
-
 		geo.drawMode = GL_TRIANGLES;
 		_objects.push_back(geo);
 	}
+}
+
+void RenderingManager::assignBuffers(Geometry& geometry) {
+	//Generate vao for the object
+	//Constant 1 means 1 vao is being generated
+	glGenVertexArrays(1, &geometry.vao);
+	glBindVertexArray(geometry.vao);
+
+	//Generate vbos for the object
+	//Constant 1 means 1 vbo is being generated
+	glGenBuffers(1, &geometry.vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &geometry.uvBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(1);
+
+	glGenBuffers(1, &geometry.normalBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(2);
 
 
 }
+
+void RenderingManager::setBufferData(Geometry& geometry) {
+	//Send geometry to the GPU
+	//Must be called whenever anything is updated about the object
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * geometry.verts.size(), geometry.verts.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.normals.size(), geometry.normals.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * geometry.uvs.size(), geometry.uvs.data(), GL_STATIC_DRAW);
+}
+
+void RenderingManager::deleteBufferData(Geometry& geometry) {
+	glDeleteBuffers(1, &geometry.vertexBuffer);
+	glDeleteBuffers(1, &geometry.normalBuffer);
+	glDeleteBuffers(1, &geometry.uvBuffer);
+	glDeleteBuffers(1, &geometry.colorBuffer);
+	glDeleteVertexArrays(1, &geometry.vao);
+}
+
+void RenderingManager::assignSpriteBuffers(Geometry& geometry) {
+	//Generate vao for the object
+	//Constant 1 means 1 vao is being generated
+	glGenVertexArrays(1, &geometry.vao);
+	glBindVertexArray(geometry.vao);
+
+	//Generate vbos for the object
+	//Constant 1 means 1 vbo is being generated
+	glGenBuffers(1, &geometry.vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(0);
+
+
+	glGenBuffers(1, &geometry.uvBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(1);
+
+}
+
+
+void RenderingManager::setSpriteBufferData(Geometry& geometry) {
+	//Send geometry to the GPU
+	//Must be called whenever anything is updated about the object
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * geometry.verts.size(), geometry.verts.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * geometry.uvs.size(), geometry.uvs.data(), GL_STATIC_DRAW);
+}
+
+
+void RenderingManager::initTextRender() {
+	//Text initialization
+	FT_Library ft;
+	if (FT_Init_FreeType(&ft))
+		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+
+	FT_Face face;
+	if (FT_New_Face(ft, "../TopShopper/resources/Fonts/lora/Lora-Regular.ttf", 0, &face))
+		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+
+	FT_Set_Pixel_Sizes(face, 0, 48);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Disable byte-alignment restriction
+
+	for (GLubyte c = 0; c < 128; c++)
+	{
+		// Load character glyph 
+		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+		{
+			std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+			continue;
+		}
+		// Generate texture
+		GLuint texture;
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			GL_RED,
+			face->glyph->bitmap.width,
+			face->glyph->bitmap.rows,
+			0,
+			GL_RED,
+			GL_UNSIGNED_BYTE,
+			face->glyph->bitmap.buffer
+		);
+		// Set texture options
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		// Now store character for later use
+		Character character = {
+			texture,
+			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+			face->glyph->advance.x
+		};
+		Characters.insert(std::pair<GLchar, Character>(c, character));
+	}
+	FT_Done_Face(face);
+	FT_Done_FreeType(ft);
+}
+
+
+
 
 void RenderingManager::cleanup() {
 	glfwTerminate();
@@ -642,70 +656,4 @@ void ErrorCallback(int error, const char* description) {
 	std::cout << description << std::endl;
 }
 
-void RenderingManager::assignBuffers(Geometry& geometry) {
-	//Generate vao for the object
-	//Constant 1 means 1 vao is being generated
-	glGenVertexArrays(1, &geometry.vao);
-	glBindVertexArray(geometry.vao);
 
-	//Generate vbos for the object
-	//Constant 1 means 1 vbo is being generated
-	glGenBuffers(1, &geometry.vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(0);
-
-	/*
-	glGenBuffers(1, &geometry.colorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);
-	*/
-
-	glGenBuffers(1, &geometry.normalBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);
-
-	glGenBuffers(1, &geometry.uvBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(2);
-
-
-}
-
-void RenderingManager::setBufferData(Geometry& geometry) {
-	//Send geometry to the GPU
-	//Must be called whenever anything is updated about the object
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * geometry.verts.size(), geometry.verts.data(), GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.normals.size(), geometry.normals.data(), GL_STATIC_DRAW);
-
-	/*
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.colorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * geometry.colors.size(), geometry.colors.data(), GL_STATIC_DRAW);
-	*/
-
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * geometry.uvs.size(), geometry.uvs.data(), GL_STATIC_DRAW);
-
-
-
-	/*
-	glGenBuffers(1, &geometry.indexBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.indexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * geometry.vIndex.size(), geometry.vIndex.data(), GL_STATIC_DRAW);
-	*/
-}
-
-void RenderingManager::deleteBufferData(Geometry& geometry) {
-	glDeleteBuffers(1, &geometry.vertexBuffer);
-	glDeleteBuffers(1, &geometry.normalBuffer);
-	glDeleteBuffers(1, &geometry.uvBuffer);
-	glDeleteBuffers(1, &geometry.colorBuffer);
-	//glDeleteBuffers(1, &geometry.indexBuffer);
-	glDeleteVertexArrays(1, &geometry.vao);
-}

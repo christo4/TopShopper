@@ -8,7 +8,7 @@
 #include "Geometry.h"
 #include <map>
 
-class Broker; 
+class Broker;
 struct GLFWwindow;
 
 
@@ -32,13 +32,19 @@ public:
 	void cleanup();
 
 	//Renders each object
-	void RenderScene(std::vector<Geometry>& objects);
+	void RenderScene();
 	void renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
+	void renderSprites();
+	void initTextRender();
+
 
 	//Create vao and vbos for objects
 	static void assignBuffers(Geometry& geometry);
 	static void setBufferData(Geometry& geometry);
 	static void deleteBufferData(Geometry& geometry);
+
+	static void assignSpriteBuffers(Geometry& geometry);
+	static void setSpriteBufferData(Geometry& geometry);
 
 	//Ensures that vao and vbos are set up properly
 	bool CheckGLErrors();
@@ -46,6 +52,7 @@ public:
 	//Pointer to the current shader program being used to render
 	GLuint shaderProgram;
 	GLuint textShaderProgram;
+	GLuint spriteShaderProgram;
 
 	GLFWwindow* getWindow();
 
@@ -67,7 +74,7 @@ private:
 
 	void openWindow();
 
-	GLuint textVao, textVbo;
+
 };
 
 #endif // RENDERINGMANAGER_H_
