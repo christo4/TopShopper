@@ -161,6 +161,11 @@ public:
 	physx::PxU32 getNbShapes();
 
 
+	// returns true if any touching/blocking hit was found
+	bool raycast(const physx::PxVec3 &origin, const physx::PxVec3 &unitDir, const physx::PxReal distance, physx::PxRaycastCallback &hitCall);
+
+
+
 
 private:
 	Broker *_broker = nullptr;
