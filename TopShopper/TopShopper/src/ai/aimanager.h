@@ -79,6 +79,9 @@ public:
 	virtual ~AIManager();
 	void init();
 	void updateSeconds(double variableDeltaTime);
+
+	void removeDeletedTarget(physx::PxVec3 deletedTarget);
+
 private:
 	Broker *_broker = nullptr;
 

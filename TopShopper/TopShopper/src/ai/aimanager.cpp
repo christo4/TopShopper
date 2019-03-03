@@ -13,6 +13,7 @@
 #include "objects/broccoli.h"
 #include "objects/sparechange.h"
 #include <cstdlib>
+#include "utility/utility.h"
 
 using namespace physx;
 
@@ -129,6 +130,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 	// check if any spawn-point spare change have been picked up in this frame (destroyed)...
 	for (int i = 0; i < NB_SPARE_CHANGE_SPAWN_POINTS; i++) {
 		if (spareChangeInstances.at(i) != nullptr && spareChangeInstances.at(i)->getDestroyFlag()) {
+			removeDeletedTarget(spareChangeSpawnPoints.at(i).p);
 			spareChangeInstances.at(i) = nullptr;
 			spareChangeSpawnTimers.at(i) = SPARE_CHANGE_RESPAWN_TIME;
 		}
@@ -150,48 +152,57 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 
 	// check if any spawn-point grocery items have been picked up in this frame (destroyed)...
 	if (milkSpawnIndex != -1 && drinkInstances.at(milkSpawnIndex)->getDestroyFlag()) {
+		removeDeletedTarget(drinkSpawnPoints.at(milkSpawnIndex).p);
 		drinkInstances.at(milkSpawnIndex) = nullptr;
 		milkSpawnIndex = -1;
 		milkSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
 	}
 	if (waterSpawnIndex != -1 && drinkInstances.at(waterSpawnIndex)->getDestroyFlag()) {
+		removeDeletedTarget(drinkSpawnPoints.at(waterSpawnIndex).p);
 		drinkInstances.at(waterSpawnIndex) = nullptr;
 		waterSpawnIndex = -1;
 		waterSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
 	}
 	if (colaSpawnIndex != -1 && drinkInstances.at(colaSpawnIndex)->getDestroyFlag()) {
+		removeDeletedTarget(drinkSpawnPoints.at(colaSpawnIndex).p);
 		drinkInstances.at(colaSpawnIndex) = nullptr;
 		colaSpawnIndex = -1;
 		colaSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
 	}
 
 	if (appleSpawnIndex != -1 && fruitInstances.at(appleSpawnIndex)->getDestroyFlag()) {
+		removeDeletedTarget(fruitSpawnPoints.at(appleSpawnIndex).p);
 		fruitInstances.at(appleSpawnIndex) = nullptr;
 		appleSpawnIndex = -1;
 		appleSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
 	}
 	if (watermelonSpawnIndex != -1 && fruitInstances.at(watermelonSpawnIndex)->getDestroyFlag()) {
+		removeDeletedTarget(fruitSpawnPoints.at(watermelonSpawnIndex).p);
 		fruitInstances.at(watermelonSpawnIndex) = nullptr;
 		watermelonSpawnIndex = -1;
 		watermelonSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
 	}
 	if (bananaSpawnIndex != -1 && fruitInstances.at(bananaSpawnIndex)->getDestroyFlag()) {
+		removeDeletedTarget(fruitSpawnPoints.at(bananaSpawnIndex).p);
 		fruitInstances.at(bananaSpawnIndex) = nullptr;
 		bananaSpawnIndex = -1;
 		bananaSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
 	}
 
 	if (carrotSpawnIndex != -1 && veggieInstances.at(carrotSpawnIndex)->getDestroyFlag()) {
+		removeDeletedTarget(veggieSpawnPoints.at(carrotSpawnIndex).p);
 		veggieInstances.at(carrotSpawnIndex) = nullptr;
 		carrotSpawnIndex = -1;
 		carrotSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
 	}
 	if (eggplantSpawnIndex != -1 && veggieInstances.at(eggplantSpawnIndex)->getDestroyFlag()) {
+		removeDeletedTarget(veggieSpawnPoints.at(eggplantSpawnIndex).p);
 		veggieInstances.at(eggplantSpawnIndex) = nullptr;
 		eggplantSpawnIndex = -1;
 		eggplantSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
 	}
 	if (broccoliSpawnIndex != -1 && veggieInstances.at(broccoliSpawnIndex)->getDestroyFlag()) {
+		removeDeletedTarget(veggieSpawnPoints.at(broccoliSpawnIndex).p);
 		veggieInstances.at(broccoliSpawnIndex) = nullptr;
 		broccoliSpawnIndex = -1;
 		broccoliSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
@@ -383,6 +394,27 @@ void AIManager::setNewAITargets() {
 					std::cout << closestTarget.x << " " << closestTarget.y << " " << closestTarget.z << std::endl;
 				}
 
+			}
+		}
+	}
+}
+
+
+
+
+
+
+void AIManager::removeDeletedTarget(physx::PxVec3 deletedTarget) {
+	const std::vector<std::shared_ptr<ShoppingCartPlayer>> &players = Broker::getInstance()->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
+	for (std::shared_ptr<ShoppingCartPlayer> player : players) {
+		std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
+		if (playerScript->_playerType == PlayerScript::BOT) {
+			for (int i = 0; i < playerScript->_targets.size(); i++) {
+				if (isApproxEqual(playerScript->_targets.at(i), deletedTarget)) {
+					std::cout << "target removed" << std::endl;
+					playerScript->_targets.erase(playerScript->_targets.begin() + i);
+					break;
+				}
 			}
 		}
 	}

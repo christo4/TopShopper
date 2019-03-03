@@ -254,20 +254,13 @@ void PlayerScript::bashed() {
 
 
 
-
-
+// NOTE: the bots should be raycasting every single frame to prevent slowing down and getting stuck
 void PlayerScript::navigate() {
-	// 1. for now, figure out the steer angle (-1.0 to 1.0) based on relative vector (me to target)
-	// 2. feed inputs (same as fixedupdate() then call this function in fixedupdate.
-
-	if (_targets.size() == 0) return;
-
 
 	ShoppingCartPlayer *player = dynamic_cast<ShoppingCartPlayer*>(_entity);
 	PxTransform transform = player->_actor->is<PxRigidDynamic>()->getGlobalPose();
 	PxVec3 pos = transform.p;
 	PxQuat rot = transform.q;
-	PxVec3 targetPos = _targets.at(0);
 
 	// find angle (in xz-plane between forward direction (can get forward vector, remove the y component then normalize it and compare it to a normalized vector from current pos to target pos)
 
@@ -275,16 +268,19 @@ void PlayerScript::navigate() {
 	// assume starting rot = PxIdentity for now...
 	PxVec3 forward(0.0f, 0.0f, 1.0f);
 	forward = rot.rotate(forward);
-
 	PxVec3 forwardNoY(forward.x, 0.0f, forward.z);
 	PxVec3 forwardNormalized = forwardNoY.getNormalized();
 
-	PxVec3 diff = targetPos - pos;
-	PxVec3 diffNoY(diff.x, 0.0f, diff.z);
-	PxVec3 diffNormalized = diff.getNormalized();
+	PxVec3 diffNoY;
+	PxVec3 diffNormalized;
 
+	if (_targets.size() > 0) {
+		PxVec3 targetPos = _targets.at(0);
+		PxVec3 diff = targetPos - pos;
+		diffNoY = PxVec3(diff.x, 0.0f, diff.z);
+		diffNormalized = diff.getNormalized();
+	}
 
-	// MOVE THIS UP LATER...
 
 	// 5 raycasts (FarLeft, MidLeft, Center, MidRight, FarRight)
 
@@ -331,14 +327,11 @@ void PlayerScript::navigate() {
 
 		int turnDir = 0;
 
-
-
 		if (farLeftStatus) {
 			if (farLeftHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(farLeftHit.block.actor->userData);
 				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
-					turnDir += 1;
-					//std::cout << "FL-hit" << std::endl;
+					if (fabs(farLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 				}
 			}
 		}
@@ -346,17 +339,7 @@ void PlayerScript::navigate() {
 			if (midLeftHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(midLeftHit.block.actor->userData);
 				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
-					turnDir += 2;
-					//std::cout << "ML-hit" << std::endl;
-				}
-			}
-		}
-		if (centerStatus) {
-			if (centerHit.hasBlock) {
-				Entity *entityHit = static_cast<Entity*>(centerHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
-					turnDir += 1;
-					//std::cout << "C-hit" << std::endl;
+					if (fabs(midLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 				}
 			}
 		}
@@ -364,8 +347,7 @@ void PlayerScript::navigate() {
 			if (midRightHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(midRightHit.block.actor->userData);
 				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
-					turnDir -= 2;
-					//std::cout << "MR-hit" << std::endl;
+					if (fabs(midRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 				}
 			}
 		}
@@ -373,13 +355,24 @@ void PlayerScript::navigate() {
 			if (farRightHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(farRightHit.block.actor->userData);
 				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
-					turnDir -= 1;
-					//std::cout << "FR-hit" << std::endl;
+					if (fabs(farRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 				}
 			}
 		}
 
 
+
+		if (turnDir == 0) {
+			if (centerStatus) {
+				if (centerHit.hasBlock) {
+					Entity *entityHit = static_cast<Entity*>(centerHit.block.actor->userData);
+					if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
+						if (fabs(centerHit.block.normal.y - 1.0f) >= 0.0001f) turnDir = 3; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+						//TODO: change this to use the hit normal instead (e.g. hit wall like \ go left, / go right) 
+					}
+				}
+			}
+		}
 
 
 		PxReal accel = 1.0f;
@@ -423,7 +416,6 @@ void PlayerScript::navigate() {
 			steer = -0.65f;
 			break;
 		case 3:
-		case 4:
 			steer = -1.0f;
 			break;
 		}
@@ -455,8 +447,15 @@ void PlayerScript::navigate() {
 
 	}
 	else {
+		if (_targets.size() == 0) { // if bot doesnt have a current target for some reason...
+			//std::cout << "BOT WITHOUT A JOB!" << std::endl;
+			//player->_shoppingCartBase->processRawInputDataController(0.0f, 0.0f, 1.0f, 0.0f, false); // put bot into a braking mode
+			return;
+		}
+
 		
 
+		// otherwise, we have a target to get to...
 
 		PxVec3 crossprod = forwardNormalized.cross(diffNormalized);
 
@@ -490,42 +489,13 @@ void PlayerScript::navigate() {
 	}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-	
-
-
-
-
 	// now check if we have arrived at (close) to our destination...
 
-	float diffNoYMag = diffNoY.magnitude();
-
-
-	if (diffNoYMag < 5.0f) {
-		_targets.erase(_targets.begin() + 0); // erase first target (element 0)
-		//player->_shoppingCartBase->clearRawInputDataController();
+	if (_targets.size() > 0) {
+		float diffNoYMag = diffNoY.magnitude();
+		if (diffNoYMag < 5.0f) {
+			_targets.erase(_targets.begin() + 0); // erase first target (element 0)
+		}
 	}
-
-
-
-
-
 	
-
-
-
-
-	
-
 }
