@@ -431,13 +431,20 @@ void PhysicsManager::switchToScene1() {
 	// VEHICLE 1:
 	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 16.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
 	std::shared_ptr<PlayerScript> player1Script = std::static_pointer_cast<PlayerScript>(vehicle1->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	player1Script->_playerType = PlayerScript::PlayerTypes::HUMAN;
 	player1Script->_inputID = 1;
 
-	// VEHICLE 2: (COMMENT OUT WHEN 2 CONTROLLERS ARE NOT PLUGGED IN)
+	// VEHICLE 2: (COMMENT OUT WHEN 2 CONTROLLERS ARE NOT PLUGGED IN - NVM this doesnt seem to matter)
 	// FOR TEST PURPOSES - BASHING
-	std::shared_ptr<ShoppingCartPlayer> vehicle2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(20.0f, 5.0f, 70.0f, PxQuat(PxIdentity)), "vehicle2"));
-	std::shared_ptr<PlayerScript> player2Script = std::static_pointer_cast<PlayerScript>(vehicle2->getComponent(ComponentTypes::PLAYER_SCRIPT));
-	player2Script->_inputID = 2;
+	//std::shared_ptr<ShoppingCartPlayer> vehicle2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(20.0f, 5.0f, 70.0f, PxQuat(PxIdentity)), "vehicle2"));
+	//std::shared_ptr<PlayerScript> player2Script = std::static_pointer_cast<PlayerScript>(vehicle2->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	//player2Script->_inputID = 2;
+
+	// BOT 1:
+
+	std::shared_ptr<ShoppingCartPlayer> bot1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 5.0f, -160.0f, PxQuat(PxIdentity)), "bot1"));
+	std::shared_ptr<PlayerScript> bot1Script = std::static_pointer_cast<PlayerScript>(bot1->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	bot1Script->_playerType = PlayerScript::PlayerTypes::BOT;
 
 }
 
@@ -898,6 +905,17 @@ PxShape* PhysicsManager::createTriMeshCollider(const std::vector<PxVec3>& verts,
 	shape->setSimulationFilterData(simData);
 
 	return shape;
+}
+
+
+
+
+
+
+
+
+bool PhysicsManager::raycast(const PxVec3 &origin, const PxVec3 &unitDir, const PxReal distance, PxRaycastCallback &hitCall) {
+	return _activeScene->_physxScene->raycast(origin, unitDir, distance, hitCall);
 }
 
 

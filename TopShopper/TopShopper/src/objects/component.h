@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 #include <glm/glm.hpp>
+#include <foundation/PxVec3.h>
 
 
 
@@ -121,6 +122,13 @@ struct PickupScript : BehaviourScript {
 
 
 struct PlayerScript : BehaviourScript {
+
+	enum PlayerTypes {
+		HUMAN,
+		BOT
+		//OBSTACLE
+	};
+
 	PlayerScript(Entity *entity);
 
 	void onSpawn() override;
@@ -136,6 +144,8 @@ struct PlayerScript : BehaviourScript {
 	void onDestroy() override;
 
 	// SPECIFICS...
+
+	PlayerTypes _playerType;
 
 	int _inputID = -1; // 1, 2, 3, or 4 (unique)
 	int _points = 0; // amount of points this player has
@@ -153,6 +163,15 @@ struct PlayerScript : BehaviourScript {
 	static const int SHOPPING_LIST_COMPLETED_POINTS = 50;
 
 	void bashed();
+
+
+	// AI STUFF...
+
+	//std::vector<physx::PxVec3> _targets = { physx::PxVec3(0.0f, 2.0f, -80.0f), physx::PxVec3(80.0f, 2.0f, 0.0f), physx::PxVec3(0.0f, 2.0f, 80.0f), physx::PxVec3(-80.0f, 2.0f, 0.0f) }; // hardcoded test point
+	std::vector<physx::PxVec3> _targets = { physx::PxVec3(0.0f, 2.0f, 160.0f) }; // hardcoded test point
+
+
+	void navigate();
 
 };
 
