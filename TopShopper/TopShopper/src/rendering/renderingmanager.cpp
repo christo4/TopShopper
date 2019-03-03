@@ -4,16 +4,9 @@
 #include <iostream>
 #include <string>
 #include "ShaderTools.h"
-
 #include "PxRigidDynamic.h"
-
 #include <ft2build.h>
 #include FT_FREETYPE_H
-
-//**Must include glad and GLFW in this order or it breaks**
-//#include <glad/glad.h>
-//#include <GLFW/glfw3.h>
-
 #include "vehicle/VehicleShoppingCart.h"
 
 
@@ -67,6 +60,9 @@ void RenderingManager::init() {
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/background3-wood.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(GROUND_GEO_NO_INDEX)->texture = texture;
+
+
+	initSpriteTextures();
 
 }
 
@@ -144,7 +140,7 @@ void RenderingManager::RenderScene() {
 		glUniform3f(colorID, g.color.x, g.color.y, g.color.z);
 		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
 		glUniformMatrix4fv(ViewID, 1, GL_FALSE, &View[0][0]);
-		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &Projection[0][0]);
+		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &Projection[0][0]);d 
 
 		glBindVertexArray(g.vao);
 		assignBuffers(g);
@@ -155,23 +151,24 @@ void RenderingManager::RenderScene() {
 
 
 	renderText("Test Text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-	//renderSprites();
+
+	renderSprite(_borderSprite, 852, 100, 1068, 172);
+
 	CheckGLErrors();
 }
 
 
-void RenderingManager::renderSprites() {
-	MyTexture texture;
+void RenderingManager::renderSprite(MyTexture spriteTex, int bottomLeftX, int bottomLeftY, int topRightX, int topRightY) {
 	Geometry sprite;
-	InitializeTexture(&texture, "../TopShopper/resources/Sprites/Border.png", GL_TEXTURE_2D);
-	sprite.texture = texture;
 
-	sprite.verts.push_back(glm::vec4(-0.2f, -0.85f, 0.0f, 1.0f));
-	sprite.verts.push_back(glm::vec4(0.2f, -0.85f, 0.0f, 1.0f));
-	sprite.verts.push_back(glm::vec4(0.2f, -0.65f, 0.0f, 1.0f));
-	sprite.verts.push_back(glm::vec4(-0.2f, -0.85f, 0.0f, 1.0f));
-	sprite.verts.push_back(glm::vec4(0.2f, -0.65f, 0.0f, 1.0f));
-	sprite.verts.push_back(glm::vec4(-0.2f, -0.65f, 0.0f, 1.0f));
+	sprite.texture = spriteTex;
+
+	sprite.verts.push_back(glm::vec4(bottomLeftX, bottomLeftY, 0.0f, 1.0f));
+	sprite.verts.push_back(glm::vec4(topRightX, bottomLeftY, 0.0f, 1.0f));
+	sprite.verts.push_back(glm::vec4(topRightX, topRightY, 0.0f, 1.0f));
+	sprite.verts.push_back(glm::vec4(bottomLeftX, bottomLeftY, 0.0f, 1.0f));
+	sprite.verts.push_back(glm::vec4(topRightX, topRightY, 0.0f, 1.0f));
+	sprite.verts.push_back(glm::vec4(bottomLeftX, topRightY, 0.0f, 1.0f));
 
 	sprite.uvs.push_back(glm::vec2(0.0f, 0.0f));
 	sprite.uvs.push_back(glm::vec2(1.0f, 0.0f));
@@ -179,14 +176,21 @@ void RenderingManager::renderSprites() {
 	sprite.uvs.push_back(glm::vec2(0.0f, 0.0f));
 	sprite.uvs.push_back(glm::vec2(1.0f, 1.0f));
 	sprite.uvs.push_back(glm::vec2(0.0f, 1.0f));
-
+	
 
 	glUseProgram(spriteShaderProgram);
+
+	int width;
+	int height;
+	glfwGetWindowSize(_window, &width, &height);
+	glm::mat4 projection = glm::ortho(0.0f, (float)width, 0.0f, (float)height);
+	glUniformMatrix4fv(glGetUniformLocation(spriteShaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(sprite.texture.target, sprite.texture.textureID);
 	GLuint uniformLocation = glGetUniformLocation(spriteShaderProgram, "SpriteTexture"); //send sprite data to the sprite shader
 	glUniform1i(uniformLocation, 0);
-
 
 	assignSpriteBuffers(sprite);
 	setSpriteBufferData(sprite);
@@ -200,6 +204,27 @@ void RenderingManager::renderSprites() {
 	glUseProgram(0);
 	glBindVertexArray(0);
 }
+
+
+
+void RenderingManager::initSpriteTextures() {
+
+	InitializeTexture(&_borderSprite, "../TopShopper/resources/Sprites/Border.png", GL_TEXTURE_2D);
+	InitializeTexture(&_appleSprite, "../TopShopper/resources/Sprites/Apple.png", GL_TEXTURE_2D);
+	InitializeTexture(&_bananaSprite, "../TopShopper/resources/Sprites/Banana.png", GL_TEXTURE_2D);
+	InitializeTexture(&_broccoliSprite, "../TopShopper/resources/Sprites/Broccoli.png", GL_TEXTURE_2D);
+	InitializeTexture(&_carrotSprite, "../TopShopper/resources/Sprites/Carrot.png", GL_TEXTURE_2D);
+	InitializeTexture(&_colaSprite, "../TopShopper/resources/Sprites/Cola.png", GL_TEXTURE_2D);
+	InitializeTexture(&_cookieSprite, "../TopShopper/resources/Sprites/Cookie.png", GL_TEXTURE_2D);
+	InitializeTexture(&_eggplantSprite, "../TopShopper/resources/Sprites/Eggplant.png", GL_TEXTURE_2D);
+	InitializeTexture(&_hotPotatoSprite, "../TopShopper/resources/Sprites/Hotpotato.png", GL_TEXTURE_2D);
+	InitializeTexture(&_milkSprite, "../TopShopper/resources/Sprites/Milk.png", GL_TEXTURE_2D);
+	InitializeTexture(&_waterSprite, "../TopShopper/resources/Sprites/Water.png", GL_TEXTURE_2D);
+	InitializeTexture(&_watermelonSprite, "../TopShopper/resources/Sprites/Watermelon.png", GL_TEXTURE_2D);
+
+}
+
+
 
 
 
@@ -218,7 +243,6 @@ void RenderingManager::renderText(std::string text, GLfloat x, GLfloat y, GLfloa
 	int width;
 	int height;
 	glfwGetWindowSize(_window, &width, &height);
-
 	glm::mat4 projection = glm::ortho(0.0f, (float)width, 0.0f, (float)height);
 
 	glGenVertexArrays(1, &textVao);
@@ -446,8 +470,6 @@ void RenderingManager::assignBuffers(Geometry& geometry) {
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.normalBuffer);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(2);
-
-
 }
 
 void RenderingManager::setBufferData(Geometry& geometry) {
@@ -611,8 +633,8 @@ void RenderingManager::openWindow() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	int width = 1920;
-	int height = 1080;
+	int width = WINDOW_WIDTH;
+	int height = WINDOW_HEIGHT;
 	_window = glfwCreateWindow(width, height, "Top Shopper", 0, 0);
 	if (!_window) {
 		std::cout << "Program failed to create GLFW window, TERMINATING" << std::endl;

@@ -1,10 +1,13 @@
 #ifndef RENDERINGMANAGER_H_
 #define RENDERINGMANAGER_H_
 
+#define WINDOW_WIDTH 1920
+#define WINDOW_HEIGHT 1080
+
+
 //**Must include glad and GLFW in this order or it breaks**
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 #include "Geometry.h"
 #include <map>
 
@@ -19,6 +22,20 @@ struct Character {
 	GLuint     Advance;    // Offset to advance to next glyph
 };
 
+enum SpriteTexture {
+	BORDER_SPRITE,
+	APPLE_SPRITE,
+	BANANA_SPRITE,
+	BROCCOLI_SPRITE,
+	CARROT_SPRITE,
+	COLA_SPRITE,
+	COOKIE_SPRITE,
+	EGGPLANT_SPRITE,
+	HOT_POTATO_SPRITE,
+	MILK_SPRITE,
+	WATER_SPRITE,
+	WATERMELON_SPRITE
+};
 
 
 class RenderingManager {
@@ -34,8 +51,9 @@ public:
 	//Renders each object
 	void RenderScene();
 	void renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
-	void renderSprites();
+	void renderSprite(MyTexture spriteTex, int bottomLeftX, int bottomLeftY, int topRightX, int topRightY);
 	void initTextRender();
+	void initSpriteTextures();
 
 
 	//Create vao and vbos for objects
@@ -64,17 +82,28 @@ public:
 
 	std::map<GLchar, Character> Characters;
 
+
+
+
 private:
 
 	Broker *_broker = nullptr;
-
 	GLFWwindow *_window = nullptr;
-
 	std::vector<Geometry> _objects;
-
 	void openWindow();
 
-
+	MyTexture _borderSprite;
+	MyTexture _appleSprite;
+	MyTexture _bananaSprite;
+	MyTexture _broccoliSprite;
+	MyTexture _carrotSprite;
+	MyTexture _colaSprite;
+	MyTexture _cookieSprite;
+	MyTexture _eggplantSprite;
+	MyTexture _hotPotatoSprite;
+	MyTexture _milkSprite;
+	MyTexture _waterSprite;
+	MyTexture _watermelonSprite;
 };
 
 #endif // RENDERINGMANAGER_H_

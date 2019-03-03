@@ -155,8 +155,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\fragment.glsl" />
+    <None Include="resources\shaders\fragmentSprite.glsl" />
     <None Include="resources\shaders\fragmentText.glsl" />
     <None Include="resources\shaders\vertex.glsl" />
+    <None Include="resources\shaders\vertexSprite.glsl" />
     <None Include="resources\shaders\vertexText.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
