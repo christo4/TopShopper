@@ -446,6 +446,18 @@ void PhysicsManager::switchToScene1() {
 	std::shared_ptr<PlayerScript> bot1Script = std::static_pointer_cast<PlayerScript>(bot1->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	bot1Script->_playerType = PlayerScript::PlayerTypes::BOT;
 
+	// BOT 2:
+
+	std::shared_ptr<ShoppingCartPlayer> bot2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(80.0f, 5.0f, 80.0f, PxQuat(PxIdentity)), "bot2"));
+	std::shared_ptr<PlayerScript> bot2Script = std::static_pointer_cast<PlayerScript>(bot2->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	bot2Script->_playerType = PlayerScript::PlayerTypes::BOT;
+
+	// BOT 3:
+
+	//std::shared_ptr<ShoppingCartPlayer> bot3 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-80.0f, 5.0f, -80.0f, PxQuat(PxIdentity)), "bot3"));
+	//std::shared_ptr<PlayerScript> bot3Script = std::static_pointer_cast<PlayerScript>(bot3->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	//bot3Script->_playerType = PlayerScript::PlayerTypes::BOT;
+
 }
 
 

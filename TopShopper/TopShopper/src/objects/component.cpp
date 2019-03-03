@@ -338,7 +338,7 @@ void PlayerScript::navigate() {
 				Entity *entityHit = static_cast<Entity*>(farLeftHit.block.actor->userData);
 				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
 					turnDir += 1;
-					std::cout << "FL-hit" << std::endl;
+					//std::cout << "FL-hit" << std::endl;
 				}
 			}
 		}
@@ -347,7 +347,7 @@ void PlayerScript::navigate() {
 				Entity *entityHit = static_cast<Entity*>(midLeftHit.block.actor->userData);
 				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
 					turnDir += 2;
-					std::cout << "ML-hit" << std::endl;
+					//std::cout << "ML-hit" << std::endl;
 				}
 			}
 		}
@@ -356,7 +356,7 @@ void PlayerScript::navigate() {
 				Entity *entityHit = static_cast<Entity*>(centerHit.block.actor->userData);
 				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
 					turnDir += 1;
-					std::cout << "C-hit" << std::endl;
+					//std::cout << "C-hit" << std::endl;
 				}
 			}
 		}
@@ -365,7 +365,7 @@ void PlayerScript::navigate() {
 				Entity *entityHit = static_cast<Entity*>(midRightHit.block.actor->userData);
 				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
 					turnDir -= 2;
-					std::cout << "MR-hit" << std::endl;
+					//std::cout << "MR-hit" << std::endl;
 				}
 			}
 		}
@@ -374,7 +374,7 @@ void PlayerScript::navigate() {
 				Entity *entityHit = static_cast<Entity*>(farRightHit.block.actor->userData);
 				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
 					turnDir -= 1;
-					std::cout << "FR-hit" << std::endl;
+					//std::cout << "FR-hit" << std::endl;
 				}
 			}
 		}

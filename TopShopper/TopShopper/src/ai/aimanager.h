@@ -14,6 +14,7 @@ class SpareChange;
 
 
 
+/*
 struct NavMesh {
 	std::vector<physx::PxVec3> _nodes; // node 0, 1, 2...
 	std::map<int, std::set<int>> _connections; // e.g. key (node 0) is connected to value (all nodes 1, 5, 7...)
@@ -68,13 +69,8 @@ struct NavMesh {
 	// NOTE: for later dynamic obstacle avoidance... I can raycast around (or maybe dynamically change nodes to be blocked if another cart is on top of them)
 	// to make a divergence from the path, I will just push a new position to the front of the _targets
 
-
-
-
-
-
 };
-
+*/
 
 
 class AIManager {
@@ -86,7 +82,7 @@ public:
 private:
 	Broker *_broker = nullptr;
 
-	static const int NB_SPARE_CHANGE_SPAWN_POINTS = 27;
+	static const int NB_SPARE_CHANGE_SPAWN_POINTS = 32;
 	const double SPARE_CHANGE_RESPAWN_TIME = 10.0; // seconds
 	std::array<std::shared_ptr<SpareChange>, NB_SPARE_CHANGE_SPAWN_POINTS> spareChangeInstances;
 	std::array<physx::PxTransform, NB_SPARE_CHANGE_SPAWN_POINTS> spareChangeSpawnPoints;
@@ -135,6 +131,10 @@ private:
 	int getNextDrinkSpawnIndex();
 	int getNextFruitSpawnIndex();
 	int getNextVeggieSpawnIndex();
+
+
+
+	void setNewAITargets();
 
 };
 
