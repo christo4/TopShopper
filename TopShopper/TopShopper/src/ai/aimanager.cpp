@@ -21,39 +21,39 @@ using namespace physx;
 AIManager::AIManager(Broker *broker) 
 	: _broker(broker)
 {
-	spareChangeSpawnPoints.at(0) = PxTransform(0.0f, 2.0f, -150.0f);
-	spareChangeSpawnPoints.at(1) = PxTransform(10.0f, 2.0f, -140.0f);
-	spareChangeSpawnPoints.at(2) = PxTransform(20.0f, 2.0f, -130.0f);
-	spareChangeSpawnPoints.at(3) = PxTransform(30.0f, 2.0f, -120.0f);
-	spareChangeSpawnPoints.at(4) = PxTransform(40.0f, 2.0f, -110.0f);
-	spareChangeSpawnPoints.at(5) = PxTransform(50.0f, 2.0f, -100.0f);
-	spareChangeSpawnPoints.at(6) = PxTransform(60.0f, 2.0f, -90.0f);
-	spareChangeSpawnPoints.at(7) = PxTransform(70.0f, 2.0f, -80.0f);
-	spareChangeSpawnPoints.at(8) = PxTransform(80.0f, 2.0f, -70.0f);
-	spareChangeSpawnPoints.at(9) = PxTransform(90.0f, 2.0f, -60.0f);
-	spareChangeSpawnPoints.at(10) = PxTransform(100.0f, 2.0f, -50.0f);
-	spareChangeSpawnPoints.at(11) = PxTransform(110.0f, 2.0f, -40.0f);
-	spareChangeSpawnPoints.at(12) = PxTransform(120.0f, 2.0f, -30.0f);
-	spareChangeSpawnPoints.at(13) = PxTransform(130.0f, 2.0f, -20.0f);
+	spareChangeSpawnPoints.at(0) = PxTransform(80.0f, 2.0f, 0.0f);
+	spareChangeSpawnPoints.at(1) = PxTransform(90.0f, 2.0f, 0.0f);
+	spareChangeSpawnPoints.at(2) = PxTransform(100.0f, 2.0f, 0.0f);
+	spareChangeSpawnPoints.at(3) = PxTransform(110.0f, 2.0f, 0.0f);
+	spareChangeSpawnPoints.at(4) = PxTransform(120.0f, 2.0f, 0.0f);
+	spareChangeSpawnPoints.at(5) = PxTransform(130.0f, 2.0f, 0.0f);
+	spareChangeSpawnPoints.at(6) = PxTransform(140.0f, 2.0f, 0.0f);
+	spareChangeSpawnPoints.at(7) = PxTransform(110.0f, 2.0f, 40.0f);
+	spareChangeSpawnPoints.at(8) = PxTransform(110.0f, 2.0f, -40.0f);
+	spareChangeSpawnPoints.at(9) = PxTransform(120.0f, 2.0f, 30.0f);
+	spareChangeSpawnPoints.at(10) = PxTransform(120.0f, 2.0f, -30.0f);
+	spareChangeSpawnPoints.at(11) = PxTransform(130.0f, 2.0f, 20.0f);
+	spareChangeSpawnPoints.at(12) = PxTransform(130.0f, 2.0f, -20.0f);
+	spareChangeSpawnPoints.at(13) = PxTransform(140.0f, 2.0f, 10.0f);
 	spareChangeSpawnPoints.at(14) = PxTransform(140.0f, 2.0f, -10.0f);
 	spareChangeSpawnPoints.at(15) = PxTransform(150.0f, 2.0f, 0.0f);
 
-	spareChangeSpawnPoints.at(16) = PxTransform(0.0f, 2.0f, 150.0f);
-	spareChangeSpawnPoints.at(17) = PxTransform(-10.0f, 2.0f, 140.0f);
-	spareChangeSpawnPoints.at(18) = PxTransform(-20.0f, 2.0f, 130.0f);
-	spareChangeSpawnPoints.at(19) = PxTransform(-30.0f, 2.0f, 120.0f);
-	spareChangeSpawnPoints.at(20) = PxTransform(-40.0f, 2.0f, 110.0f);
-	spareChangeSpawnPoints.at(21) = PxTransform(-50.0f, 2.0f, 100.0f);
-	spareChangeSpawnPoints.at(22) = PxTransform(-60.0f, 2.0f, 90.0f);
-	spareChangeSpawnPoints.at(23) = PxTransform(-70.0f, 2.0f, 80.0f);
-	spareChangeSpawnPoints.at(24) = PxTransform(-80.0f, 2.0f, 70.0f);
-	spareChangeSpawnPoints.at(25) = PxTransform(-90.0f, 2.0f, 60.0f);
-	spareChangeSpawnPoints.at(26) = PxTransform(-100.0f, 2.0f, 50.0f);
-	spareChangeSpawnPoints.at(27) = PxTransform(-110.0f, 2.0f, 40.0f);
-	spareChangeSpawnPoints.at(28) = PxTransform(-120.0f, 2.0f, 30.0f);
-	spareChangeSpawnPoints.at(29) = PxTransform(-130.0f, 2.0f, 20.0f);
-	spareChangeSpawnPoints.at(30) = PxTransform(-140.0f, 2.0f, 10.0f);
-	spareChangeSpawnPoints.at(31) = PxTransform(-150.0f, 2.0f, 0.0f);
+	spareChangeSpawnPoints.at(16) = PxTransform(-70.0f, 2.0f, -80.0f);
+	spareChangeSpawnPoints.at(17) = PxTransform(-70.0f, 2.0f, -70.0f);
+	spareChangeSpawnPoints.at(18) = PxTransform(-70.0f, 2.0f, -60.0f);
+	spareChangeSpawnPoints.at(19) = PxTransform(-70.0f, 2.0f, -50.0f);
+	spareChangeSpawnPoints.at(20) = PxTransform(-70.0f, 2.0f, -40.0f);
+	spareChangeSpawnPoints.at(21) = PxTransform(-70.0f, 2.0f, -30.0f);
+	spareChangeSpawnPoints.at(22) = PxTransform(-70.0f, 2.0f, -20.0f);
+	spareChangeSpawnPoints.at(23) = PxTransform(-70.0f, 2.0f, -10.0f);
+	spareChangeSpawnPoints.at(24) = PxTransform(-70.0f, 2.0f, 0.0f);
+	spareChangeSpawnPoints.at(25) = PxTransform(-70.0f, 2.0f, 10.0f);
+	spareChangeSpawnPoints.at(26) = PxTransform(-70.0f, 2.0f, 20.0f);
+	spareChangeSpawnPoints.at(27) = PxTransform(-70.0f, 2.0f, 30.0f);
+	spareChangeSpawnPoints.at(28) = PxTransform(-70.0f, 2.0f, 40.0f);
+	spareChangeSpawnPoints.at(29) = PxTransform(-70.0f, 2.0f, 50.0f);
+	spareChangeSpawnPoints.at(30) = PxTransform(-70.0f, 2.0f, 60.0f);
+	spareChangeSpawnPoints.at(31) = PxTransform(-70.0f, 2.0f, 70.0f);
 
 	// SAFE-GUARD...
 	for (int i = 0; i < NB_SPARE_CHANGE_SPAWN_POINTS; i++) {
@@ -63,35 +63,35 @@ AIManager::AIManager(Broker *broker)
 
 
 
-	drinkSpawnPoints.at(0) = PxTransform(-60.0f, 2.0f, 130.0f);
-	drinkSpawnPoints.at(1) = PxTransform(60.0f, 2.0f, 130.0f);
-	drinkSpawnPoints.at(2) = PxTransform(-100.0f, 2.0f, 75.0f);
-	drinkSpawnPoints.at(3) = PxTransform(100.0f, 2.0f, 75.0f);
-	drinkSpawnPoints.at(4) = PxTransform(0.0f, 2.0f, 110.0f);
-	drinkSpawnPoints.at(5) = PxTransform(0.0f, 2.0f, 70.0f);
-	drinkSpawnPoints.at(6) = PxTransform(-90.0f, 2.0f, 110.0f);
-	drinkSpawnPoints.at(7) = PxTransform(90.0f, 2.0f, 110.0f);
-	drinkSpawnPoints.at(8) = PxTransform(0.0f, 2.0f, 160.0f);
+	drinkSpawnPoints.at(0) = PxTransform(-59.0f, 2.0f, -23.0f);
+	drinkSpawnPoints.at(1) = PxTransform(-86.0f, 2.0f, -23.0f);
+	drinkSpawnPoints.at(2) = PxTransform(-156.0f, 2.0f, -23.0f);
+	drinkSpawnPoints.at(3) = PxTransform(-117.0f, 2.0f, -95.0f);
+	drinkSpawnPoints.at(4) = PxTransform(-50.0f, 2.0f, -74.0f);
+	drinkSpawnPoints.at(5) = PxTransform(-81.0f, 2.0f, -135.0f);
+	drinkSpawnPoints.at(6) = PxTransform(-29.0f, 2.0f, -110.0f);
+	drinkSpawnPoints.at(7) = PxTransform(26.0f, 2.0f, -158.0f);
+	drinkSpawnPoints.at(8) = PxTransform(6.0f, 2.0f, -84.0f);
 
-	fruitSpawnPoints.at(0) = PxTransform(150.0f, 2.0f, 45.0f);
-	fruitSpawnPoints.at(1) = PxTransform(150.0f, 2.0f, -20.0f);
-	fruitSpawnPoints.at(2) = PxTransform(90.0f, 2.0f, -110.0f);
-	fruitSpawnPoints.at(3) = PxTransform(25.0f, 2.0f, -145.0f);
-	fruitSpawnPoints.at(4) = PxTransform(15.0f, 2.0f, -100.0f);
-	fruitSpawnPoints.at(5) = PxTransform(50.0f, 2.0f, -60.0f);
-	fruitSpawnPoints.at(6) = PxTransform(85.0f, 2.0f, 15.0f);
-	fruitSpawnPoints.at(7) = PxTransform(95.0f, 2.0f, 45.0f);
-	fruitSpawnPoints.at(8) = PxTransform(55.0f, 2.0f, -20.0f);
+	fruitSpawnPoints.at(0) = PxTransform(-59.0f, 2.0f, 23.0f);
+	fruitSpawnPoints.at(1) = PxTransform(-86.0f, 2.0f, 23.0f);
+	fruitSpawnPoints.at(2) = PxTransform(-156.0f, 2.0f, 23.0f);
+	fruitSpawnPoints.at(3) = PxTransform(-117.0f, 2.0f, 95.0f);
+	fruitSpawnPoints.at(4) = PxTransform(-50.0f, 2.0f, 74.0f);
+	fruitSpawnPoints.at(5) = PxTransform(-81.0f, 2.0f, 135.0f);
+	fruitSpawnPoints.at(6) = PxTransform(-29.0f, 2.0f, 110.0f);
+	fruitSpawnPoints.at(7) = PxTransform(26.0f, 2.0f, 158.0f);
+	fruitSpawnPoints.at(8) = PxTransform(6.0f, 2.0f, 84.0f);
 
-	veggieSpawnPoints.at(0) = PxTransform(-30.0f, 2.0f, -75.0f);
-	veggieSpawnPoints.at(1) = PxTransform(-45.0f, 2.0f, -140.0f);
-	veggieSpawnPoints.at(2) = PxTransform(-110.0f, 2.0f, -95.0f);
-	veggieSpawnPoints.at(3) = PxTransform(-70.0f, 2.0f, -65.0f);
-	veggieSpawnPoints.at(4) = PxTransform(-65.0f, 2.0f, -25.0f);
-	veggieSpawnPoints.at(5) = PxTransform(-70.0f, 2.0f, 35.0f);
-	veggieSpawnPoints.at(6) = PxTransform(-125.0f, 2.0f, 60.0f);
-	veggieSpawnPoints.at(7) = PxTransform(-150.0f, 2.0f, -35.0f);
-	veggieSpawnPoints.at(8) = PxTransform(-105.0f, 2.0f, -110.0f);
+	veggieSpawnPoints.at(0) = PxTransform(33.0f, 2.0f, 50.0f);
+	veggieSpawnPoints.at(1) = PxTransform(33.0f, 2.0f, -50.0f);
+	veggieSpawnPoints.at(2) = PxTransform(77.0f, 2.0f, 145.0f);
+	veggieSpawnPoints.at(3) = PxTransform(77.0f, 2.0f, -145.0f);
+	veggieSpawnPoints.at(4) = PxTransform(133.0f, 2.0f, 66.0f);
+	veggieSpawnPoints.at(5) = PxTransform(133.0f, 2.0f, -66.0f);
+	veggieSpawnPoints.at(6) = PxTransform(103.0f, 2.0f, 42.0f);
+	veggieSpawnPoints.at(7) = PxTransform(103.0f, 2.0f, -42.0f);
+	veggieSpawnPoints.at(8) = PxTransform(63.0f, 2.0f, 0.0f);
 
 
 	for (int i = 0; i < NB_DRINK_SPAWN_POINTS; i++) {

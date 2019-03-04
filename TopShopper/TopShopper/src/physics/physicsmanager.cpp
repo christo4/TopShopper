@@ -428,8 +428,17 @@ void PhysicsManager::switchToScene1() {
 	// GROUND:
 	std::shared_ptr<Ground> ground = std::dynamic_pointer_cast<Ground>(instantiateEntity(EntityTypes::GROUND, PxTransform(0.0f, 0.0f, 0.0f, PxQuat(PxIdentity)), "ground"));
 
+	// OBSTACLE1.1:
+	std::shared_ptr<Obstacle1> obstacle1_1 = std::dynamic_pointer_cast<Obstacle1>(instantiateEntity(EntityTypes::OBSTACLE1, PxTransform(-115.0f, 0.0f, -4.0f, PxQuat(PxIdentity)), "obstacle1_1"));
+
+	// OBSTACLE2.1:
+	std::shared_ptr<Obstacle2> obstacle2_1 = std::dynamic_pointer_cast<Obstacle2>(instantiateEntity(EntityTypes::OBSTACLE2, PxTransform(70.0f, 0.0f, 90.0f, PxQuat(PxIdentity)), "obstacle2_1"));
+
+	// OBSTACLE2.2:
+	std::shared_ptr<Obstacle2> obstacle2_2 = std::dynamic_pointer_cast<Obstacle2>(instantiateEntity(EntityTypes::OBSTACLE2, PxTransform(70.0f, 0.0f, -90.0f, PxQuat(PxIdentity)), "obstacle2_2"));
+
 	// VEHICLE 1:
-	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 16.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
+	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 15.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
 	std::shared_ptr<PlayerScript> player1Script = std::static_pointer_cast<PlayerScript>(vehicle1->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	player1Script->_playerType = PlayerScript::PlayerTypes::HUMAN;
 	player1Script->_inputID = 1;
@@ -448,7 +457,7 @@ void PhysicsManager::switchToScene1() {
 
 	// BOT 2:
 
-	std::shared_ptr<ShoppingCartPlayer> bot2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(80.0f, 5.0f, 80.0f, PxQuat(PxIdentity)), "bot2"));
+	std::shared_ptr<ShoppingCartPlayer> bot2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 5.0f, 160.0f, PxQuat(PxIdentity)), "bot2"));
 	std::shared_ptr<PlayerScript> bot2Script = std::static_pointer_cast<PlayerScript>(bot2->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	bot2Script->_playerType = PlayerScript::PlayerTypes::BOT;
 
@@ -611,6 +620,54 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 
 		// ENTITY...
 		entity = std::make_shared<Ground>(actor);
+		break;
+	}
+	case EntityTypes::OBSTACLE1:
+	{
+		std::vector<PxVec3> verts = castVectorOfGLMVec4ToVectorOfPxVec3(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE1_GEO)->verts);
+		std::vector<PxU32> indices = _broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE1_GEO)->vIndex;
+		PxMaterial *material = gPhysics->createMaterial(0.5f, 0.5f, 0.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_OBSTACLE, CollisionFlags::COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eSIMULATION_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createTriMeshCollider(verts, indices, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidStatic *actor = gPhysics->createRigidStatic(transform);
+		actor->setName(name);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Obstacle1>(actor);
+		break;
+	}
+	case EntityTypes::OBSTACLE2:
+	{
+		std::vector<PxVec3> verts = castVectorOfGLMVec4ToVectorOfPxVec3(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE2_GEO)->verts);
+		std::vector<PxU32> indices = _broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE2_GEO)->vIndex;
+		PxMaterial *material = gPhysics->createMaterial(0.5f, 0.5f, 0.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_OBSTACLE, CollisionFlags::COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eSIMULATION_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createTriMeshCollider(verts, indices, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidStatic *actor = gPhysics->createRigidStatic(transform);
+		actor->setName(name);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Obstacle2>(actor);
 		break;
 	}
 	case EntityTypes::MILK:

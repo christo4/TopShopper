@@ -17,6 +17,9 @@
 #include "objects/eggplant.h"
 #include "objects/broccoli.h"
 #include "objects/sparechange.h"
+#include "objects/obstacle1.h"
+#include "objects/obstacle2.h"
+
 
 class Broker;
 

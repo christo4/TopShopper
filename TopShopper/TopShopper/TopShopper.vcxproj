@@ -104,6 +104,8 @@
     <ClCompile Include="src\objects\entity.cpp" />
     <ClCompile Include="src\objects\ground.cpp" />
     <ClCompile Include="src\objects\milk.cpp" />
+    <ClCompile Include="src\objects\obstacle1.cpp" />
+    <ClCompile Include="src\objects\obstacle2.cpp" />
     <ClCompile Include="src\objects\shoppingcartplayer.cpp" />
     <ClCompile Include="src\objects\sparechange.cpp" />
     <ClCompile Include="src\objects\water.cpp" />
@@ -137,6 +139,8 @@
     <ClInclude Include="src\objects\entity.h" />
     <ClInclude Include="src\objects\ground.h" />
     <ClInclude Include="src\objects\milk.h" />
+    <ClInclude Include="src\objects\obstacle1.h" />
+    <ClInclude Include="src\objects\obstacle2.h" />
     <ClInclude Include="src\objects\shoppingcartplayer.h" />
     <ClInclude Include="src\objects\sparechange.h" />
     <ClInclude Include="src\objects\water.h" />

@@ -22,6 +22,8 @@ Geometry* WatermelonGeo = new Geometry();
 Geometry* CarrotGeo = new Geometry();
 Geometry* EggplantGeo = new Geometry();
 Geometry* BroccoliGeo = new Geometry();
+Geometry* Obstacle1Geo = new Geometry();
+Geometry* Obstacle2Geo = new Geometry();
 
 Geometry* VehicleChassisGeoNoIndex = new Geometry();
 Geometry* VehicleWheelGeoNoIndex = new Geometry();
@@ -36,7 +38,8 @@ Geometry* WatermelonGeoNoIndex = new Geometry();
 Geometry* CarrotGeoNoIndex = new Geometry();
 Geometry* EggplantGeoNoIndex = new Geometry();
 Geometry* BroccoliGeoNoIndex = new Geometry();
-
+Geometry* Obstacle1GeoNoIndex = new Geometry();
+Geometry* Obstacle2GeoNoIndex = new Geometry();
 
 LoadingManager::LoadingManager(Broker *broker) 
 	: _broker(broker)
@@ -499,6 +502,71 @@ void LoadingManager::init() {
 	normalIndex.clear();
 
 
+
+	//obstacle1
+	loadObject("../TopShopper/resources/Objects/Wall.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	Obstacle1Geo->verts = returnVertices;
+	Obstacle1Geo->uvs = returnUV;
+	Obstacle1Geo->normals = returnNormal;
+	Obstacle1Geo->vIndex = vIndex;
+	Obstacle1Geo->uvIndex = uvIndex;
+	Obstacle1Geo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		Obstacle1GeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		Obstacle1GeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		Obstacle1GeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+
+	//obstacle2
+	loadObject("../TopShopper/resources/Objects/Wall2.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	Obstacle2Geo->verts = returnVertices;
+	Obstacle2Geo->uvs = returnUV;
+	Obstacle2Geo->normals = returnNormal;
+	Obstacle2Geo->vIndex = vIndex;
+	Obstacle2Geo->uvIndex = uvIndex;
+	Obstacle2Geo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		Obstacle2GeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		Obstacle2GeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		Obstacle2GeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
 	
 
 }
@@ -625,6 +693,10 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return EggplantGeo;
 	case GeometryTypes::BROCCOLI_GEO:
 		return BroccoliGeo;
+	case GeometryTypes::OBSTACLE1_GEO:
+		return Obstacle1Geo;
+	case GeometryTypes::OBSTACLE2_GEO:
+		return Obstacle2Geo;
 	case GeometryTypes::VEHICLE_CHASSIS_GEO_NO_INDEX:
 		return VehicleChassisGeoNoIndex;
 	case GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX:
@@ -651,6 +723,10 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return EggplantGeoNoIndex;
 	case GeometryTypes::BROCCOLI_GEO_NO_INDEX:
 		return BroccoliGeoNoIndex;
+	case GeometryTypes::OBSTACLE1_GEO_NO_INDEX:
+		return Obstacle1GeoNoIndex;
+	case GeometryTypes::OBSTACLE2_GEO_NO_INDEX:
+		return Obstacle2GeoNoIndex;
 	default:
 		return nullptr;
 	}
