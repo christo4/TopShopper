@@ -25,6 +25,9 @@ public:
 	PhysicsManager* getPhysicsManager() { return _physicsManager; }
 	RenderingManager* getRenderingManager() { return _renderingManager; }
 
+
+	bool _isPaused = false; // is the game paused currently?
+
 private:
 	static Broker* _instance;
 	Broker();

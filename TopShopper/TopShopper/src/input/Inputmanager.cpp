@@ -49,7 +49,11 @@ void InputManager::updateSeconds(double variableDeltaTime) {
 		_gamePads[i]->leftBump = (bool) buttonArray[4];
 		_gamePads[i]->rightBump = (bool) buttonArray[5];
 		_gamePads[i]->backButton = (bool) buttonArray[6];
-		_gamePads[i]->startButton = (bool) buttonArray[7];
+
+		bool newStartButtonState = (bool) buttonArray[7];
+		_gamePads[i]->startButtonJustPressed = (!_gamePads[i]->startButton && newStartButtonState);
+		_gamePads[i]->startButton = newStartButtonState;
+
 		_gamePads[i]->leftStick = (bool) buttonArray[8];
 		_gamePads[i]->rightStick = (bool) buttonArray[9];
 		_gamePads[i]->upButton = (bool) buttonArray[10];
@@ -66,6 +70,10 @@ void InputManager::updateSeconds(double variableDeltaTime) {
 	_keyboardAndMouse->dKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D);
 	_keyboardAndMouse->leftShiftKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT_SHIFT);
 	_keyboardAndMouse->spaceKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE);
+
+	bool newPKeyState = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_P);
+	_keyboardAndMouse->pKeyJustPressed = (!_keyboardAndMouse->pKey && newPKeyState);
+	_keyboardAndMouse->pKey = newPKeyState;
 
 }
 

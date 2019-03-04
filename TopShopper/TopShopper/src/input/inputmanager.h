@@ -28,6 +28,8 @@ struct Gamepad {
 	bool rightButton;
 	bool downButton;
 	bool leftButton;
+
+	bool startButtonJustPressed = false; // hack for now
 };
 
 // ONLY HAVE 1 KEYBOARD and MOUSE
@@ -39,6 +41,9 @@ struct KeyboardAndMouse {
 	bool leftShiftKey;
 	bool spaceKey;
 	// NOTE: can add more controls in future if we need them
+
+	bool pKey;
+	bool pKeyJustPressed = false; // hack for now
 };
 
 

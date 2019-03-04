@@ -288,6 +288,15 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 
 	setNewAITargets();
 
+
+
+	// update match timer...
+	_matchTimer -= variableDeltaTime;
+	if (_matchTimer <= 0.0) {
+		_matchTimer = 0.0; // clamp at 0 so rendering doesnt screw up
+		_broker->_isPaused = true; // FOR NOW, we pause the game when match is over
+		//std::cout << "MATCH END" << std::endl;
+	}
 }
 
 
@@ -418,4 +427,23 @@ void AIManager::removeDeletedTarget(physx::PxVec3 deletedTarget) {
 			}
 		}
 	}
+}
+
+
+
+
+
+std::string AIManager::getMatchTimePrettyFormat() {
+	int timeCeiling = (int) ceil(_matchTimer);
+	int minutes = timeCeiling / 60;
+	int seconds = timeCeiling % 60;
+
+	std::string prettyTime = "";
+	if (minutes < 10) prettyTime += "0";
+	prettyTime += std::to_string(minutes);
+	prettyTime += ":";
+	if (seconds < 10) prettyTime += "0";
+	prettyTime += std::to_string(seconds);
+
+	return prettyTime;
 }

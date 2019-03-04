@@ -82,6 +82,8 @@ public:
 
 	void removeDeletedTarget(physx::PxVec3 deletedTarget);
 
+	std::string getMatchTimePrettyFormat();
+
 private:
 	Broker *_broker = nullptr;
 
@@ -138,6 +140,10 @@ private:
 
 
 	void setNewAITargets();
+
+
+	double _matchTimer = 300; // 5min (300s) match
+
 
 };
 

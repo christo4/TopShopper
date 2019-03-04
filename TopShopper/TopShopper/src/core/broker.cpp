@@ -42,13 +42,16 @@ void Broker::updateAllSeconds(double& simTime, const double& fixedDeltaTime, dou
 	_loadingManager->updateSeconds(variableDeltaTime); // useless right now, but if we want dynamic loading it could go first
 	_inputManager->updateSeconds(variableDeltaTime); // NOTE: this needs to be done before physics updates
 	
-	while (accumulator >= fixedDeltaTime) {
-		_physicsManager->updateSeconds(fixedDeltaTime);
-		accumulator -= fixedDeltaTime;
-		simTime += fixedDeltaTime;
+	if (!_isPaused) {
+		while (accumulator >= fixedDeltaTime) {
+			_physicsManager->updateSeconds(fixedDeltaTime);
+			accumulator -= fixedDeltaTime;
+			simTime += fixedDeltaTime;
+		}
+
+		_aiManager->updateSeconds(variableDeltaTime);
 	}
 	
-	_aiManager->updateSeconds(variableDeltaTime);
 	_renderingManager->updateSeconds(variableDeltaTime);
 	_audioManager->updateSeconds(variableDeltaTime);
 	
