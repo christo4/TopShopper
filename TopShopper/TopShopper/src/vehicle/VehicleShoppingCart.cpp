@@ -165,7 +165,7 @@ void VehicleShoppingCart::processRawInputDataKeyboard(const bool accelKeyPressed
 		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
 		isAccelerating = false;
 		PxQuat quat = _vehicle4W->getRigidDynamicActor()->getGlobalPose().q;
-		float turboSpeed = 30.0f;
+		float turboSpeed = 60.0f;
 		PxVec3 forward(0.0f, 0.0f, turboSpeed);
 		forward = quat.rotate(forward);
 		_vehicle4W->getRigidDynamicActor()->setLinearVelocity(forward); // NOTE: maybe set a high acceleration instead? (also maybe make it so that cart has to be grounded to boost)
@@ -229,7 +229,7 @@ void VehicleShoppingCart::processRawInputDataController(const PxReal accel, cons
 		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
 		netAccel = 0.0f;
 		PxQuat quat = _vehicle4W->getRigidDynamicActor()->getGlobalPose().q;
-		float turboSpeed = 30.0f;
+		float turboSpeed = 60.0f;
 		PxVec3 forward(0.0f, 0.0f, turboSpeed);
 		forward = quat.rotate(forward);
 		_vehicle4W->getRigidDynamicActor()->setLinearVelocity(forward); // NOTE: maybe set a high acceleration instead? (also maybe make it so that cart has to be grounded to boost)
