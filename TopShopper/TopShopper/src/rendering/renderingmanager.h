@@ -122,6 +122,7 @@ private:
 	MyTexture *_waterSprite = new MyTexture();
 	MyTexture *_watermelonSprite = new MyTexture();
 	MyTexture *_clockSprite = new MyTexture();
+	MyTexture *_checkMarkSprite = new MyTexture();
 };
 
 #endif // RENDERINGMANAGER_H_

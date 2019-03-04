@@ -14,6 +14,7 @@
 using namespace physx;
 
 
+
 RenderingManager::RenderingManager(Broker *broker)
 	: _broker(broker)
 {
@@ -48,6 +49,8 @@ void RenderingManager::init() {
 
 	glUseProgram(shaderProgram);
 
+
+	/*TODO: Should do this in loading manager or a texture manager class*/
 	MyTexture texture;
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/yellow.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(SPARE_CHANGE_GEO_NO_INDEX)->texture = texture;
@@ -108,6 +111,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		deleteBufferData(geoDel);
 	}
 
+
 	_objects.clear();
 	push3DObjects();
 	RenderScene();
@@ -123,13 +127,12 @@ void RenderingManager::RenderScene() {
 	// bind our shader program and the vertex array object containing our
 	// scene geometry, then tell OpenGL to draw our geometry
 
-
 	float fov = 60.0f;
 	int width;
 	int height;
 	glfwGetWindowSize(_window, &width, &height);
 
-	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 0.1f, 1000.0f);
+	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 1.0f, 1000.0f);
 
 	// TODO: fix the follow camera to lag behind the player, don't be blocked by walls and don't spin so much, and be panned with right stick (this changes where it is looking at)
 	std::shared_ptr<ShoppingCartPlayer> player = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers().at(0);
@@ -138,9 +141,26 @@ void RenderingManager::RenderScene() {
 	PxVec3 playerPos = playerTransform.p;
 	PxQuat playerRot = playerTransform.q;
 
-	PxVec3 testVec(0, 17, -30);
+	PxVec3 playerVel = playerDyn->getLinearVelocity();
+
+
+
+
+
+
+	PxVec3 testVec(0, 30, -40);
 	testVec = playerRot.rotate(testVec);
-	glm::vec3 cameraPosition = glm::vec3(playerPos.x + testVec.x, playerPos.y + testVec.y, playerPos.z + testVec.z);
+	if (testVec.y < 10.0f) {
+		testVec.y = 10.0f;
+	}
+
+	std::cout << testVec.x << " " << testVec.y << " " << testVec.z << std::endl;
+
+
+	glm::vec3 cameraPosition = glm::vec3(playerPos.x + testVec.x,  testVec.y, playerPos.z + testVec.z);
+
+	
+
 	glm::mat4 View = glm::lookAt(
 		glm::vec3(cameraPosition), // camera position
 		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at 
@@ -192,9 +212,10 @@ void RenderingManager::renderHud() {
 	int offset = 72;
 	int i = 0;
 	for (EntityTypes eType : script->_shoppingList_Types) {
-		if (!script->_shoppingList_Flags[i]) {
-			renderSprite(*getSpriteTexture(eType), (856 + i*offset), 104, (920 + i*offset), 168);
-		}
+		if (script->_shoppingList_Flags[i]) {
+			renderSprite(*getSpriteTexture(CHECK_MARK), (856 + i * offset), 104, (920 + i * offset), 168);
+		}		
+		renderSprite(*getSpriteTexture(eType), (856 + i * offset), 104, (920 + i * offset), 168);
 		i++;
 	}
 	i = 0;
@@ -209,9 +230,12 @@ void RenderingManager::renderHud() {
 	renderSprite(*_borderSprite, 1580, 850, 1796, 922);
 
 	for (EntityTypes eType : script->_shoppingList_Types) {
-		if (!script->_shoppingList_Flags[i]) {
-			renderSprite(*getSpriteTexture(eType), (1584 + i*offset), 854, (1648 + i*offset), 918);
+		if (script->_shoppingList_Flags[i]) {
+			renderSprite(*getSpriteTexture(CHECK_MARK), (1584 + i * offset), 854, (1648 + i * offset), 918);
 		}
+
+		renderSprite(*getSpriteTexture(eType), (1584 + i*offset), 854, (1648 + i*offset), 918);
+	
 		i++;
 	}
 	i = 0;
@@ -227,9 +251,11 @@ void RenderingManager::renderHud() {
 	renderSprite(*_borderSprite, 1580, 700, 1796, 772);
 
 	for (EntityTypes eType : script->_shoppingList_Types) {
-		if (!script->_shoppingList_Flags[i]) {
-			renderSprite(*getSpriteTexture(eType), (1584 + i * offset), 704, (1648 + i * offset), 768);
+		if (script->_shoppingList_Flags[i]) {
+			renderSprite(*getSpriteTexture(CHECK_MARK), (1584 + i * offset), 704, (1648 + i * offset), 768);
 		}
+		renderSprite(*getSpriteTexture(eType), (1584 + i * offset), 704, (1648 + i * offset), 768);
+		
 		i++;
 	}
 	i = 0;
@@ -308,6 +334,7 @@ void RenderingManager::initSpriteTextures() {
 	InitializeTexture(_waterSprite, "../TopShopper/resources/Sprites/Water.png", GL_TEXTURE_2D);
 	InitializeTexture(_watermelonSprite, "../TopShopper/resources/Sprites/Watermelon.png", GL_TEXTURE_2D);
 	InitializeTexture(_clockSprite, "../TopShopper/resources/Sprites/clock.png", GL_TEXTURE_2D);
+	InitializeTexture(_checkMarkSprite, "../TopShopper/resources/Sprites/Check_Mark.png", GL_TEXTURE_2D);
 
 }
 
@@ -333,6 +360,8 @@ MyTexture * RenderingManager::getSpriteTexture(EntityTypes type) {
 			return _eggplantSprite;
 		case EntityTypes::BROCCOLI:
 			return _broccoliSprite;
+		case EntityTypes::CHECK_MARK:
+			return _checkMarkSprite;
 		default:
 			return nullptr;
 	}

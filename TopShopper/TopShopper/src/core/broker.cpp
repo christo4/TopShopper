@@ -47,11 +47,14 @@ void Broker::updateAllSeconds(double& simTime, const double& fixedDeltaTime, dou
 			_physicsManager->updateSeconds(fixedDeltaTime);
 			accumulator -= fixedDeltaTime;
 			simTime += fixedDeltaTime;
+			
 		}
-
+		
 		_aiManager->updateSeconds(variableDeltaTime);
+		
 	}
 	
+
 	_renderingManager->updateSeconds(variableDeltaTime);
 	_audioManager->updateSeconds(variableDeltaTime);
 	
