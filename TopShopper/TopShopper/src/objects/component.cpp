@@ -61,7 +61,7 @@ void PickupScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape *ot
 		std::cout << "COMPONENT.CPP | PICKUP WAS PICKED UP!" << std::endl;
 		std::cout << "PLAYER POINTS = " << playerScript->_points << std::endl;
 		_entity->destroy(); // destroy this pickup
-		Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TEST_SOUND));
+		Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND));
 	}
 }
 
