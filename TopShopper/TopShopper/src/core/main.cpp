@@ -1,8 +1,12 @@
 #include "broker.h"
 #include <iostream>
 #include <Windows.h>
+#include <ctime>
 
 int main() {
+
+	srand(time(NULL)); // set the seed for all calls to rand(), seed will be different on every run of program 
+
 	// initial loading... (slow)
 	Broker *broker = Broker::getInstance();
 	broker->initAll();

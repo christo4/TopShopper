@@ -141,7 +141,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		if (spareChangeInstances.at(i) == nullptr) {
 			spareChangeSpawnTimers.at(i) -= variableDeltaTime;
 			if (spareChangeSpawnTimers.at(i) <= 0.0) {
-				std::cout << "AIMANAGER.CPP | NEW SPARE CHANGE SPAWN" << std::endl;
+				//std::cout << "AIMANAGER.CPP | NEW SPARE CHANGE SPAWN" << std::endl;
 				spareChangeInstances.at(i) = std::dynamic_pointer_cast<SpareChange>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::SPARE_CHANGE, spareChangeSpawnPoints.at(i), "SpareChangeSP"+i));
 			}
 		}
@@ -214,7 +214,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		milkSpawnTimer -= variableDeltaTime;
 		if (milkSpawnTimer <= 0.0) {
 			milkSpawnIndex = getNextDrinkSpawnIndex();
-			std::cout << "AIMANAGER.CPP | NEW MILK SPAWN" << std::endl;
+			//std::cout << "AIMANAGER.CPP | NEW MILK SPAWN" << std::endl;
 			drinkInstances.at(milkSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::MILK, drinkSpawnPoints.at(milkSpawnIndex), "MilkSP");
 		}
 	}
@@ -222,7 +222,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		waterSpawnTimer -= variableDeltaTime;
 		if (waterSpawnTimer <= 0.0) {
 			waterSpawnIndex = getNextDrinkSpawnIndex();
-			std::cout << "AIMANAGER.CPP | NEW WATER SPAWN" << std::endl;
+			//std::cout << "AIMANAGER.CPP | NEW WATER SPAWN" << std::endl;
 			drinkInstances.at(waterSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::WATER, drinkSpawnPoints.at(waterSpawnIndex), "WaterSP");
 		}
 	}
@@ -230,7 +230,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		colaSpawnTimer -= variableDeltaTime;
 		if (colaSpawnTimer <= 0.0) {
 			colaSpawnIndex = getNextDrinkSpawnIndex();
-			std::cout << "AIMANAGER.CPP | NEW COLA SPAWN" << std::endl;
+			//std::cout << "AIMANAGER.CPP | NEW COLA SPAWN" << std::endl;
 			drinkInstances.at(colaSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::COLA, drinkSpawnPoints.at(colaSpawnIndex), "ColaSP");
 		}
 	}
@@ -239,7 +239,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		appleSpawnTimer -= variableDeltaTime;
 		if (appleSpawnTimer <= 0.0) {
 			appleSpawnIndex = getNextFruitSpawnIndex();
-			std::cout << "AIMANAGER.CPP | NEW APPLE SPAWN" << std::endl;
+			//std::cout << "AIMANAGER.CPP | NEW APPLE SPAWN" << std::endl;
 			fruitInstances.at(appleSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::APPLE, fruitSpawnPoints.at(appleSpawnIndex), "AppleSP");
 		}
 	}
@@ -247,7 +247,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		watermelonSpawnTimer -= variableDeltaTime;
 		if (watermelonSpawnTimer <= 0.0) {
 			watermelonSpawnIndex = getNextFruitSpawnIndex();
-			std::cout << "AIMANAGER.CPP | NEW WATERMELON SPAWN" << std::endl;
+			//std::cout << "AIMANAGER.CPP | NEW WATERMELON SPAWN" << std::endl;
 			fruitInstances.at(watermelonSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::WATERMELON, fruitSpawnPoints.at(watermelonSpawnIndex), "WatermelonSP");
 		}
 	}
@@ -255,7 +255,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		bananaSpawnTimer -= variableDeltaTime;
 		if (bananaSpawnTimer <= 0.0) {
 			bananaSpawnIndex = getNextFruitSpawnIndex();
-			std::cout << "AIMANAGER.CPP | NEW BANANA SPAWN" << std::endl;
+			//std::cout << "AIMANAGER.CPP | NEW BANANA SPAWN" << std::endl;
 			fruitInstances.at(bananaSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::BANANA, fruitSpawnPoints.at(bananaSpawnIndex), "BananaSP");
 		}
 	}
@@ -264,7 +264,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		carrotSpawnTimer -= variableDeltaTime;
 		if (carrotSpawnTimer <= 0.0) {
 			carrotSpawnIndex = getNextVeggieSpawnIndex();
-			std::cout << "AIMANAGER.CPP | NEW CARROT SPAWN" << std::endl;
+			//std::cout << "AIMANAGER.CPP | NEW CARROT SPAWN" << std::endl;
 			veggieInstances.at(carrotSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::CARROT, veggieSpawnPoints.at(carrotSpawnIndex), "CarrotSP");
 		}
 	}
@@ -272,7 +272,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		eggplantSpawnTimer -= variableDeltaTime;
 		if (eggplantSpawnTimer <= 0.0) {
 			eggplantSpawnIndex = getNextVeggieSpawnIndex();
-			std::cout << "AIMANAGER.CPP | NEW EGGPLANT SPAWN" << std::endl;
+			//std::cout << "AIMANAGER.CPP | NEW EGGPLANT SPAWN" << std::endl;
 			veggieInstances.at(eggplantSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::EGGPLANT, veggieSpawnPoints.at(eggplantSpawnIndex), "EggplantSP");
 		}
 	}
@@ -280,7 +280,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		broccoliSpawnTimer -= variableDeltaTime;
 		if (broccoliSpawnTimer <= 0.0) {
 			broccoliSpawnIndex = getNextVeggieSpawnIndex();
-			std::cout << "AIMANAGER.CPP | NEW BROCCOLI SPAWN" << std::endl;
+			//std::cout << "AIMANAGER.CPP | NEW BROCCOLI SPAWN" << std::endl;
 			veggieInstances.at(broccoliSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::BROCCOLI, veggieSpawnPoints.at(broccoliSpawnIndex), "BroccoliSP");
 		}
 	}
@@ -400,7 +400,7 @@ void AIManager::setNewAITargets() {
 
 				if (targetFound) {
 					playerScript->_targets.push_back(closestTarget);
-					std::cout << closestTarget.x << " " << closestTarget.y << " " << closestTarget.z << std::endl;
+					//std::cout << closestTarget.x << " " << closestTarget.y << " " << closestTarget.z << std::endl;
 				}
 
 			}
@@ -420,7 +420,7 @@ void AIManager::removeDeletedTarget(physx::PxVec3 deletedTarget) {
 		if (playerScript->_playerType == PlayerScript::BOT) {
 			for (int i = 0; i < playerScript->_targets.size(); i++) {
 				if (isApproxEqual(playerScript->_targets.at(i), deletedTarget)) {
-					std::cout << "target removed" << std::endl;
+					//std::cout << "target removed" << std::endl;
 					playerScript->_targets.erase(playerScript->_targets.begin() + i);
 					break;
 				}
