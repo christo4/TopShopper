@@ -140,7 +140,7 @@ void RenderingManager::RenderScene() {
 		glUniform3f(colorID, g.color.x, g.color.y, g.color.z);
 		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
 		glUniformMatrix4fv(ViewID, 1, GL_FALSE, &View[0][0]);
-		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &Projection[0][0]);d 
+		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &Projection[0][0]);
 
 		glBindVertexArray(g.vao);
 		assignBuffers(g);
@@ -149,13 +149,87 @@ void RenderingManager::RenderScene() {
 		glBindVertexArray(0);
 	}
 
+	/*
+	renderText("Your Score: 1090", 1500, 1000, 1.0f, glm::vec3(0.8f, 0.0f, 0.0f));
+	renderText("Opp1 Score: 800", 1580, 950, 0.8f, glm::vec3(0.0f, 0.0f, 0.8f));
+	renderText("Opp2 Score: 950", 1580, 900, 0.8f, glm::vec3(0.0f, 0.8f, 0.0f));
+	*/
 
-	renderText("Test Text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-
+	/*
 	renderSprite(_borderSprite, 852, 100, 1068, 172);
+	renderSprite(_appleSprite, 856, 104, 920, 168);
+	renderSprite(_broccoliSprite, (856 + (1 * 72)), 104, (920 + (1 * 72)), 168);
+	renderSprite(_bananaSprite, (856 + (2*72)), 104, (920 + (2*72)), 168);
+	*/
+
+	renderHud();
 
 	CheckGLErrors();
 }
+
+void RenderingManager::renderHud() {
+
+	std::vector<std::shared_ptr<ShoppingCartPlayer>> players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
+	std::shared_ptr<ShoppingCartPlayer> player = players[0];
+	std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	int points = script->_points;
+	
+
+	//player1 hud elements
+	renderSprite(*_borderSprite, 852, 100, 1068, 172);
+	int offset = 72;
+	int i = 0;
+	for (EntityTypes eType : script->_shoppingList_Types) {
+		if (!script->_shoppingList_Flags[i]) {
+			renderSprite(*getSpriteTexture(eType), (856 + i*offset), 104, (920 + i*offset), 168);
+		}
+		i++;
+	}
+	i = 0;
+	std::string pointDisplay = std::to_string(points);
+	renderText("Your Score: " + pointDisplay, 1550, 1000, 1.0f, glm::vec3(0.8f, 0.0f, 0.0f));
+
+	
+	//player 2 hud elements
+	player = players[1];
+	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	points = script->_points;
+
+	renderSprite(*_borderSprite, 1580, 850, 1796, 922);
+
+	for (EntityTypes eType : script->_shoppingList_Types) {
+		if (!script->_shoppingList_Flags[i]) {
+			renderSprite(*getSpriteTexture(eType), (1584 + i*offset), 854, (1648 + i*offset), 918);
+		}
+		i++;
+	}
+	i = 0;
+	pointDisplay = std::to_string(points);
+	renderText("Opp1 Score: " + pointDisplay, 1580, 950, 0.8f, glm::vec3(0.0f, 0.0f, 0.8f));
+	
+	
+	//player 3 hud elements
+	player = players[2];
+	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	points = script->_points;
+
+	renderSprite(*_borderSprite, 1580, 700, 1796, 772);
+
+	for (EntityTypes eType : script->_shoppingList_Types) {
+		if (!script->_shoppingList_Flags[i]) {
+			renderSprite(*getSpriteTexture(eType), (1584 + i * offset), 704, (1648 + i * offset), 768);
+		}
+		i++;
+	}
+	i = 0;
+	pointDisplay = std::to_string(points);
+	renderText("Opp2 Score: " + pointDisplay, 1580, 800, 0.8f, glm::vec3(0.0f, 0.8f, 0.0f));
+	
+
+
+
+}
+
 
 
 void RenderingManager::renderSprite(MyTexture spriteTex, int bottomLeftX, int bottomLeftY, int topRightX, int topRightY) {
@@ -209,21 +283,47 @@ void RenderingManager::renderSprite(MyTexture spriteTex, int bottomLeftX, int bo
 
 void RenderingManager::initSpriteTextures() {
 
-	InitializeTexture(&_borderSprite, "../TopShopper/resources/Sprites/Border.png", GL_TEXTURE_2D);
-	InitializeTexture(&_appleSprite, "../TopShopper/resources/Sprites/Apple.png", GL_TEXTURE_2D);
-	InitializeTexture(&_bananaSprite, "../TopShopper/resources/Sprites/Banana.png", GL_TEXTURE_2D);
-	InitializeTexture(&_broccoliSprite, "../TopShopper/resources/Sprites/Broccoli.png", GL_TEXTURE_2D);
-	InitializeTexture(&_carrotSprite, "../TopShopper/resources/Sprites/Carrot.png", GL_TEXTURE_2D);
-	InitializeTexture(&_colaSprite, "../TopShopper/resources/Sprites/Cola.png", GL_TEXTURE_2D);
-	InitializeTexture(&_cookieSprite, "../TopShopper/resources/Sprites/Cookie.png", GL_TEXTURE_2D);
-	InitializeTexture(&_eggplantSprite, "../TopShopper/resources/Sprites/Eggplant.png", GL_TEXTURE_2D);
-	InitializeTexture(&_hotPotatoSprite, "../TopShopper/resources/Sprites/Hotpotato.png", GL_TEXTURE_2D);
-	InitializeTexture(&_milkSprite, "../TopShopper/resources/Sprites/Milk.png", GL_TEXTURE_2D);
-	InitializeTexture(&_waterSprite, "../TopShopper/resources/Sprites/Water.png", GL_TEXTURE_2D);
-	InitializeTexture(&_watermelonSprite, "../TopShopper/resources/Sprites/Watermelon.png", GL_TEXTURE_2D);
+	InitializeTexture(_borderSprite, "../TopShopper/resources/Sprites/Border.png", GL_TEXTURE_2D);
+	InitializeTexture(_appleSprite, "../TopShopper/resources/Sprites/Apple.png", GL_TEXTURE_2D);
+	InitializeTexture(_bananaSprite, "../TopShopper/resources/Sprites/Banana.png", GL_TEXTURE_2D);
+	InitializeTexture(_broccoliSprite, "../TopShopper/resources/Sprites/Broccoli.png", GL_TEXTURE_2D);
+	InitializeTexture(_carrotSprite, "../TopShopper/resources/Sprites/Carrot.png", GL_TEXTURE_2D);
+	InitializeTexture(_colaSprite, "../TopShopper/resources/Sprites/Cola.png", GL_TEXTURE_2D);
+	InitializeTexture(_cookieSprite, "../TopShopper/resources/Sprites/Cookie.png", GL_TEXTURE_2D);
+	InitializeTexture(_eggplantSprite, "../TopShopper/resources/Sprites/Eggplant.png", GL_TEXTURE_2D);
+	InitializeTexture(_hotPotatoSprite, "../TopShopper/resources/Sprites/Hotpotato.png", GL_TEXTURE_2D);
+	InitializeTexture(_milkSprite, "../TopShopper/resources/Sprites/Milk.png", GL_TEXTURE_2D);
+	InitializeTexture(_waterSprite, "../TopShopper/resources/Sprites/Water.png", GL_TEXTURE_2D);
+	InitializeTexture(_watermelonSprite, "../TopShopper/resources/Sprites/Watermelon.png", GL_TEXTURE_2D);
 
 }
 
+
+
+MyTexture * RenderingManager::getSpriteTexture(EntityTypes type) {
+	switch (type) {
+		case EntityTypes::MILK:
+			return _milkSprite;
+		case EntityTypes::WATER:
+			return _waterSprite;
+		case EntityTypes::COLA:
+			return _colaSprite;
+		case EntityTypes::APPLE:
+			return _appleSprite;
+		case EntityTypes::WATERMELON:
+			return _watermelonSprite;
+		case EntityTypes::BANANA:
+			return _bananaSprite;
+		case EntityTypes::CARROT:
+			return _carrotSprite;
+		case EntityTypes::EGGPLANT:
+			return _eggplantSprite;
+		case EntityTypes::BROCCOLI:
+			return _broccoliSprite;
+		default:
+			return nullptr;
+	}
+}
 
 
 

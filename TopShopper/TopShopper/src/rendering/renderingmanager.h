@@ -10,6 +10,7 @@
 #include <GLFW/glfw3.h>
 #include "Geometry.h"
 #include <map>
+#include "../objects/entity.h"
 
 class Broker;
 struct GLFWwindow;
@@ -37,6 +38,19 @@ enum SpriteTexture {
 	WATERMELON_SPRITE
 };
 
+/*
+static struct HUDInfo {
+	glm::vec2 playerListBotLeft = glm::vec2(852.0f, 100.0f);
+	glm::vec2 playerListTopRight = glm::vec2(1068.0f, 172.0f);
+	glm::vec2 playerListFirstBotLeft = glm::vec2(856.0f, 104.0f);
+	glm::vec2 playerListFirstTopRight = glm::vec2(920, 168);
+
+
+
+};
+
+*/
+
 
 class RenderingManager {
 public:
@@ -52,8 +66,10 @@ public:
 	void RenderScene();
 	void renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
 	void renderSprite(MyTexture spriteTex, int bottomLeftX, int bottomLeftY, int topRightX, int topRightY);
+	void renderHud();
 	void initTextRender();
 	void initSpriteTextures();
+	MyTexture * getSpriteTexture(EntityTypes type);
 
 
 	//Create vao and vbos for objects
@@ -92,18 +108,18 @@ private:
 	std::vector<Geometry> _objects;
 	void openWindow();
 
-	MyTexture _borderSprite;
-	MyTexture _appleSprite;
-	MyTexture _bananaSprite;
-	MyTexture _broccoliSprite;
-	MyTexture _carrotSprite;
-	MyTexture _colaSprite;
-	MyTexture _cookieSprite;
-	MyTexture _eggplantSprite;
-	MyTexture _hotPotatoSprite;
-	MyTexture _milkSprite;
-	MyTexture _waterSprite;
-	MyTexture _watermelonSprite;
+	MyTexture *_borderSprite = new MyTexture();
+	MyTexture *_appleSprite = new MyTexture();
+	MyTexture *_bananaSprite = new MyTexture();
+	MyTexture *_broccoliSprite = new MyTexture();
+	MyTexture *_carrotSprite = new MyTexture();
+	MyTexture *_colaSprite = new MyTexture();
+	MyTexture *_cookieSprite = new MyTexture();
+	MyTexture *_eggplantSprite = new MyTexture();
+	MyTexture *_hotPotatoSprite = new MyTexture();
+	MyTexture *_milkSprite = new MyTexture();
+	MyTexture *_waterSprite = new MyTexture();
+	MyTexture *_watermelonSprite = new MyTexture();
 };
 
 #endif // RENDERINGMANAGER_H_
