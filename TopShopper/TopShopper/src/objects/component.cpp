@@ -320,11 +320,11 @@ void PlayerScript::navigate() {
 	PxVec3 midRightUnitDir = forward.getNormalized();
 	PxVec3 farRightUnitDir = (rot.rotate(PxVec3(-1.0, 0.0, 1.0))).getNormalized();
 
-	PxReal farLeftDistance = 15.0f;
-	PxReal midLeftDistance = 15.0f;
-	PxReal centerDistance = 15.0f;
-	PxReal midRightDistance = 15.0f;
-	PxReal farRightDistance = 15.0f;
+	PxReal farLeftDistance = 20.0f;
+	PxReal midLeftDistance = 20.0f;
+	PxReal centerDistance = 20.0f;
+	PxReal midRightDistance = 20.0f;
+	PxReal farRightDistance = 20.0f;
 
 	PxHitBuffer<PxRaycastHit> farLeftHit;
 	PxHitBuffer<PxRaycastHit> midLeftHit;
@@ -347,7 +347,7 @@ void PlayerScript::navigate() {
 		if (farLeftStatus) {
 			if (farLeftHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(farLeftHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
+				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
 					if (fabs(farLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 				}
 			}
@@ -355,7 +355,7 @@ void PlayerScript::navigate() {
 		if (midLeftStatus) {
 			if (midLeftHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(midLeftHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
+				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
 					if (fabs(midLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 				}
 			}
@@ -363,7 +363,7 @@ void PlayerScript::navigate() {
 		if (midRightStatus) {
 			if (midRightHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(midRightHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
+				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
 					if (fabs(midRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 				}
 			}
@@ -371,7 +371,7 @@ void PlayerScript::navigate() {
 		if (farRightStatus) {
 			if (farRightHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(farRightHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
+				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
 					if (fabs(farRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 				}
 			}
@@ -383,7 +383,7 @@ void PlayerScript::navigate() {
 			if (centerStatus) {
 				if (centerHit.hasBlock) {
 					Entity *entityHit = static_cast<Entity*>(centerHit.block.actor->userData);
-					if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND) {
+					if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
 						if (fabs(centerHit.block.normal.y - 1.0f) >= 0.0001f) turnDir = 3; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 						//TODO: change this to use the hit normal instead (e.g. hit wall like \ go left, / go right) 
 					}
@@ -487,7 +487,7 @@ void PlayerScript::navigate() {
 
 
 		//PxReal accel = diffNoYMag > 1.0f ? 1.0f : diffNoYMag;
-		PxReal accel = 1.0f;
+		PxReal accel = 0.9f;
 		PxReal reverse = 0.0f;
 		PxReal handbrake = 0.0f;
 		//PxReal steer = isCCW ? steerAbs : steerAbs * -1;
