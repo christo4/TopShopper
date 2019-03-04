@@ -52,6 +52,9 @@ void RenderingManager::init() {
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/yellow.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(SPARE_CHANGE_GEO_NO_INDEX)->texture = texture;
 
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/yellow.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(BANANA_GEO_NO_INDEX)->texture = texture;
+
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(VEHICLE_CHASSIS_GEO_NO_INDEX)->texture = texture;
 
@@ -61,7 +64,31 @@ void RenderingManager::init() {
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/background3-wood.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(GROUND_GEO_NO_INDEX)->texture = texture;
 
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/white.png", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(MILK_GEO_NO_INDEX)->texture = texture;
 
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/blue.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(WATER_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/brown.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(COLA_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/red.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(APPLE_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/pink.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(WATERMELON_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/orange.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(CARROT_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/purple.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(EGGPLANT_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/green.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(BROCCOLI_GEO_NO_INDEX)->texture = texture;
+
+	
 	initSpriteTextures();
 
 }
@@ -129,6 +156,7 @@ void RenderingManager::RenderScene() {
 
 
 	for (Geometry& g : _objects) {
+
 		glUseProgram(shaderProgram);
 
 		glActiveTexture(GL_TEXTURE0);
@@ -150,7 +178,6 @@ void RenderingManager::RenderScene() {
 	}
 
 	renderHud();
-
 	CheckGLErrors();
 }
 
@@ -161,8 +188,6 @@ void RenderingManager::renderHud() {
 	std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
 	int points = script->_points;
 	
-
-	//player1 hud elements
 	renderSprite(*_borderSprite, 852, 100, 1068, 172);
 	int offset = 72;
 	int i = 0;
@@ -176,7 +201,6 @@ void RenderingManager::renderHud() {
 	std::string pointDisplay = std::to_string(points);
 	renderText("Your Score: " + pointDisplay, 1550, 1000, 1.0f, glm::vec3(0.8f, 0.0f, 0.0f));
 
-	
 	//player 2 hud elements
 	player = players[1];
 	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
@@ -211,9 +235,10 @@ void RenderingManager::renderHud() {
 	i = 0;
 	pointDisplay = std::to_string(points);
 	renderText("Opp2 Score: " + pointDisplay, 1580, 800, 0.8f, glm::vec3(0.0f, 0.8f, 0.0f));
-	
 
-
+	std::string timeString = _broker->getAIManager()->getMatchTimePrettyFormat();
+	renderText(timeString, 870, 1010, 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
+	//renderSprite(*_clockSprite, 862, 990, 1028, 1920);
 
 }
 
@@ -282,6 +307,7 @@ void RenderingManager::initSpriteTextures() {
 	InitializeTexture(_milkSprite, "../TopShopper/resources/Sprites/Milk.png", GL_TEXTURE_2D);
 	InitializeTexture(_waterSprite, "../TopShopper/resources/Sprites/Water.png", GL_TEXTURE_2D);
 	InitializeTexture(_watermelonSprite, "../TopShopper/resources/Sprites/Watermelon.png", GL_TEXTURE_2D);
+	InitializeTexture(_clockSprite, "../TopShopper/resources/Sprites/clock.png", GL_TEXTURE_2D);
 
 }
 
@@ -311,9 +337,6 @@ MyTexture * RenderingManager::getSpriteTexture(EntityTypes type) {
 			return nullptr;
 	}
 }
-
-
-
 
 
 //https://learnopengl.com/In-Practice/Text-Rendering
@@ -443,70 +466,70 @@ void RenderingManager::push3DObjects() {
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
-			geo.color = glm::vec3(0.5f, 0.5f, 0.5f);
+			//geo.color = glm::vec3(0.5f, 0.5f, 0.5f);
 			break;
 		}
 		case EntityTypes::MILK:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::MILK_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			geo.color = glm::vec3(0.9f, 0.9f, 0.9f);
+			//geo.color = glm::vec3(0.9f, 0.9f, 0.9f);
 			break;
 		}
 		case EntityTypes::WATER:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::WATER_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			geo.color = glm::vec3(0.0f, 0.25f, 0.9f);
+			//geo.color = glm::vec3(0.0f, 0.25f, 0.9f);
 			break;
 		}
 		case EntityTypes::COLA:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::COLA_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			geo.color = glm::vec3(0.45f, 0.25f, 0.1f);
+			//geo.color = glm::vec3(0.45f, 0.25f, 0.1f);
 			break;
 		}
 		case EntityTypes::APPLE:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::APPLE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			geo.color = glm::vec3(0.95f, 0.15f, 0.2f);
+			//geo.color = glm::vec3(0.95f, 0.15f, 0.2f);
 			break;
 		}
 		case EntityTypes::WATERMELON:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::WATERMELON_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			geo.color = glm::vec3(0.95f, 0.15f, 0.85f);
+			//geo.color = glm::vec3(0.95f, 0.15f, 0.85f);
 			break;
 		}
 		case EntityTypes::BANANA:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::BANANA_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			geo.color = glm::vec3(0.95f, 0.85f, 0.15f);
+			//geo.color = glm::vec3(0.95f, 0.85f, 0.15f);
 			break;
 		}
 		case EntityTypes::CARROT:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::CARROT_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			geo.color = glm::vec3(0.95f, 0.35f, 0.0f);
+			//geo.color = glm::vec3(0.95f, 0.35f, 0.0f);
 			break;
 		}
 		case EntityTypes::EGGPLANT:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::EGGPLANT_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			geo.color = glm::vec3(0.45f, 0.0f, 0.95f);
+			//geo.color = glm::vec3(0.45f, 0.0f, 0.95f);
 			break;
 		}
 		case EntityTypes::BROCCOLI:
 		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::BROCCOLI_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			geo.color = glm::vec3(0.05f, 0.5f, 0.2f);
+			//geo.color = glm::vec3(0.05f, 0.5f, 0.2f);
 			break;
 		}
 		case EntityTypes::SPARE_CHANGE:

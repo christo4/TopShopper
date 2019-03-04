@@ -9,17 +9,33 @@
 #include <string.h>
 #include <stdio.h>
 
-
-
 Geometry* VehicleChassisGeo = new Geometry();
 Geometry* VehicleWheelGeo = new Geometry();
 Geometry* GroundGeo = new Geometry();
 Geometry* SpareChangeGeo = new Geometry();
+Geometry* BananaGeo = new Geometry();
+Geometry* MilkGeo = new Geometry();
+Geometry* WaterGeo = new Geometry();
+Geometry* ColaGeo = new Geometry();
+Geometry* AppleGeo = new Geometry();
+Geometry* WatermelonGeo = new Geometry();
+Geometry* CarrotGeo = new Geometry();
+Geometry* EggplantGeo = new Geometry();
+Geometry* BroccoliGeo = new Geometry();
 
 Geometry* VehicleChassisGeoNoIndex = new Geometry();
 Geometry* VehicleWheelGeoNoIndex = new Geometry();
 Geometry* GroundGeoNoIndex = new Geometry();
 Geometry* SpareChangeGeoNoIndex = new Geometry();
+Geometry* BananaGeoNoIndex = new Geometry();
+Geometry* MilkGeoNoIndex = new Geometry();
+Geometry* WaterGeoNoIndex = new Geometry();
+Geometry* ColaGeoNoIndex = new Geometry();
+Geometry* AppleGeoNoIndex = new Geometry();
+Geometry* WatermelonGeoNoIndex = new Geometry();
+Geometry* CarrotGeoNoIndex = new Geometry();
+Geometry* EggplantGeoNoIndex = new Geometry();
+Geometry* BroccoliGeoNoIndex = new Geometry();
 
 
 LoadingManager::LoadingManager(Broker *broker) 
@@ -47,7 +63,6 @@ void LoadingManager::init() {
 	// TODO: change this to chassis.obj later
 	loadObject("../TopShopper/resources/Objects/ShoppingCart.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 	
-	
 	VehicleChassisGeo->verts = returnVertices;
 	VehicleChassisGeo->uvs = returnUV;
 	VehicleChassisGeo->normals = returnNormal;
@@ -55,8 +70,6 @@ void LoadingManager::init() {
 	VehicleChassisGeo->uvIndex = uvIndex;
 	VehicleChassisGeo->normalIndex = normalIndex;
 	
-
-
 	for (unsigned int i = 0; i < vIndex.size(); i++) {
 		VehicleChassisGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
 	}
@@ -68,7 +81,6 @@ void LoadingManager::init() {
 	for (unsigned int i = 0; i < normalIndex.size(); i++) {
 		VehicleChassisGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
 	}
-
 
 
 	returnVertices.clear();
@@ -160,7 +172,7 @@ void LoadingManager::init() {
 	// PICKUP GEOMETRY (TEMP):
 
 
-	loadObject("../TopShopper/resources/Objects/Banana.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 	
 	
 	SpareChangeGeo->verts = returnVertices;
@@ -192,6 +204,302 @@ void LoadingManager::init() {
 	uvIndex.clear();
 	normalIndex.clear();
 
+	//Banana
+	loadObject("../TopShopper/resources/Objects/Banana.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	BananaGeo->verts = returnVertices;
+	BananaGeo->uvs = returnUV;
+	BananaGeo->normals = returnNormal;
+	BananaGeo->vIndex = vIndex;
+	BananaGeo->uvIndex = uvIndex;
+	BananaGeo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		BananaGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		BananaGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		BananaGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+	
+
+	//milk
+	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	MilkGeo->verts = returnVertices;
+	MilkGeo->uvs = returnUV;
+	MilkGeo->normals = returnNormal;
+	MilkGeo->vIndex = vIndex;
+	MilkGeo->uvIndex = uvIndex;
+	MilkGeo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		MilkGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		MilkGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		MilkGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+
+	//water
+	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	WaterGeo->verts = returnVertices;
+	WaterGeo->uvs = returnUV;
+	WaterGeo->normals = returnNormal;
+	WaterGeo->vIndex = vIndex;
+	WaterGeo->uvIndex = uvIndex;
+	WaterGeo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		WaterGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		WaterGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		WaterGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+
+	//cola
+	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	ColaGeo->verts = returnVertices;
+	ColaGeo->uvs = returnUV;
+	ColaGeo->normals = returnNormal;
+	ColaGeo->vIndex = vIndex;
+	ColaGeo->uvIndex = uvIndex;
+	ColaGeo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		ColaGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		ColaGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		ColaGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+	//Apple
+	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	AppleGeo->verts = returnVertices;
+	AppleGeo->uvs = returnUV;
+	AppleGeo->normals = returnNormal;
+	AppleGeo->vIndex = vIndex;
+	AppleGeo->uvIndex = uvIndex;
+	AppleGeo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		AppleGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		AppleGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		AppleGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+	//Watermelon
+	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	WatermelonGeo->verts = returnVertices;
+	WatermelonGeo->uvs = returnUV;
+	WatermelonGeo->normals = returnNormal;
+	WatermelonGeo->vIndex = vIndex;
+	WatermelonGeo->uvIndex = uvIndex;
+	WatermelonGeo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		WatermelonGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		WatermelonGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		WatermelonGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+
+	//Carrot
+	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	CarrotGeo->verts = returnVertices;
+	CarrotGeo->uvs = returnUV;
+	CarrotGeo->normals = returnNormal;
+	CarrotGeo->vIndex = vIndex;
+	CarrotGeo->uvIndex = uvIndex;
+	CarrotGeo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		CarrotGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		CarrotGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		CarrotGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+	//Eggplant
+	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	EggplantGeo->verts = returnVertices;
+	EggplantGeo->uvs = returnUV;
+	EggplantGeo->normals = returnNormal;
+	EggplantGeo->vIndex = vIndex;
+	EggplantGeo->uvIndex = uvIndex;
+	EggplantGeo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		EggplantGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		EggplantGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		EggplantGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+
+	//Broccoli
+	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	BroccoliGeo->verts = returnVertices;
+	BroccoliGeo->uvs = returnUV;
+	BroccoliGeo->normals = returnNormal;
+	BroccoliGeo->vIndex = vIndex;
+	BroccoliGeo->uvIndex = uvIndex;
+	BroccoliGeo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		BroccoliGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		BroccoliGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		BroccoliGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+
+	
 
 }
 
@@ -289,7 +597,6 @@ bool LoadingManager::loadObject(const char* imageName, std::vector<glm::vec4>&re
 	
 }
 
-
 Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 	switch (type) {
 	case GeometryTypes::VEHICLE_CHASSIS_GEO:
@@ -300,6 +607,24 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return GroundGeo;
 	case GeometryTypes::SPARE_CHANGE_GEO:
 		return SpareChangeGeo;
+	case GeometryTypes::BANANA_GEO:
+		return BananaGeo;
+	case GeometryTypes::MILK_GEO:
+		return MilkGeo;
+	case GeometryTypes::WATER_GEO:
+		return WaterGeo;
+	case GeometryTypes::COLA_GEO:
+		return ColaGeo;
+	case GeometryTypes::APPLE_GEO:
+		return AppleGeo;
+	case GeometryTypes::WATERMELON_GEO:
+		return WatermelonGeo;
+	case GeometryTypes::CARROT_GEO:
+		return CarrotGeo;
+	case GeometryTypes::EGGPLANT_GEO:
+		return EggplantGeo;
+	case GeometryTypes::BROCCOLI_GEO:
+		return BroccoliGeo;
 	case GeometryTypes::VEHICLE_CHASSIS_GEO_NO_INDEX:
 		return VehicleChassisGeoNoIndex;
 	case GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX:
@@ -308,12 +633,28 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return GroundGeoNoIndex;
 	case GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX:
 		return SpareChangeGeoNoIndex;
+	case GeometryTypes::BANANA_GEO_NO_INDEX:
+		return BananaGeoNoIndex;
+	case GeometryTypes::MILK_GEO_NO_INDEX:
+		return MilkGeoNoIndex;
+	case GeometryTypes::WATER_GEO_NO_INDEX:
+		return WaterGeoNoIndex;
+	case GeometryTypes::COLA_GEO_NO_INDEX:
+		return ColaGeoNoIndex;
+	case GeometryTypes::APPLE_GEO_NO_INDEX:
+		return AppleGeoNoIndex;
+	case GeometryTypes::WATERMELON_GEO_NO_INDEX:
+		return WatermelonGeoNoIndex;
+	case GeometryTypes::CARROT_GEO_NO_INDEX:
+		return CarrotGeoNoIndex;
+	case GeometryTypes::EGGPLANT_GEO_NO_INDEX:
+		return EggplantGeoNoIndex;
+	case GeometryTypes::BROCCOLI_GEO_NO_INDEX:
+		return BroccoliGeoNoIndex;
 	default:
 		return nullptr;
 	}
 }
-
-
 
 // FROM: https://stackoverflow.com/questions/8512958/is-there-a-windows-variant-of-strsep
 char* mystrsep(char** stringp, const char* delim)

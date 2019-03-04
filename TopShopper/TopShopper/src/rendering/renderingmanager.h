@@ -87,6 +87,7 @@ public:
 	GLuint shaderProgram;
 	GLuint textShaderProgram;
 	GLuint spriteShaderProgram;
+	GLuint shaderProgramNoTex;
 
 	GLFWwindow* getWindow();
 
@@ -120,6 +121,7 @@ private:
 	MyTexture *_milkSprite = new MyTexture();
 	MyTexture *_waterSprite = new MyTexture();
 	MyTexture *_watermelonSprite = new MyTexture();
+	MyTexture *_clockSprite = new MyTexture();
 };
 
 #endif // RENDERINGMANAGER_H_
