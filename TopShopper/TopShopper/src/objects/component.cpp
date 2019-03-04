@@ -8,6 +8,7 @@
 
 
 using namespace physx;
+bool turboState = false;
 
 ////////////////////////////
 Component::Component(Entity *entity, ComponentTypes tag) : _entity(entity), _tag(tag) {}
@@ -89,7 +90,14 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 				PxReal handbrake = pad->xButton ? 1.0f : 0.0f;
 				PxReal steer = glm::clamp(pad->leftStickX *-1, -1.0f, 1.0f); // must be negated otherwise steering is backwards
 				bool turboButtonPressed = pad->bButton; // this function doesnt work as intended yet...
-
+				if (turboButtonPressed && !(turboState)) {
+					Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TURBO_SOUND));
+					turboState = true;
+				}
+				else if (!turboButtonPressed && turboState) {
+					turboState = false;
+				}
+				
 				player->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
 			}
 			else {
@@ -101,7 +109,14 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 					bool steerLeftKeyPressed = kam->dKey; // NOTE: the steer keys have to be reversed here
 					bool steerRightKeyPressed = kam->aKey;
 					bool turboKeyPressed = kam->spaceKey;
-
+					if (turboKeyPressed && !(turboState)) {
+						Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TURBO_SOUND));
+						turboState = true;
+					}
+					else if (!turboKeyPressed && turboState) {
+						turboState = false;
+					}
+					
 					player->_shoppingCartBase->processRawInputDataKeyboard(accelKeyPressed, reverseKeyPressed, handbrakeKeyPressed, steerLeftKeyPressed, steerRightKeyPressed, turboKeyPressed);
 				}
 			}
@@ -202,6 +217,7 @@ void PlayerScript::pickedUpItem(EntityTypes pickupType) {
 void PlayerScript::bashed() {
 	ShoppingCartPlayer *bashedCart = static_cast<ShoppingCartPlayer*>(_entity);
 	bashedCart->_shoppingCartBase->setBashProtected();
+	Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND));
 
 	std::vector<EntityTypes> lostItems; // can have size 0,1 or 2
 	for (int i = 0; i < 3; i++) {
