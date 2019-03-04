@@ -67,6 +67,12 @@ void RenderingManager::init() {
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/background3-wood.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(GROUND_GEO_NO_INDEX)->texture = texture;
 
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/background3-wood.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(OBSTACLE1_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/background3-wood.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(OBSTACLE2_GEO_NO_INDEX)->texture = texture;
+
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/white.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(MILK_GEO_NO_INDEX)->texture = texture;
 
@@ -559,6 +565,20 @@ void RenderingManager::push3DObjects() {
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX));
 			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
 			geo.color = glm::vec3(0.95f, 0.65f, 0.2f);
+			break;
+		}
+		case EntityTypes::OBSTACLE1:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE1_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
+			//geo.color = glm::vec3(0.5f, 0.5f, 0.5f);
+			break;
+		}
+		case EntityTypes::OBSTACLE2:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE2_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
+			//geo.color = glm::vec3(0.5f, 0.5f, 0.5f);
 			break;
 		}
 		default:
