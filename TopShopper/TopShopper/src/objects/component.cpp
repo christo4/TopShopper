@@ -7,6 +7,7 @@
 #include <cstdlib>
 
 
+
 using namespace physx;
 bool turboState = false;
 
@@ -59,8 +60,8 @@ void PickupScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape *ot
 		std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 		playerScript->addPoints(_points); // increase player points by this pickup's value
 		playerScript->pickedUpItem(_entity->getTag()); // tell player that this type of pickup was picked up
-		std::cout << "COMPONENT.CPP | PICKUP WAS PICKED UP!" << std::endl;
-		std::cout << "PLAYER POINTS = " << playerScript->_points << std::endl;
+		//std::cout << "COMPONENT.CPP | PICKUP WAS PICKED UP!" << std::endl;
+		//std::cout << "PLAYER POINTS = " << playerScript->_points << std::endl;
 		_entity->destroy(); // destroy this pickup
 		Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND));
 	}
@@ -189,8 +190,8 @@ void PlayerScript::generateNewShoppingList() {
 	else _shoppingList_Types.at(2) = EntityTypes::BROCCOLI;
 
 
-	std::cout << "COMPONENT.CPP | NEW SHOPPING LIST!" << std::endl;
-	std::cout << _shoppingList_Types.at(0) << "|" << _shoppingList_Types.at(1) << "|" << _shoppingList_Types.at(2) << std::endl;
+	//std::cout << "COMPONENT.CPP | NEW SHOPPING LIST!" << std::endl;
+	//std::cout << _shoppingList_Types.at(0) << "|" << _shoppingList_Types.at(1) << "|" << _shoppingList_Types.at(2) << std::endl;
 
 }
 
@@ -265,7 +266,7 @@ void PlayerScript::bashed() {
 	}
 
 
-	std::cout << "BASH EVENT" << std::endl;
+	//std::cout << "BASH EVENT" << std::endl;
 }
 
 
