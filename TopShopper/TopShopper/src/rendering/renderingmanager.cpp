@@ -145,21 +145,14 @@ void RenderingManager::RenderScene() {
 
 
 
-
-
-
 	PxVec3 testVec(0, 30, -40);
 	testVec = playerRot.rotate(testVec);
 	if (testVec.y < 10.0f) {
 		testVec.y = 10.0f;
 	}
 
-	std::cout << testVec.x << " " << testVec.y << " " << testVec.z << std::endl;
-
 
 	glm::vec3 cameraPosition = glm::vec3(playerPos.x + testVec.x,  testVec.y, playerPos.z + testVec.z);
-
-	
 
 	glm::mat4 View = glm::lookAt(
 		glm::vec3(cameraPosition), // camera position
