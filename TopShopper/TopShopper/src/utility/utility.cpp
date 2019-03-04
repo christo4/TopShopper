@@ -13,3 +13,13 @@ std::vector<physx::PxVec3> castVectorOfGLMVec4ToVectorOfPxVec3(std::vector<glm::
 	}
 	return v_pxVec;
 }
+
+
+bool isApproxEqual(physx::PxVec3 v1, physx::PxVec3 v2) {
+	float myEpsilon = 0.0001f;
+	if (fabs(v1.x - v2.x) >= myEpsilon) return false;
+	if (fabs(v1.y - v2.y) >= myEpsilon) return false;
+	if (fabs(v1.z - v2.z) >= myEpsilon) return false;
+
+	return true;
+}

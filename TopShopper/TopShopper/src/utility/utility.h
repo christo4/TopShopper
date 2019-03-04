@@ -14,6 +14,7 @@ physx::PxVec3 castGLMVec4ToPxVec3(glm::vec4 glmVec);
 std::vector<physx::PxVec3> castVectorOfGLMVec4ToVectorOfPxVec3(std::vector<glm::vec4> v_glmVec);
 
 
+bool isApproxEqual(physx::PxVec3 v1, physx::PxVec3 v2);
 
 
 

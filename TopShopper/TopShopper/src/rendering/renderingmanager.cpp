@@ -149,19 +149,6 @@ void RenderingManager::RenderScene() {
 		glBindVertexArray(0);
 	}
 
-	/*
-	renderText("Your Score: 1090", 1500, 1000, 1.0f, glm::vec3(0.8f, 0.0f, 0.0f));
-	renderText("Opp1 Score: 800", 1580, 950, 0.8f, glm::vec3(0.0f, 0.0f, 0.8f));
-	renderText("Opp2 Score: 950", 1580, 900, 0.8f, glm::vec3(0.0f, 0.8f, 0.0f));
-	*/
-
-	/*
-	renderSprite(_borderSprite, 852, 100, 1068, 172);
-	renderSprite(_appleSprite, 856, 104, 920, 168);
-	renderSprite(_broccoliSprite, (856 + (1 * 72)), 104, (920 + (1 * 72)), 168);
-	renderSprite(_bananaSprite, (856 + (2*72)), 104, (920 + (2*72)), 168);
-	*/
-
 	renderHud();
 
 	CheckGLErrors();
