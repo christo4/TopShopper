@@ -275,7 +275,7 @@ void LoadingManager::init() {
 
 
 	//water
-	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+	loadObject("../TopShopper/resources/Objects/Water.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 
 
 	WaterGeo->verts = returnVertices;

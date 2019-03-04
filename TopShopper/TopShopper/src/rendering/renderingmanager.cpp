@@ -52,7 +52,7 @@ void RenderingManager::init() {
 
 	/*TODO: Should do this in loading manager or a texture manager class*/
 	MyTexture texture;
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/yellow.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(SPARE_CHANGE_GEO_NO_INDEX)->texture = texture;
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/yellow.jpg", GL_TEXTURE_2D);
@@ -138,7 +138,7 @@ void RenderingManager::RenderScene() {
 	int height;
 	glfwGetWindowSize(_window, &width, &height);
 
-	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 1.0f, 1000.0f);
+	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 5.0f, 1000.0f);
 
 	// TODO: fix the follow camera to lag behind the player, don't be blocked by walls and don't spin so much, and be panned with right stick (this changes where it is looking at)
 	std::shared_ptr<ShoppingCartPlayer> player = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers().at(0);
@@ -149,16 +149,17 @@ void RenderingManager::RenderScene() {
 
 	PxVec3 playerVel = playerDyn->getLinearVelocity();
 
-
-
-	PxVec3 testVec(0, 30, -40);
+	
+	PxVec3 testVec(0, 15, -25);
 	testVec = playerRot.rotate(testVec);
+
+
 	if (testVec.y < 10.0f) {
 		testVec.y = 10.0f;
 	}
 
 
-	glm::vec3 cameraPosition = glm::vec3(playerPos.x + testVec.x,  testVec.y, playerPos.z + testVec.z);
+	glm::vec3 cameraPosition = glm::vec3(playerPos.x + testVec.x, playerPos.y + testVec.y, playerPos.z + testVec.z);
 
 	glm::mat4 View = glm::lookAt(
 		glm::vec3(cameraPosition), // camera position
