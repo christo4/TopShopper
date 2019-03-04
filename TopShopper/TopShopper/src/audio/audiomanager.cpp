@@ -8,7 +8,11 @@
 
 using namespace std;
 
-AudioManager::SoundEffect* testSoundEffect = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* rollingSound = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* hitWallSound = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* dropItemSound = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* pickItemSound = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* turboSound = new AudioManager::SoundEffect();
 
 
 AudioManager::AudioManager(Broker *broker) 
@@ -24,8 +28,16 @@ AudioManager::~AudioManager() {
 
 AudioManager::SoundEffect* AudioManager::getSoundEffect(SoundEffectTypes sound) {
 	switch (sound) {
-	case SoundEffectTypes::TEST_SOUND:
-		return testSoundEffect;
+	case SoundEffectTypes::ROLL_SOUND:
+		return rollingSound;
+	case SoundEffectTypes::HITWALL_SOUND:
+		return hitWallSound;
+	case SoundEffectTypes::PICKITEM_SOUND:
+		return pickItemSound;
+	case SoundEffectTypes::DROPITEM_SOUND:
+		return dropItemSound;
+	case SoundEffectTypes::TURBO_SOUND:
+		return turboSound;
 	default:
 		return nullptr;
 	}
@@ -83,8 +95,11 @@ void AudioManager::resumeMusic() {
 }
 
 void AudioManager::playSFX(SoundEffect *mySfx) {
-	Mix_SetPosition(mySfx->channel, mySfx->angle, mySfx->distance);
-	Mix_PlayChannel(mySfx->channel, mySfx->sfx, mySfx->loop);
+	if (!Mix_Playing(mySfx->channel)) {
+		Mix_SetPosition(mySfx->channel, mySfx->angle, mySfx->distance);
+		Mix_PlayChannel(mySfx->channel, mySfx->sfx, mySfx->loop);
+	}
+	
 	//Mix_PlayChannelTimed(mySfx->channel, mySfx->sfx, mySfx->loop, mySfx->time);
 	//SDL_Delay(mySfx->time);
 }
@@ -102,17 +117,34 @@ void AudioManager::init() {
 	Mix_AllocateChannels(16);
 
 	// load sound effect from file
-	for (int i = 0; i < filenames.size(); i++) {
-		SoundEffect sfx;
-		sfx.filename = filenames[i];
-		sfx.sfx = loadSFX(sfx.filename);
-		sfx.channel = i; // allocate the channel for sound effect
-		soundEffects.push_back(sfx);
-	}
+	//for (int i = 0; i < filenames.size(); i++) {
+	//	SoundEffect sfx;
+	//	sfx.filename = filenames[i];
+	//	sfx.sfx = loadSFX(sfx.filename);
+	//	sfx.channel = i; // allocate the channel for sound effect
+	//	soundEffects.push_back(sfx);
+	//}
 
-	testSoundEffect->filename = "../TopShopper/resources/sfx/test2.wav";
-	testSoundEffect->sfx = loadSFX(testSoundEffect->filename);
-	testSoundEffect->channel = 0;
+	rollingSound->filename = "../TopShopper/resources/sfx/rollCart.wav";
+	rollingSound->sfx = loadSFX(rollingSound->filename);
+	rollingSound->channel = 0;
+
+	hitWallSound->filename = "../TopShopper/resources/sfx/cartHitWall.wav";
+	hitWallSound->sfx = loadSFX(hitWallSound->filename);
+	hitWallSound->channel = 1;
+
+	pickItemSound->filename = "../TopShopper/resources/sfx/pickItem.wav";
+	pickItemSound->sfx = loadSFX(pickItemSound->filename);
+	pickItemSound->channel = 2;
+
+	dropItemSound->filename = "../TopShopper/resources/sfx/itemDrop.wav";
+	dropItemSound->sfx = loadSFX(dropItemSound->filename);
+	dropItemSound->channel = 3;
+
+	turboSound->filename = "../TopShopper/resources/sfx/turbo.wav";
+	turboSound->sfx = loadSFX(turboSound->filename);
+	turboSound->distance = 400;
+	turboSound->channel = 4;
 
 
 

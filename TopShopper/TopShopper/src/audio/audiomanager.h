@@ -11,7 +11,11 @@
 class Broker;
 
 enum SoundEffectTypes {
-	TEST_SOUND
+	ROLL_SOUND,
+	HITWALL_SOUND,
+	PICKITEM_SOUND,
+	DROPITEM_SOUND,
+	TURBO_SOUND
 };
 
 class AudioManager {
@@ -28,7 +32,7 @@ public:
 	};
 	
 	struct Music {
-		std::string filename = "../TopShopper/resources/sfx/SuperMarioBros.mp3";
+		std::string filename = "../TopShopper/resources/sfx/elevatorMusic.mp3";
 		Mix_Music* music;
 		int volume = MIX_MAX_VOLUME / 32;  // only work for mod, mp3 and ogg files
 		int loop = -1; // number of times to play, -1 forever, bigger than 0(number of times)
