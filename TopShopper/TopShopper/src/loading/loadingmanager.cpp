@@ -242,7 +242,7 @@ void LoadingManager::init() {
 	
 
 	//milk
-	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+	loadObject("../TopShopper/resources/Objects/Milk.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 
 
 	MilkGeo->verts = returnVertices;
@@ -405,7 +405,7 @@ void LoadingManager::init() {
 
 
 	//Carrot
-	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+	loadObject("../TopShopper/resources/Objects/Carrot.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 
 
 	CarrotGeo->verts = returnVertices;
