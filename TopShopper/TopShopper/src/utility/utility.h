@@ -17,6 +17,7 @@ std::vector<physx::PxVec3> castVectorOfGLMVec4ToVectorOfPxVec3(std::vector<glm::
 bool isApproxEqual(physx::PxVec3 v1, physx::PxVec3 v2);
 
 
+//void toEulerAngles(const physx::PxQuat& q, double& roll, double& pitch, double& yaw);
 
 
 #endif // UTILITY_H_

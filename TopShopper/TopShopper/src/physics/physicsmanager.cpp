@@ -594,6 +594,34 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 
 		// DEFAULT: NON-KINEMATIC DYNAMIC (GRAVITY ENABLED)
 
+/*
+// NOTE: I believe its the LOOKAT shape that breaks the AI since the raycasts hit it!
+		PxFilterData simDataLA(CollisionFlags::COLLISION_FLAG_LOOKAT_SHAPE, CollisionFlags::COLLISION_FLAG_LOOKAT_SHAPE_AGAINST, 0, 0);
+		PxFilterData qryDataLA;
+		setupNonDrivableSurface(qryDataLA);
+		bool isExclusiveLA = true;
+		PxShapeFlags shapeFlagsLA = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		PxShape *lookAtShape = createSphereCollider(0.1f, gPhysics->createMaterial(0.0f, 0.0f, 0.0f), simDataLA, qryDataLA, isExclusiveLA, shapeFlagsLA);
+		lookAtShape->setLocalPose(PxTransform(0.0f, 0.0f, 3.0f));
+
+		shoppingCartBase->_vehicle4W->getRigidDynamicActor()->attachShape(*lookAtShape);
+
+
+		PxFilterData simDataCam(CollisionFlags::COLLISION_FLAG_CAMERA_SHAPE, CollisionFlags::COLLISION_FLAG_CAMERA_SHAPE_AGAINST, 0, 0);
+		PxFilterData qryDataCam;
+		setupNonDrivableSurface(qryDataCam);
+		bool isExclusiveCam = true;
+		PxShapeFlags shapeFlagsCam = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		PxShape *cameraShape = createSphereCollider(0.1f, gPhysics->createMaterial(0.0f, 0.0f, 0.0f), simDataCam, qryDataCam, isExclusiveCam, shapeFlagsCam);
+		cameraShape->setLocalPose(PxTransform(0.0f, 15.0f, -25.0f));
+
+		shoppingCartBase->_vehicle4W->getRigidDynamicActor()->attachShape(*cameraShape);
+
+		shoppingCartBase->_lookAtShape = lookAtShape;
+		shoppingCartBase->_cameraShape = cameraShape;
+*/
 		// ENTITY...
 		entity = std::make_shared<ShoppingCartPlayer>(shoppingCartBase);
 		break;

@@ -8,12 +8,14 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "vehicle/VehicleShoppingCart.h"
+#include <deque>
 
 
 
 using namespace physx;
 
 
+std::deque<float> gVehicleThetas = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; // I WILL ENFORCE THIS TO BE A FIXED SIZE OF 10 (for now, holds the last 10 frames worth of VEHICLE ROTATIONS)
 
 RenderingManager::RenderingManager(Broker *broker)
 	: _broker(broker)
@@ -126,8 +128,8 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 
 
 void RenderingManager::RenderScene() {
-	//Clears the screen to a dark grey background
-	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+	//Clears the screen to a light grey background
+	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// bind our shader program and the vertex array object containing our
@@ -138,33 +140,56 @@ void RenderingManager::RenderScene() {
 	int height;
 	glfwGetWindowSize(_window, &width, &height);
 
-	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 5.0f, 1000.0f);
+	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 5.0f, 500.0f);
 
 	// TODO: fix the follow camera to lag behind the player, don't be blocked by walls and don't spin so much, and be panned with right stick (this changes where it is looking at)
+	// NOTE: later on... for right thumbstick, the cmaera position will curl around the circle proportional to -1.0 to 1.0 (post-process over the theta)
 	std::shared_ptr<ShoppingCartPlayer> player = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers().at(0);
 	PxRigidDynamic* playerDyn = player->_actor->is<PxRigidDynamic>();
 	PxTransform playerTransform = playerDyn->getGlobalPose();
 	PxVec3 playerPos = playerTransform.p;
 	PxQuat playerRot = playerTransform.q;
 
-	PxVec3 playerVel = playerDyn->getLinearVelocity();
+	PxVec3 forward(0.0f, 0.0f, 1.0f);
+	forward = playerRot.rotate(forward);
+	PxVec3 forwardNoYNorm = PxVec3(forward.x, 0.0f, forward.z).getNormalized();
+	float theta = acos(forwardNoYNorm.dot(PxVec3(0.0f, 0.0f, 1.0f))); // theta in [0, pi]
 
-	
-	PxVec3 testVec(0, 15, -25);
-	testVec = playerRot.rotate(testVec);
+	// now use cross product to figure out which side (sign of theta)...
+	// +ve theta if CCW, -ve theta if CW
 
+	PxVec3 crossprod = forwardNoYNorm.cross(PxVec3(0.0f, 0.0f, 1.0f));
+	bool isCCW = crossprod.y <= 0.0f;
+	if (!isCCW) theta *= -1;
 
-	if (testVec.y < 10.0f) {
-		testVec.y = 10.0f;
+	// now theta in [-pi, 0] or [0, pi]
+
+	gVehicleThetas.pop_front(); // pop the oldest frame
+	gVehicleThetas.push_back(theta); // push current vehicle rotation (around +y-axis)
+
+	// get the average vehicle rotation in last 10 frames (incl. this one) 
+	// have to use vectors since thetas have edge case problems (e.g. going from pi to -pi)
+	PxVec3 vehicleRotationVecSum(0.0f, 0.0f, 0.0f);
+	for (float t : gVehicleThetas) {
+		// assume a radius of 1 for this calculation (scale later by our intended radius)
+		// also assume a y of 0.0f (can set y later)
+		vehicleRotationVecSum += PxVec3(sin(t), 0.0f, cos(t));
 	}
+	vehicleRotationVecSum /= gVehicleThetas.size();
 
+	// NOTE: I could change this to perform the glm::mix(t=0.5f) over all vectors, but the current solution seems to work
 
-	glm::vec3 cameraPosition = glm::vec3(playerPos.x + testVec.x, playerPos.y + testVec.y, playerPos.z + testVec.z);
+	float radius = 30.0f; // FIXED (for now)
+	float camX = -1*radius * vehicleRotationVecSum.x;
+	float camY = 20.0f;
+	float camZ = -1*radius * vehicleRotationVecSum.z;
+
+	glm::vec3 camPos(playerPos.x + camX, playerPos.y + camY, playerPos.z + camZ);
 
 	glm::mat4 View = glm::lookAt(
-		glm::vec3(cameraPosition), // camera position
+		camPos, // camera position
 		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at 
-		glm::vec3(0, 1, 0)  // up vector
+		glm::vec3(0.0f, 1.0f, 0.0f)  // up vector
 	);
 
 
@@ -184,7 +209,7 @@ void RenderingManager::RenderScene() {
 		GLuint uniformLocation = glGetUniformLocation(shaderProgram, "imageTexture");
 
 		glUniform1i(uniformLocation, 0);
-		glUniform3f(cameraID, cameraPosition.x, cameraPosition.y, cameraPosition.z);
+		glUniform3f(cameraID, camPos.x, camPos.y, camPos.z);
 		glUniform3f(colorID, g.color.x, g.color.y, g.color.z);
 		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
 		glUniformMatrix4fv(ViewID, 1, GL_FALSE, &View[0][0]);

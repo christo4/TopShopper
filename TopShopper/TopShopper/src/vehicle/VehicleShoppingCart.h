@@ -44,6 +44,8 @@ class VehicleShoppingCart {
 
 
 		std::vector<physx::PxShape*> _wheelShapes;
+		//physx::PxShape *_lookAtShape = nullptr;
+		//physx::PxShape *_cameraShape = nullptr;
 
 
 	private:
