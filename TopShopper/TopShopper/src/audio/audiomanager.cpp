@@ -1,3 +1,4 @@
+
 #include "audiomanager.h"
 #include "core/broker.h"
 
@@ -15,7 +16,7 @@ AudioManager::SoundEffect* pickItemSound = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* turboSound = new AudioManager::SoundEffect();
 
 
-AudioManager::AudioManager(Broker *broker) 
+AudioManager::AudioManager(Broker *broker)
 	: _broker(broker)
 {
 
@@ -67,7 +68,7 @@ Mix_Chunk* AudioManager::loadSFX(string filename) {
 	if (mSFX[filename] == nullptr) {
 		mSFX[filename] = Mix_LoadWAV(filename.c_str());
 		if (mSFX[filename] == NULL) {
-			cout << "SFX loading error"<< Mix_GetError()  << endl;
+			cout << "SFX loading error" << Mix_GetError() << endl;
 		}
 	}
 	return mSFX[filename];
@@ -94,12 +95,23 @@ void AudioManager::resumeMusic() {
 		Mix_ResumeMusic();
 }
 
+void AudioManager::changeVolumeSFX(SoundEffect *mySfx, int volume) {
+	//mySfx->volume = volume;
+	Mix_Volume(mySfx->channel, volume);
+}
+
+void AudioManager::haltSFX(SoundEffect *mySfx) {
+	if (Mix_Playing(mySfx->channel)) {
+		Mix_FadeOutChannel(mySfx->channel, 15);
+	}
+}
+
 void AudioManager::playSFX(SoundEffect *mySfx) {
 	if (!Mix_Playing(mySfx->channel)) {
 		Mix_SetPosition(mySfx->channel, mySfx->angle, mySfx->distance);
 		Mix_PlayChannel(mySfx->channel, mySfx->sfx, mySfx->loop);
 	}
-	
+
 	//Mix_PlayChannelTimed(mySfx->channel, mySfx->sfx, mySfx->loop, mySfx->time);
 	//SDL_Delay(mySfx->time);
 }
@@ -139,16 +151,20 @@ void AudioManager::init() {
 
 	dropItemSound->filename = "../TopShopper/resources/sfx/itemDrop.wav";
 	dropItemSound->sfx = loadSFX(dropItemSound->filename);
+	dropItemSound->distance = 0;
+
 	dropItemSound->channel = 3;
 
 	turboSound->filename = "../TopShopper/resources/sfx/turbo.wav";
 	turboSound->sfx = loadSFX(turboSound->filename);
-	turboSound->distance = 400;
+	turboSound->volume = MIX_MAX_VOLUME / 20;
+	//turboSound->distance = 200;
 	turboSound->channel = 4;
 
 
 
-	
+
+
 
 	// load music from file
 	bgm.music = loadMusic(bgm.filename);
@@ -156,7 +172,7 @@ void AudioManager::init() {
 	playMusic(&bgm);
 
 
-	
+
 
 }
 
@@ -167,8 +183,12 @@ void AudioManager::updateSeconds(double variableDeltaTime) {
 	//}
 	//resumeMusic();
 	//playSFX(testSoundEffect);
-	
-	
+	//printf("music is%s playing.\n",  ? "" : " not");
+	if (!Mix_PlayingMusic()) {
+		playMusic(&bgm);
+	}
+
+	//cout << "rolling volume: " << rollingSound->volume << endl;
+
 
 }
-

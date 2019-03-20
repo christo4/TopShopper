@@ -98,6 +98,26 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 				else if (!turboButtonPressed && turboState) {
 					turboState = false;
 				}
+				PxRigidDynamic *playerDyn = player->_actor->is<PxRigidDynamic>();
+				PxVec3 velocity = playerDyn->getLinearVelocity();
+				float speed = velocity.magnitude();
+
+				std::cout << speed << std::endl;
+				Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND));
+				Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND)->volume*speed / 60);
+				//if (pad->leftTrigger > -1 || pad->rightTrigger > -1 || turboButtonPressed) {
+				//	PxRigidDynamic *playerDyn = player->_actor->is<PxRigidDynamic>();
+				//	PxVec3 velocity = playerDyn->getLinearVelocity();
+				//	float speed = velocity.magnitude();
+
+				//	std::cout << speed << std::endl;
+				//	Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND));
+				//	Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND)->volume*speed / 60);
+				//}
+				//else {
+				//	Broker::getInstance()->getAudioManager()->haltSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND));
+
+				//}
 				
 				player->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
 			}
@@ -117,12 +137,39 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 					else if (!turboKeyPressed && turboState) {
 						turboState = false;
 					}
-					
+					PxRigidDynamic *playerDyn = player->_actor->is<PxRigidDynamic>();
+					PxVec3 velocity = playerDyn->getLinearVelocity();
+					float speed = velocity.magnitude();
+
+					std::cout << speed << std::endl;
+					Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND));
+					Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND)->volume*speed / 60);
 					player->_shoppingCartBase->processRawInputDataKeyboard(accelKeyPressed, reverseKeyPressed, handbrakeKeyPressed, steerLeftKeyPressed, steerRightKeyPressed, turboKeyPressed);
 				}
 			}
 		}
 		else if (_playerType == PlayerTypes::BOT) {
+			//std::vector<std::shared_ptr<ShoppingCartPlayer>> carts = Broker::getInstance()->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
+			//std::shared_ptr<ShoppingCartPlayer> player1 = nullptr;
+			//for (const std::shared_ptr<ShoppingCartPlayer> &cart : carts) {
+			//	std::shared_ptr<PlayerScript> cartScript = std::static_pointer_cast<PlayerScript>(cart->getComponent(ComponentTypes::PLAYER_SCRIPT));
+			//	if (cartScript->_playerType == PlayerTypes::HUMAN && cartScript->_inputID == 1) {
+			//		player1 = cart;
+			//		break;
+			//	}
+			//}
+
+			//physx::PxVec3 playerPos = player1->_actor->is<physx::PxRigidDynamic>()->getGlobalPose().p;
+			//
+			//physx::PxVec3 myPos = (dynamic_cast<ShoppingCartPlayer*>(_entity))->_actor->is<physx::PxRigidDynamic>()->getGlobalPose().p;
+			//physx::PxVec3 myVelocity = (dynamic_cast<ShoppingCartPlayer*>(_entity))->_actor->is<physx::PxRigidDynamic>()->getLinearVelocity();
+
+			//float speed = myVelocity.magnitude();
+			//float distanceBetween = (myPos - playerPos).magnitude();
+
+			//Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND));
+			//Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND)->volume*speed / 60);
+
 			navigate();
 		}
 		
@@ -135,7 +182,11 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 	}
 }
 
-void PlayerScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
+void PlayerScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {
+	if (otherEntity->getTag() == EntityTypes::OBSTACLE1 || otherEntity->getTag() == EntityTypes::OBSTACLE2 || otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+		Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND));
+	}
+}
 void PlayerScript::onCollisionExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
 
 void PlayerScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity) {
@@ -218,7 +269,8 @@ void PlayerScript::pickedUpItem(EntityTypes pickupType) {
 void PlayerScript::bashed() {
 	ShoppingCartPlayer *bashedCart = static_cast<ShoppingCartPlayer*>(_entity);
 	bashedCart->_shoppingCartBase->setBashProtected();
-	Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND));
+//	Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND));
+	Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::DROPITEM_SOUND));
 
 	std::vector<EntityTypes> lostItems; // can have size 0,1 or 2
 	for (int i = 0; i < 3; i++) {

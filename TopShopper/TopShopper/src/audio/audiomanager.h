@@ -29,8 +29,9 @@ public:
 		int time = 1500; // time to play in millisecond also is the time delay
 		int channel; // the channel that play the sound effect (channel >= 0)
 		int loop = 0; // -1 for infinite loop, 0 for play once, more than 2 for number of rounds
+		int volume = MIX_MAX_VOLUME;
 	};
-	
+
 	struct Music {
 		std::string filename = "../TopShopper/resources/sfx/elevatorMusic.mp3";
 		Mix_Music* music;
@@ -49,6 +50,8 @@ public:
 	void resumeMusic();
 
 	void playSFX(SoundEffect *mySfx);
+	void haltSFX(SoundEffect *mySfx);
+	void changeVolumeSFX(SoundEffect *mySfx, int volume);
 
 	Mix_Music* loadMusic(std::string filename);
 	//Mix_Chunk* loadSFX(SoundEffect *mySfx);
