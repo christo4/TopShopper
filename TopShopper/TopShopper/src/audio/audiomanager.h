@@ -11,7 +11,8 @@
 class Broker;
 
 enum SoundEffectTypes {
-	ROLL_SOUND,
+	ROLL_SOUND_PLAYER1,
+	ROLL_SOUND_AI1,
 	HITWALL_SOUND,
 	PICKITEM_SOUND,
 	DROPITEM_SOUND,
@@ -52,6 +53,8 @@ public:
 	void playSFX(SoundEffect *mySfx);
 	void haltSFX(SoundEffect *mySfx);
 	void changeVolumeSFX(SoundEffect *mySfx, int volume);
+
+	void changeDistanceSFX(SoundEffect * mySfx, float distance);
 
 	Mix_Music* loadMusic(std::string filename);
 	//Mix_Chunk* loadSFX(SoundEffect *mySfx);

@@ -9,7 +9,9 @@
 
 using namespace std;
 
-AudioManager::SoundEffect* rollingSound = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* rollingSound_player1 = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* rollingSound_ai1 = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* rollingSound_ai2 = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* hitWallSound = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* dropItemSound = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* pickItemSound = new AudioManager::SoundEffect();
@@ -29,8 +31,10 @@ AudioManager::~AudioManager() {
 
 AudioManager::SoundEffect* AudioManager::getSoundEffect(SoundEffectTypes sound) {
 	switch (sound) {
-	case SoundEffectTypes::ROLL_SOUND:
-		return rollingSound;
+	case SoundEffectTypes::ROLL_SOUND_PLAYER1:
+		return rollingSound_player1;
+	case SoundEffectTypes::ROLL_SOUND_AI1:
+		return rollingSound_ai1;
 	case SoundEffectTypes::HITWALL_SOUND:
 		return hitWallSound;
 	case SoundEffectTypes::PICKITEM_SOUND:
@@ -100,6 +104,11 @@ void AudioManager::changeVolumeSFX(SoundEffect *mySfx, int volume) {
 	Mix_Volume(mySfx->channel, volume);
 }
 
+void AudioManager::changeDistanceSFX(SoundEffect *mySfx, float distance) {
+	//mySfx->volume = volume;
+	Mix_SetPosition(mySfx->channel, 90, (Uint8)distance);
+}
+
 void AudioManager::haltSFX(SoundEffect *mySfx) {
 	if (Mix_Playing(mySfx->channel)) {
 		Mix_FadeOutChannel(mySfx->channel, 15);
@@ -137,9 +146,13 @@ void AudioManager::init() {
 	//	soundEffects.push_back(sfx);
 	//}
 
-	rollingSound->filename = "../TopShopper/resources/sfx/rollCart.wav";
-	rollingSound->sfx = loadSFX(rollingSound->filename);
-	rollingSound->channel = 0;
+	rollingSound_player1->filename = "../TopShopper/resources/sfx/rollCart.wav";
+	rollingSound_player1->sfx = loadSFX(rollingSound_player1->filename);
+	rollingSound_player1->channel = 0;
+
+	rollingSound_ai1->filename = "../TopShopper/resources/sfx/rollCart.wav";
+	rollingSound_ai1->sfx = loadSFX(rollingSound_ai1->filename);
+	rollingSound_ai1->channel = 5;
 
 	hitWallSound->filename = "../TopShopper/resources/sfx/cartHitWall.wav";
 	hitWallSound->sfx = loadSFX(hitWallSound->filename);
