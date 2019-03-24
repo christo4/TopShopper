@@ -104,7 +104,7 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 				PxVec3 velocity = playerDyn->getLinearVelocity();
 				float speed = velocity.magnitude();
 
-				std::cout << speed << std::endl;
+				//std::cout << speed << std::endl;
 				Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_PLAYER1));
 				Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_PLAYER1), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_PLAYER1)->volume*speed / 60);
 				
