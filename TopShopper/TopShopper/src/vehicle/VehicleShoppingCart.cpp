@@ -156,11 +156,41 @@ void VehicleShoppingCart::processRawInputDataKeyboard(const bool accelKeyPressed
 	// neither pressed = accel = false (no gear change needed)
 
 	_isKeyAndMouseControlled = true; // flag that this vehicle is being controlled by a keyboard/mouse
-
 	bool isAccelerating;
 
+
+	// NOTE: DO THESE CHECKS BEFORE OTHER STUFF... 
+	// CHECK FOR START TURBO / FINISH TURBO EVENTS...
+	bool actualTurboState = turboKeyPressed; // start off with just the input...
+	bool lastFrameTurboState = _isTurboing;
+	
+
+	if (lastFrameTurboState && !turboKeyPressed) { // FINISHED TURBO THIS FRAME...
+		// BEING EXTRA SAFE!
+		_turboFuel = glm::clamp(floorf(_turboFuel), 0.0f, 4.0f);
+		_nbBoosts = glm::clamp((int)(floorf(_turboFuel)), 0, 4);
+	}
+
+
+	// OVERRIDE TURBO INPUT IF NOT ENOUGH FUEL/BOOSTS...
+	else if (!lastFrameTurboState && turboKeyPressed) { // ATTEMPT TO START TURBO THIS FRAME...
+		if (_nbBoosts >= 1) {
+			// BEING EXTRA SAFE!
+			_turboFuel = glm::clamp(floorf(_turboFuel), 0.0f, 4.0f);
+			_nbBoosts = glm::clamp((int)(floorf(_turboFuel)), 0, 4);
+		}
+		else {
+			actualTurboState = false; // override turbo input since there aren't enough boosts...
+		}
+	}
+
+	else if (lastFrameTurboState && turboKeyPressed) { // ATTEMPT TO CONTINUE TURBO THIS FRAME...
+		if (_turboFuel <= 0.0f) actualTurboState = false; // override turbo input since there isn't any fuel left...
+	}
+
+
 	// TURBO KEY OVERRIDES ACCELKEY/REVERSEKEY (It does not override handbrake however)
-	if (turboKeyPressed) {
+	if (actualTurboState) {
 		_isTurboing = true;
 		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
 		isAccelerating = false;
@@ -221,11 +251,41 @@ void VehicleShoppingCart::processRawInputDataController(const PxReal accel, cons
 	*/
 
 	_isKeyAndMouseControlled = false; // flag that this vehicle is being controlled by a gamepad
-
 	PxReal netAccel;
 
+
+	// NOTE: DO THESE CHECKS BEFORE OTHER STUFF... 
+	// CHECK FOR START TURBO / FINISH TURBO EVENTS...
+	bool actualTurboState = turboButtonPressed; // start off with just the input...
+	bool lastFrameTurboState = _isTurboing;
+
+
+	if (lastFrameTurboState && !turboButtonPressed) { // FINISHED TURBO THIS FRAME...
+		// BEING EXTRA SAFE!
+		_turboFuel = glm::clamp(floorf(_turboFuel), 0.0f, 4.0f);
+		_nbBoosts = glm::clamp((int)(floorf(_turboFuel)), 0, 4);
+	}
+
+
+	// OVERRIDE TURBO INPUT IF NOT ENOUGH FUEL/BOOSTS...
+	else if (!lastFrameTurboState && turboButtonPressed) { // ATTEMPT TO START TURBO THIS FRAME...
+		if (_nbBoosts >= 1) {
+			// BEING EXTRA SAFE!
+			_turboFuel = glm::clamp(floorf(_turboFuel), 0.0f, 4.0f);
+			_nbBoosts = glm::clamp((int)(floorf(_turboFuel)), 0, 4);
+		}
+		else {
+			actualTurboState = false; // override turbo input since there aren't enough boosts...
+		}
+	}
+
+	else if (lastFrameTurboState && turboButtonPressed) { // ATTEMPT TO CONTINUE TURBO THIS FRAME...
+		if (_turboFuel <= 0.0f) actualTurboState = false; // override turbo input since there isn't any fuel left...
+	}
+
+
 	// TURBO BUTTON OVERRIDES TRIGGERS (It does not override handbrake however)
-	if (turboButtonPressed) {
+	if (actualTurboState) {
 		_isTurboing = true;
 		_vehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
 		netAccel = 0.0f;
@@ -293,4 +353,24 @@ void VehicleShoppingCart::tickBashProtectionTimer(double fixedDeltaTime) {
 		_isBashProtected = false;
 		std::cout << "BASH PROTECTION LIFTED" << std::endl;
 	}
+}
+
+
+
+
+void VehicleShoppingCart::consumeTurbo(double fixedDeltaTime) {
+	_turboFuel -= _turboConsumptionRate * fixedDeltaTime;
+	if (_turboFuel < 0.0) _turboFuel = 0.0f;
+	_nbBoosts = glm::clamp((int)(floorf(_turboFuel)), 0, 4);
+
+	//std::cout << "CONSUME RESULT FUEL " << _turboFuel << std::endl;
+}
+
+void VehicleShoppingCart::rechargeTurbo(double fixedDeltaTime) {
+	_turboFuel += _turboRechargeRate * fixedDeltaTime;
+	if (_turboFuel > 4.0) _turboFuel = 4.0f;
+	_nbBoosts = glm::clamp((int)(floorf(_turboFuel)), 0, 4);
+
+	//std::cout << "RECHARGE RESULT FUEL " << _turboFuel << std::endl;
+
 }

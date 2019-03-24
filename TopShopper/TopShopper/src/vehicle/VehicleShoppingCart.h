@@ -47,6 +47,18 @@ class VehicleShoppingCart {
 		//physx::PxShape *_lookAtShape = nullptr;
 		//physx::PxShape *_cameraShape = nullptr;
 
+		//int getNBBoosts() { return _nbBoosts; }
+
+
+		void consumeTurbo(double fixedDeltaTime);
+		void rechargeTurbo(double fixedDeltaTime);
+
+
+
+		float _turboFuel = 4.0f; // will be clamped between 0.0f and 4.0f
+		int _nbBoosts = 4; // = floor(_turboFuel), will be 0, 1, 2, 3, or 4
+
+
 
 	private:
 		physx::PxVehicleDrive4WRawInputData _rawInputData;
@@ -62,6 +74,15 @@ class VehicleShoppingCart {
 		double _bashProtectionTimer = -1.0;
 
 		//double _stateTimer = DBL_MAX; // use DBL_MAX for practically infinite timer
+
+
+
+		
+
+
+
+		const float _turboConsumptionRate = 0.5f; // -0.5 / second
+		const float _turboRechargeRate = 0.25f; // +0.25 / second
 
 };
 

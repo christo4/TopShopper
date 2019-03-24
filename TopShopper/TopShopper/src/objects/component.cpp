@@ -167,12 +167,25 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 					PxVec3 velocity = playerDyn->getLinearVelocity();
 					float speed = velocity.magnitude();
 
-					std::cout << speed << std::endl;
+					//std::cout << speed << std::endl;
 					Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_PLAYER1));
 					Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_PLAYER1), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_PLAYER1)->volume*speed / 60);
 					player->_shoppingCartBase->processRawInputDataKeyboard(accelKeyPressed, reverseKeyPressed, handbrakeKeyPressed, steerLeftKeyPressed, steerRightKeyPressed, turboKeyPressed);
 				}
 			}
+
+			// HUMAN ONLY...
+			// CONSUME FUEL OR RECHARGE FUEL...
+			// NO NEED TO CONSUME/RECHARGE TURBO WHEN YOU HAVE THE HOT POTATO...
+			if (!_hasHotPotato) {
+				if (player->_shoppingCartBase->IsTurboing()) {
+					player->_shoppingCartBase->consumeTurbo(fixedDeltaTime);
+				}
+				else {
+					player->_shoppingCartBase->rechargeTurbo(fixedDeltaTime);
+				}
+			}
+
 		}
 		else if (_playerType == PlayerTypes::BOT) {
 			std::vector<std::shared_ptr<ShoppingCartPlayer>> carts = Broker::getInstance()->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
@@ -210,7 +223,7 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 			PxVec3 crossprod = forwardNoYNormalized.cross(myPosNormalized);
 			bool isCCW = crossprod.y <= 0.0f;
 			if (!isCCW) angle = 360 - angle;
-			std::cout << "Angle: " << angle << std::endl;
+			//std::cout << "Angle: " << angle << std::endl;
 			Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1)->volume*(speed / 60));
 			Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1), (distanceBetween / 255), angle);
 
@@ -797,6 +810,10 @@ void PlayerScript::navigate() {
 void PlayerScript::giveHotPotato(double remainingDuration) {
 	_hasHotPotato = true;
 	_hotPotatoTimer = remainingDuration;
+	// give max turbo to hot potato recipient...
+	ShoppingCartPlayer *player = dynamic_cast<ShoppingCartPlayer*>(_entity);
+	player->_shoppingCartBase->_turboFuel = 4.0f;
+	player->_shoppingCartBase->_nbBoosts = 4;
 }
 
 void PlayerScript::tickHotPotatoTimer(double fixedDeltaTime) {
@@ -815,6 +832,13 @@ void PlayerScript::explodeHotPotato() {
 	//TODO: UI indicator that you exploded/points were lost???
 	coinExplosion();
 }
+
+
+int PlayerScript::getNBBoosts() {
+	ShoppingCartPlayer *player = dynamic_cast<ShoppingCartPlayer*>(_entity);
+	return player->_shoppingCartBase->_nbBoosts;
+}
+
 
 
 

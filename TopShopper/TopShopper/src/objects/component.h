@@ -211,6 +211,7 @@ struct PlayerScript : BehaviourScript {
 	void explodeHotPotato();
 
 
+	int getNBBoosts();
 };
 
 
