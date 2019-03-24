@@ -38,18 +38,6 @@ enum SpriteTexture {
 	WATERMELON_SPRITE
 };
 
-/*
-static struct HUDInfo {
-	glm::vec2 playerListBotLeft = glm::vec2(852.0f, 100.0f);
-	glm::vec2 playerListTopRight = glm::vec2(1068.0f, 172.0f);
-	glm::vec2 playerListFirstBotLeft = glm::vec2(856.0f, 104.0f);
-	glm::vec2 playerListFirstTopRight = glm::vec2(920, 168);
-
-
-
-};
-
-*/
 
 
 class RenderingManager {
@@ -69,6 +57,8 @@ public:
 	void renderHud();
 	void initTextRender();
 	void initSpriteTextures();
+	void init3DTextures();
+	void initFrameBuffers();
 	MyTexture * getSpriteTexture(EntityTypes type);
 
 
@@ -107,6 +97,11 @@ private:
 	Broker *_broker = nullptr;
 	GLFWwindow *_window = nullptr;
 	std::vector<Geometry> _objects;
+	GLuint _lightDepthFBO;
+	unsigned int _shadowWidth = 1024;
+	unsigned int _shadowHeight = 1024;
+
+
 	void openWindow();
 
 	MyTexture *_borderSprite = new MyTexture();

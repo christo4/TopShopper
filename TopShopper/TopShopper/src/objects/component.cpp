@@ -102,7 +102,7 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 				PxVec3 velocity = playerDyn->getLinearVelocity();
 				float speed = velocity.magnitude();
 
-				std::cout << speed << std::endl;
+				//std::cout << speed << std::endl;
 				Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_PLAYER1));
 				Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_PLAYER1), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_PLAYER1)->volume*speed / 60);
 				//if (pad->leftTrigger > -1 || pad->rightTrigger > -1 || turboButtonPressed) {
@@ -141,7 +141,7 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 					PxVec3 velocity = playerDyn->getLinearVelocity();
 					float speed = velocity.magnitude();
 
-					std::cout << speed << std::endl;
+					//std::cout << speed << std::endl;
 					Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_PLAYER1));
 					Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_PLAYER1), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_PLAYER1)->volume*speed / 60);
 					player->_shoppingCartBase->processRawInputDataKeyboard(accelKeyPressed, reverseKeyPressed, handbrakeKeyPressed, steerLeftKeyPressed, steerRightKeyPressed, turboKeyPressed);
@@ -167,7 +167,7 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 			float speed = myVelocity.magnitude();
 			float distanceBetween = (myPos - playerPos).magnitude();
 
-			std::cout << "distance between: " << distanceBetween << std::endl;
+			//std::cout << "distance between: " << distanceBetween << std::endl;
 			Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1)->volume*(speed / 60)*(distanceBetween / 255));
 			Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1), (distanceBetween / 255));
 

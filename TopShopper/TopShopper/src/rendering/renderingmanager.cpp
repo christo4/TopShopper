@@ -51,56 +51,10 @@ void RenderingManager::init() {
 
 	glUseProgram(shaderProgram);
 
-
 	/*TODO: Should do this in loading manager or a texture manager class*/
-	MyTexture texture;
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(SPARE_CHANGE_GEO_NO_INDEX)->texture = texture;
-
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/yellow.jpg", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(BANANA_GEO_NO_INDEX)->texture = texture;
-
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(VEHICLE_CHASSIS_GEO_NO_INDEX)->texture = texture;
-
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background1-asphalt.jpg", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(VEHICLE_WHEEL_GEO_NO_INDEX)->texture = texture;
-
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background3-wood.jpg", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(GROUND_GEO_NO_INDEX)->texture = texture;
-
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background3-wood.jpg", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(OBSTACLE1_GEO_NO_INDEX)->texture = texture;
-
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background3-wood.jpg", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(OBSTACLE2_GEO_NO_INDEX)->texture = texture;
-
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/white.png", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(MILK_GEO_NO_INDEX)->texture = texture;
-
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/blue.jpg", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(WATER_GEO_NO_INDEX)->texture = texture;
-
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/brown.jpg", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(COLA_GEO_NO_INDEX)->texture = texture;
-
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/red.jpg", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(APPLE_GEO_NO_INDEX)->texture = texture;
-
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/pink.jpg", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(WATERMELON_GEO_NO_INDEX)->texture = texture;
-
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/orange.jpg", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(CARROT_GEO_NO_INDEX)->texture = texture;
-
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/purple.jpg", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(EGGPLANT_GEO_NO_INDEX)->texture = texture;
-
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/green.jpg", GL_TEXTURE_2D);
-	_broker->getLoadingManager()->getGeometry(BROCCOLI_GEO_NO_INDEX)->texture = texture;
-
-	
+	init3DTextures();
 	initSpriteTextures();
+	initFrameBuffers();
 
 }
 
@@ -130,7 +84,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 void RenderingManager::RenderScene() {
 	//Clears the screen to a light grey background
 	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
 	// bind our shader program and the vertex array object containing our
 	// scene geometry, then tell OpenGL to draw our geometry
@@ -140,9 +94,8 @@ void RenderingManager::RenderScene() {
 	int height;
 	glfwGetWindowSize(_window, &width, &height);
 
-	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 5.0f, 500.0f);
+	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 1.0f, 500.0f);
 
-	// TODO: fix the follow camera to lag behind the player, don't be blocked by walls and don't spin so much, and be panned with right stick (this changes where it is looking at)
 	// NOTE: later on... for right thumbstick, the cmaera position will curl around the circle proportional to -1.0 to 1.0 (post-process over the theta)
 	std::shared_ptr<ShoppingCartPlayer> player = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers().at(0);
 	PxRigidDynamic* playerDyn = player->_actor->is<PxRigidDynamic>();
@@ -184,8 +137,9 @@ void RenderingManager::RenderScene() {
 	float camY = 20.0f;
 	float camZ = -1*radius * vehicleRotationVecSum.z;
 
-	glm::vec3 camPos(playerPos.x + camX, playerPos.y + camY, playerPos.z + camZ);
 
+
+	glm::vec3 camPos(playerPos.x + camX, playerPos.y + camY, playerPos.z + camZ);
 	glm::mat4 View = glm::lookAt(
 		camPos, // camera position
 		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at 
@@ -196,13 +150,38 @@ void RenderingManager::RenderScene() {
 	GLuint ModelID = glGetUniformLocation(shaderProgram, "Model");
 	GLuint ViewID = glGetUniformLocation(shaderProgram, "View");
 	GLuint ProjectionID = glGetUniformLocation(shaderProgram, "Projection");
-	GLuint colorID = glGetUniformLocation(shaderProgram, "Color");
 	GLuint cameraID = glGetUniformLocation(shaderProgram, "CameraPos");
+
+
+
+	//View = glm::lookAt(glm::vec3(0.0f, 200.0f, 0.0f), glm::vec3(0.5f,15.0f,0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+
+
+	glViewport(0, 0, (GLuint)_shadowWidth, (GLuint)_shadowHeight);
+	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	for (Geometry& g : _objects) {
+	
+		
+
+	
+	}
+
+
+
+	
+
+
+	glViewport(0, 0, (GLuint)width, (GLuint)height);	//reset the viewport to the full window to render from the camera pov
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
 	for (Geometry& g : _objects) {
 
-		glUseProgram(shaderProgram);
+		glUseProgram(shaderProgram);					//use the default shader program
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(g.texture.target, g.texture.textureID);
@@ -210,7 +189,6 @@ void RenderingManager::RenderScene() {
 
 		glUniform1i(uniformLocation, 0);
 		glUniform3f(cameraID, camPos.x, camPos.y, camPos.z);
-		glUniform3f(colorID, g.color.x, g.color.y, g.color.z);
 		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
 		glUniformMatrix4fv(ViewID, 1, GL_FALSE, &View[0][0]);
 		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &Projection[0][0]);
@@ -226,6 +204,8 @@ void RenderingManager::RenderScene() {
 	CheckGLErrors();
 }
 
+
+//TODO: shouldn't be hardcoding the offsets for when the score display is dependent on the number of players in the game
 void RenderingManager::renderHud() {
 
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
@@ -289,8 +269,6 @@ void RenderingManager::renderHud() {
 
 	std::string timeString = _broker->getAIManager()->getMatchTimePrettyFormat();
 	renderText(timeString, 870, 1010, 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
-	//renderSprite(*_clockSprite, 862, 990, 1028, 1920);
-
 }
 
 
@@ -344,53 +322,6 @@ void RenderingManager::renderSprite(MyTexture spriteTex, int bottomLeftX, int bo
 
 
 
-void RenderingManager::initSpriteTextures() {
-
-	InitializeTexture(_borderSprite, "../TopShopper/resources/Sprites/Border.png", GL_TEXTURE_2D);
-	InitializeTexture(_appleSprite, "../TopShopper/resources/Sprites/Apple.png", GL_TEXTURE_2D);
-	InitializeTexture(_bananaSprite, "../TopShopper/resources/Sprites/Banana.png", GL_TEXTURE_2D);
-	InitializeTexture(_broccoliSprite, "../TopShopper/resources/Sprites/Broccoli.png", GL_TEXTURE_2D);
-	InitializeTexture(_carrotSprite, "../TopShopper/resources/Sprites/Carrot.png", GL_TEXTURE_2D);
-	InitializeTexture(_colaSprite, "../TopShopper/resources/Sprites/Cola.png", GL_TEXTURE_2D);
-	InitializeTexture(_cookieSprite, "../TopShopper/resources/Sprites/Cookie.png", GL_TEXTURE_2D);
-	InitializeTexture(_eggplantSprite, "../TopShopper/resources/Sprites/Eggplant.png", GL_TEXTURE_2D);
-	InitializeTexture(_hotPotatoSprite, "../TopShopper/resources/Sprites/Hotpotato.png", GL_TEXTURE_2D);
-	InitializeTexture(_milkSprite, "../TopShopper/resources/Sprites/Milk.png", GL_TEXTURE_2D);
-	InitializeTexture(_waterSprite, "../TopShopper/resources/Sprites/Water.png", GL_TEXTURE_2D);
-	InitializeTexture(_watermelonSprite, "../TopShopper/resources/Sprites/Watermelon.png", GL_TEXTURE_2D);
-	InitializeTexture(_clockSprite, "../TopShopper/resources/Sprites/clock.png", GL_TEXTURE_2D);
-	InitializeTexture(_checkMarkSprite, "../TopShopper/resources/Sprites/Check_Mark.png", GL_TEXTURE_2D);
-
-}
-
-
-
-MyTexture * RenderingManager::getSpriteTexture(EntityTypes type) {
-	switch (type) {
-		case EntityTypes::MILK:
-			return _milkSprite;
-		case EntityTypes::WATER:
-			return _waterSprite;
-		case EntityTypes::COLA:
-			return _colaSprite;
-		case EntityTypes::APPLE:
-			return _appleSprite;
-		case EntityTypes::WATERMELON:
-			return _watermelonSprite;
-		case EntityTypes::BANANA:
-			return _bananaSprite;
-		case EntityTypes::CARROT:
-			return _carrotSprite;
-		case EntityTypes::EGGPLANT:
-			return _eggplantSprite;
-		case EntityTypes::BROCCOLI:
-			return _broccoliSprite;
-		case EntityTypes::CHECK_MARK:
-			return _checkMarkSprite;
-		default:
-			return nullptr;
-	}
-}
 
 
 //https://learnopengl.com/In-Practice/Text-Rendering
@@ -519,92 +450,66 @@ void RenderingManager::push3DObjects() {
 		case EntityTypes::GROUND:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
-			//geo.color = glm::vec3(0.5f, 0.5f, 0.5f);
 			break;
 		}
 		case EntityTypes::MILK:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::MILK_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			//geo.color = glm::vec3(0.9f, 0.9f, 0.9f);
 			break;
 		}
 		case EntityTypes::WATER:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::WATER_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			//geo.color = glm::vec3(0.0f, 0.25f, 0.9f);
 			break;
 		}
 		case EntityTypes::COLA:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::COLA_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			//geo.color = glm::vec3(0.45f, 0.25f, 0.1f);
 			break;
 		}
 		case EntityTypes::APPLE:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::APPLE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			//geo.color = glm::vec3(0.95f, 0.15f, 0.2f);
 			break;
 		}
 		case EntityTypes::WATERMELON:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::WATERMELON_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			//geo.color = glm::vec3(0.95f, 0.15f, 0.85f);
 			break;
 		}
 		case EntityTypes::BANANA:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::BANANA_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			//geo.color = glm::vec3(0.95f, 0.85f, 0.15f);
 			break;
 		}
 		case EntityTypes::CARROT:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::CARROT_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			//geo.color = glm::vec3(0.95f, 0.35f, 0.0f);
 			break;
 		}
 		case EntityTypes::EGGPLANT:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::EGGPLANT_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			//geo.color = glm::vec3(0.45f, 0.0f, 0.95f);
 			break;
 		}
 		case EntityTypes::BROCCOLI:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::BROCCOLI_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			//geo.color = glm::vec3(0.05f, 0.5f, 0.2f);
 			break;
 		}
 		case EntityTypes::SPARE_CHANGE:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX));
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			geo.color = glm::vec3(0.95f, 0.65f, 0.2f);
 			break;
 		}
 		case EntityTypes::OBSTACLE1:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE1_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
-			//geo.color = glm::vec3(0.5f, 0.5f, 0.5f);
 			break;
 		}
 		case EntityTypes::OBSTACLE2:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE2_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO));
-			//geo.color = glm::vec3(0.5f, 0.5f, 0.5f);
 			break;
 		}
 		default:
@@ -625,6 +530,125 @@ void RenderingManager::push3DObjects() {
 		_objects.push_back(geo);
 	}
 }
+
+void RenderingManager::initFrameBuffers() {
+	glGenFramebuffers(1, &_lightDepthFBO);
+
+	unsigned int depthMap;
+
+	glGenTextures(1, &depthMap);								//init the texture for the depth map information
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _shadowWidth, _shadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);			//configure the frame buffer to retain depth info
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);						//rebind the frame buffer to default			
+}
+
+
+void RenderingManager::initSpriteTextures() {
+
+	InitializeTexture(_borderSprite, "../TopShopper/resources/Sprites/Border.png", GL_TEXTURE_2D);
+	InitializeTexture(_appleSprite, "../TopShopper/resources/Sprites/Apple.png", GL_TEXTURE_2D);
+	InitializeTexture(_bananaSprite, "../TopShopper/resources/Sprites/Banana.png", GL_TEXTURE_2D);
+	InitializeTexture(_broccoliSprite, "../TopShopper/resources/Sprites/Broccoli.png", GL_TEXTURE_2D);
+	InitializeTexture(_carrotSprite, "../TopShopper/resources/Sprites/Carrot.png", GL_TEXTURE_2D);
+	InitializeTexture(_colaSprite, "../TopShopper/resources/Sprites/Cola.png", GL_TEXTURE_2D);
+	InitializeTexture(_cookieSprite, "../TopShopper/resources/Sprites/Cookie.png", GL_TEXTURE_2D);
+	InitializeTexture(_eggplantSprite, "../TopShopper/resources/Sprites/Eggplant.png", GL_TEXTURE_2D);
+	InitializeTexture(_hotPotatoSprite, "../TopShopper/resources/Sprites/Hotpotato.png", GL_TEXTURE_2D);
+	InitializeTexture(_milkSprite, "../TopShopper/resources/Sprites/Milk.png", GL_TEXTURE_2D);
+	InitializeTexture(_waterSprite, "../TopShopper/resources/Sprites/Water.png", GL_TEXTURE_2D);
+	InitializeTexture(_watermelonSprite, "../TopShopper/resources/Sprites/Watermelon.png", GL_TEXTURE_2D);
+	InitializeTexture(_clockSprite, "../TopShopper/resources/Sprites/clock.png", GL_TEXTURE_2D);
+	InitializeTexture(_checkMarkSprite, "../TopShopper/resources/Sprites/Check_Mark.png", GL_TEXTURE_2D);
+
+}
+
+void RenderingManager::init3DTextures() {
+	MyTexture texture;
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(SPARE_CHANGE_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/yellow.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(BANANA_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(VEHICLE_CHASSIS_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/background1-asphalt.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(VEHICLE_WHEEL_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(GROUND_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(OBSTACLE1_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/background3-wood.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(OBSTACLE2_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/white.png", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(MILK_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/blue.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(WATER_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/brown.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(COLA_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/red.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(APPLE_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/pink.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(WATERMELON_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/orange.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(CARROT_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/purple.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(EGGPLANT_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/green.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(BROCCOLI_GEO_NO_INDEX)->texture = texture;
+}
+
+
+
+
+MyTexture * RenderingManager::getSpriteTexture(EntityTypes type) {
+	switch (type) {
+	case EntityTypes::MILK:
+		return _milkSprite;
+	case EntityTypes::WATER:
+		return _waterSprite;
+	case EntityTypes::COLA:
+		return _colaSprite;
+	case EntityTypes::APPLE:
+		return _appleSprite;
+	case EntityTypes::WATERMELON:
+		return _watermelonSprite;
+	case EntityTypes::BANANA:
+		return _bananaSprite;
+	case EntityTypes::CARROT:
+		return _carrotSprite;
+	case EntityTypes::EGGPLANT:
+		return _eggplantSprite;
+	case EntityTypes::BROCCOLI:
+		return _broccoliSprite;
+	case EntityTypes::CHECK_MARK:
+		return _checkMarkSprite;
+	default:
+		return nullptr;
+	}
+}
+
 
 void RenderingManager::assignBuffers(Geometry& geometry) {
 	//Generate vao for the object
@@ -650,6 +674,7 @@ void RenderingManager::assignBuffers(Geometry& geometry) {
 	glEnableVertexAttribArray(2);
 }
 
+
 void RenderingManager::setBufferData(Geometry& geometry) {
 	//Send geometry to the GPU
 	//Must be called whenever anything is updated about the object
@@ -662,6 +687,7 @@ void RenderingManager::setBufferData(Geometry& geometry) {
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.uvBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * geometry.uvs.size(), geometry.uvs.data(), GL_STATIC_DRAW);
 }
+
 
 void RenderingManager::deleteBufferData(Geometry& geometry) {
 	glDeleteBuffers(1, &geometry.vertexBuffer);
@@ -765,7 +791,6 @@ void RenderingManager::initTextRender() {
 void RenderingManager::cleanup() {
 	glfwTerminate();
 }
-
 
 
 bool RenderingManager::CheckGLErrors() {

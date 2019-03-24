@@ -1,7 +1,6 @@
 #version 410
 
 // interpolated colour received from vertex stage
-in vec3 color;
 in vec3 Normal;
 in vec3 FragPos;
 in vec3 look;
@@ -15,6 +14,9 @@ uniform sampler2D imageTexture;
 void main(void)
 {
 	float specularStrength = 0.7;
+	vec3 lightPosition = vec3(0.0f, 30.0f, 0.0f);
+
+
 
 	//AMBIENT
 	vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
@@ -22,7 +24,7 @@ void main(void)
 	vec3 ambient = ambientStrength * lightColor;
 
 	vec3 norm = normalize(Normal);
-	vec3 lightDir = normalize(vec3(0.0f, 30.0f, 0.0f) - FragPos);
+	vec3 lightDir = normalize(lightPosition - FragPos);
 	
 	//DIFFUSE
 	float diff = max(dot(norm, lightDir), 0.0);

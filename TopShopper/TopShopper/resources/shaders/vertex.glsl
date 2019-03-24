@@ -9,12 +9,10 @@ layout(location = 1) in vec2 VertexUV;
 uniform mat4 Model;
 uniform mat4 View;
 uniform mat4 Projection;
-uniform vec3 Color;
 uniform vec3 CameraPos;
 
 
 // output to be interpolated between vertices and passed to the fragment stage
-out vec3 color;
 out vec3 Normal;
 out vec3 FragPos;
 out vec3 look;
@@ -26,7 +24,6 @@ void main()
     gl_Position =  Projection* View * Model * VertexPosition;
 
     // assign output colour to be interpolated
-    color = Color;
 	//Normal = mat3(transpose(inverse(Model))) * VertexNormal;
 	Normal = VertexNormal;
 	FragPos = vec3(Model * VertexPosition);
