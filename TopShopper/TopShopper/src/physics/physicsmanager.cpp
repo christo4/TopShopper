@@ -438,7 +438,7 @@ void PhysicsManager::switchToScene1() {
 	std::shared_ptr<Obstacle2> obstacle2_2 = std::dynamic_pointer_cast<Obstacle2>(instantiateEntity(EntityTypes::OBSTACLE2, PxTransform(70.0f, 0.0f, -90.0f, PxQuat(PxIdentity)), "obstacle2_2"));
 
 	// VEHICLE 1:
-	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 15.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
+	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-160.0f, 5.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
 	std::shared_ptr<PlayerScript> player1Script = std::static_pointer_cast<PlayerScript>(vehicle1->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	player1Script->_playerType = PlayerScript::PlayerTypes::HUMAN;
 	player1Script->_inputID = 1;
@@ -912,6 +912,30 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 
 		// ENTITY...
 		entity = std::make_shared<Broccoli>(actor);
+		break;
+	}
+	case EntityTypes::COOKIE:
+	{
+		PxReal radius = 1.5f;
+		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createSphereCollider(radius, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidDynamic *actor = gPhysics->createRigidDynamic(transform);
+		actor->setName(name);
+		actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Cookie>(actor);
 		break;
 	}
 	case EntityTypes::SPARE_CHANGE:

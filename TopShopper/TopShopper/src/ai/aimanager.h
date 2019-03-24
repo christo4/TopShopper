@@ -11,6 +11,7 @@
 class Broker;
 class Entity;
 class SpareChange;
+class Cookie;
 
 
 
@@ -86,6 +87,10 @@ public:
 
 private:
 	Broker *_broker = nullptr;
+
+	std::shared_ptr<Cookie> _startingCookie = nullptr; // ONLY SPAWNS ONCE AT START OF GAME
+	physx::PxTransform _startingCookieSpawnPoint = physx::PxTransform(0.0f, 14.0f, 0.0f, physx::PxQuat(physx::PxIdentity));
+
 
 	static const int NB_SPARE_CHANGE_SPAWN_POINTS = 32;
 	const double SPARE_CHANGE_RESPAWN_TIME = 10.0; // seconds

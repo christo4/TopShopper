@@ -100,6 +100,7 @@
     <ClCompile Include="src\objects\carrot.cpp" />
     <ClCompile Include="src\objects\cola.cpp" />
     <ClCompile Include="src\objects\component.cpp" />
+    <ClCompile Include="src\objects\cookie.cpp" />
     <ClCompile Include="src\objects\eggplant.cpp" />
     <ClCompile Include="src\objects\entity.cpp" />
     <ClCompile Include="src\objects\ground.cpp" />
@@ -135,6 +136,7 @@
     <ClInclude Include="src\objects\carrot.h" />
     <ClInclude Include="src\objects\cola.h" />
     <ClInclude Include="src\objects\component.h" />
+    <ClInclude Include="src\objects\cookie.h" />
     <ClInclude Include="src\objects\eggplant.h" />
     <ClInclude Include="src\objects\entity.h" />
     <ClInclude Include="src\objects\ground.h" />

@@ -19,6 +19,7 @@
 #include "objects/sparechange.h"
 #include "objects/obstacle1.h"
 #include "objects/obstacle2.h"
+#include "objects/cookie.h"
 
 
 class Broker;

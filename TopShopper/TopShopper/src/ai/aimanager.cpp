@@ -113,7 +113,7 @@ AIManager::~AIManager() {
 }
 
 void AIManager::init() {
-
+	_startingCookie = std::dynamic_pointer_cast<Cookie>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::COOKIE, _startingCookieSpawnPoint, "startingCookie"));
 }
 
 void AIManager::updateSeconds(double variableDeltaTime) {
@@ -124,6 +124,13 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 			std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
 			script->update(variableDeltaTime);
 		}
+	}
+
+	// STARTING COOKIE SPAWNING...
+	// check if the cookie has been picked up yet (destroyed)...
+	if (_startingCookie != nullptr && _startingCookie->getDestroyFlag()) {
+		removeDeletedTarget(_startingCookieSpawnPoint.p);
+		_startingCookie = nullptr;
 	}
 
 	// SPARE CHANGE SPAWNING...
@@ -338,6 +345,12 @@ void AIManager::setNewAITargets() {
 		std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 		if (playerScript->_playerType == PlayerScript::BOT) {
 			if (playerScript->_targets.size() == 0) {
+
+				// at start of round, all AIs will head towards center hill (starting cookie)
+				if (_startingCookie != nullptr) {
+					playerScript->_targets.push_back(_startingCookieSpawnPoint.p);
+				}
+
 				// find a new final target (pickup on your list for now)
 				PxVec3 playerPos = player->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
 

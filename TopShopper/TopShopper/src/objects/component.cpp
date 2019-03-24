@@ -291,14 +291,31 @@ void PlayerScript::navigate() {
 	PxVec3 diffNoY;
 	PxVec3 diffNormalized;
 
+	bool targetOnHill = false;
+	bool targetOnWall = false;
+	bool forcedTurbo = false;
+	// ~~~NOTE: this depends on the map staying the same size! AND being symmetrically round!
+	const PxVec3 mapCenterPos = PxVec3(0.0f, 0.0f, 0.0f);
+	const float hillRadius = 50.0f; // rounding up to be safe (its alround 48.?)
+	const float wallStartRadius = 165.0f; // rounding down to be safe (its around 168.?)
 	if (_targets.size() > 0) {
 		PxVec3 targetPos = _targets.at(0);
 		PxVec3 diff = targetPos - pos;
 		diffNoY = PxVec3(diff.x, 0.0f, diff.z);
 		diffNormalized = diff.getNormalized();
+
+		PxVec3 targetPosNoY = PxVec3(targetPos.x, 0.0f, targetPos.z);
+		float targetDistance = (targetPosNoY - mapCenterPos).magnitude();
+		if (targetDistance <= hillRadius) targetOnHill = true;
+		else if (targetDistance >= wallStartRadius) targetOnWall = true;
+
+		PxVec3 posNoY = PxVec3(pos.x, 0.0f, pos.z);
+		float posDistance = (posNoY - mapCenterPos).magnitude();
+		
+		if ((targetOnHill && posDistance <= hillRadius) || (targetOnWall && posDistance >= wallStartRadius)) forcedTurbo = true;
 	}
 
-
+	
 	// 5 raycasts (FarLeft, MidLeft, Center, MidRight, FarRight)
 
 	// 1. find the forward vector...
@@ -339,7 +356,7 @@ void PlayerScript::navigate() {
 	bool farRightStatus = Broker::getInstance()->getPhysicsManager()->raycast(farRightOrigin, farRightUnitDir, farRightDistance, farRightHit);
 
 
-
+	bool redirected = false;
 	if (farLeftStatus || midLeftStatus || centerStatus || midRightStatus || farRightStatus) {
 
 		int turnDir = 0;
@@ -347,32 +364,72 @@ void PlayerScript::navigate() {
 		if (farLeftStatus) {
 			if (farLeftHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(farLeftHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
-					if (fabs(farLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+				if (entityHit->getTag() == EntityTypes::GROUND) {
+					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
+					PxVec3 hitPosNoY = PxVec3(farLeftHit.block.position.x, 0.0f, farLeftHit.block.position.z);
+					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
+					if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+						if (fabs(farLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+						redirected = true;
+					}
+				}
+				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+					turnDir += 1;
+					redirected = true;
 				}
 			}
 		}
 		if (midLeftStatus) {
 			if (midLeftHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(midLeftHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
-					if (fabs(midLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+				if (entityHit->getTag() == EntityTypes::GROUND) {
+					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
+					PxVec3 hitPosNoY = PxVec3(midLeftHit.block.position.x, 0.0f, midLeftHit.block.position.z);
+					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
+					if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+						if (fabs(midLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+						redirected = true;
+					}
+				}
+				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+					turnDir += 2;
+					redirected = true;
 				}
 			}
 		}
 		if (midRightStatus) {
 			if (midRightHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(midRightHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
-					if (fabs(midRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+				if (entityHit->getTag() == EntityTypes::GROUND) {
+					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
+					PxVec3 hitPosNoY = PxVec3(midRightHit.block.position.x, 0.0f, midRightHit.block.position.z);
+					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
+					if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+						if (fabs(midRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+						redirected = true;
+					}
+				}
+				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+					turnDir -= 2;
+					redirected = true;
 				}
 			}
 		}
 		if (farRightStatus) {
 			if (farRightHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(farRightHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
-					if (fabs(farRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+				if (entityHit->getTag() == EntityTypes::GROUND) {
+					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
+					PxVec3 hitPosNoY = PxVec3(farRightHit.block.position.x, 0.0f, farRightHit.block.position.z);
+					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
+					if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+						if (fabs(farRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+						redirected = true;
+					}
+				}
+				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+					turnDir -= 1;
+					redirected = true;
 				}
 			}
 		}
@@ -383,87 +440,60 @@ void PlayerScript::navigate() {
 			if (centerStatus) {
 				if (centerHit.hasBlock) {
 					Entity *entityHit = static_cast<Entity*>(centerHit.block.actor->userData);
-					if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
-						if (fabs(centerHit.block.normal.y - 1.0f) >= 0.0001f) turnDir = 3; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
-						//TODO: change this to use the hit normal instead (e.g. hit wall like \ go left, / go right) 
+					if (entityHit->getTag() == EntityTypes::GROUND) {
+						// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
+						PxVec3 hitPosNoY = PxVec3(centerHit.block.position.x, 0.0f, centerHit.block.position.z);
+						float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
+						if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+							if (fabs(centerHit.block.normal.y - 1.0f) >= 0.0001f) turnDir = 3; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+							redirected = true;
+						}
+					}
+					else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+						turnDir = 3;
+						redirected = true;
 					}
 				}
 			}
 		}
 
+		if (redirected) {
+			PxReal accel = 1.0f;
+			PxReal reverse = 0.0f;
+			PxReal handbrake = 0.0f;
+			PxReal steer;
 
-		PxReal accel = 1.0f;
-		PxReal reverse = 0.0f;
-		PxReal handbrake = 0.0f;
+			switch (turnDir) {
+			case -3:
+				steer = 1.0f;
+				break;
+			case -2:
+				steer = 0.65f;
+				break;
+			case -1:
+				steer = 0.35f;
+				break;
+			case 0:
+				steer = 0.0f;
+				break;
+			case 1:
+				steer = -0.35f;
+				break;
+			case 2:
+				steer = -0.65f;
+				break;
+			case 3:
+				steer = -1.0f;
+				break;
+			}
 
-		// REMEMBER: steering is reverse (-1.0 is clockwise)
+			bool turboButtonPressed = forcedTurbo;
 
-		//PxReal steer = turnDir >= 0 ? -0.5f : 0.5f;
-
-		//PxReal steer = turnDir >= 0 ? -1.0f : 1.0f;
-		/*
-		PxReal steer;
-		if (turnDir > 0) steer = -1.0f;
-		else if (turnDir == 0) steer = 0.0f;
-		else steer = 1.0f;
-		*/
-
-
-		// THIS IS SO UGLY, i'll use math later...
-		
-		PxReal steer;
-
-		switch (turnDir) {
-		case -3:
-			steer = 1.0f;
-			break;
-		case -2:
-			steer = 0.65f;
-			break;
-		case -1:
-			steer = 0.35f;
-			break;
-		case 0:
-			steer = 0.0f;
-			break;
-		case 1:
-			steer = -0.35f;
-			break;
-		case 2:
-			steer = -0.65f;
-			break;
-		case 3:
-			steer = -1.0f;
-			break;
+			player->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
 		}
-		
-
-
-		bool turboButtonPressed = false;
-
-		player->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
-
-
-
-
-
-		// if any hit returns true, do this...
-
-		// cases::
-
-		// FL only, steer = 1.0
-		// FL + ML, steer = 1.0
-		// FL + ML + C, steer = 1.0
-		// FL + ML + C + MR, steer = 1.0
-		// FL + ML + C + MR + FR, steer = 1.0 (use this randomly)
-
-
-
-
-
 
 	}
-	else {
+	if (!redirected) {
 		if (_targets.size() == 0) { // if bot doesnt have a current target for some reason...
 			//std::cout << "BOT WITHOUT A JOB!" << std::endl;
 			//player->_shoppingCartBase->processRawInputDataController(0.0f, 0.0f, 1.0f, 0.0f, false); // put bot into a braking mode
@@ -499,8 +529,8 @@ void PlayerScript::navigate() {
 		else steer = isCCW ? 1.0f : -1.0f;
 
 
-		bool turboButtonPressed = false;
-		//bool turboButtonPressed = true;
+		bool turboButtonPressed = forcedTurbo;
+		
 
 		player->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
 	}
