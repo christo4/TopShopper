@@ -104,9 +104,9 @@ void AudioManager::changeVolumeSFX(SoundEffect *mySfx, int volume) {
 	Mix_Volume(mySfx->channel, volume);
 }
 
-void AudioManager::changeDistanceSFX(SoundEffect *mySfx, float distance) {
+void AudioManager::changeDistanceSFX(SoundEffect *mySfx, float distance, float angle) {
 	//mySfx->volume = volume;
-	Mix_SetPosition(mySfx->channel, 90, (Uint8)distance);
+	Mix_SetPosition(mySfx->channel, (Sint16)angle, (Uint8)distance);
 }
 
 void AudioManager::haltSFX(SoundEffect *mySfx) {
@@ -117,7 +117,7 @@ void AudioManager::haltSFX(SoundEffect *mySfx) {
 
 void AudioManager::playSFX(SoundEffect *mySfx) {
 	if (!Mix_Playing(mySfx->channel)) {
-		Mix_SetPosition(mySfx->channel, mySfx->angle, mySfx->distance);
+		//Mix_SetPosition(mySfx->channel, mySfx->angle, mySfx->distance);
 		Mix_PlayChannel(mySfx->channel, mySfx->sfx, mySfx->loop);
 	}
 
@@ -149,10 +149,12 @@ void AudioManager::init() {
 	rollingSound_player1->filename = "../TopShopper/resources/sfx/rollCart.wav";
 	rollingSound_player1->sfx = loadSFX(rollingSound_player1->filename);
 	rollingSound_player1->channel = 0;
+	rollingSound_player1->loop = 4;
 
 	rollingSound_ai1->filename = "../TopShopper/resources/sfx/rollCart.wav";
 	rollingSound_ai1->sfx = loadSFX(rollingSound_ai1->filename);
 	rollingSound_ai1->channel = 5;
+	
 
 	hitWallSound->filename = "../TopShopper/resources/sfx/cartHitWall.wav";
 	hitWallSound->sfx = loadSFX(hitWallSound->filename);
@@ -170,9 +172,9 @@ void AudioManager::init() {
 
 	turboSound->filename = "../TopShopper/resources/sfx/turbo.wav";
 	turboSound->sfx = loadSFX(turboSound->filename);
-	turboSound->volume = MIX_MAX_VOLUME / 20;
 	//turboSound->distance = 200;
 	turboSound->channel = 4;
+	changeVolumeSFX(turboSound, 20);
 
 
 
@@ -188,8 +190,23 @@ void AudioManager::init() {
 
 
 }
+float AudioManager::getAngle(glm::vec3 a, glm::vec3 b) {
+	//float angle = atan2((a.x * b.z) - (a.z-b.x), (a.x*b.x) + (a.z*b.z));
+	float angle = acos((a.x*b.x) + (a.z*b.z));
+	//angle = (angle / 3.1415926) * 360;
+	angle = (angle / 3.1415926) * 180;
+
+	return angle;
+}
 
 void AudioManager::updateSeconds(double variableDeltaTime) {
+	//playSFX(dropItemSound);
+	//float angle = getAngle(testV1, testV2);
+	//changeDistanceSFX(dropItemSound, 200, (Sint16)angle);
+	//testV2.x += 5;
+	//testV2.y += 5;
+	//std::cout << "float angle: " << angle << std::endl;
+
 	// play all the sound effects insidethe soundeffect vector
 	//for (int i = 0; i < soundEffects.size(); i++) {
 	//	playSFX(&soundEffects[i]);

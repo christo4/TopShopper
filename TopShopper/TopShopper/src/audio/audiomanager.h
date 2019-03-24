@@ -6,6 +6,9 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #undef main
 
 class Broker;
@@ -43,6 +46,7 @@ public:
 	AudioManager(Broker *broker);
 	virtual ~AudioManager();
 	void init();
+	float getAngle(glm::vec3 a, glm::vec3 b);
 	void updateSeconds(double variableDeltaTime);
 
 	SoundEffect* getSoundEffect(SoundEffectTypes sound);
@@ -54,7 +58,7 @@ public:
 	void haltSFX(SoundEffect *mySfx);
 	void changeVolumeSFX(SoundEffect *mySfx, int volume);
 
-	void changeDistanceSFX(SoundEffect * mySfx, float distance);
+	void changeDistanceSFX(SoundEffect * mySfx, float distance, float angle);
 
 	Mix_Music* loadMusic(std::string filename);
 	//Mix_Chunk* loadSFX(SoundEffect *mySfx);
@@ -69,6 +73,11 @@ private:
 	Music bgm;
 	std::vector<std::string> filenames = { "../TopShopper/resources/sfx/test2.wav" };
 	std::vector<SoundEffect> soundEffects;
+
+
+	// for testing
+	glm::vec3 testV1 = glm::vec3(10, 0, 1);
+	glm::vec3 testV2 = glm::vec3(1, 0, 3);
 };
 
 
