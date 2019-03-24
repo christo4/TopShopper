@@ -61,7 +61,8 @@ void RenderingManager::init() {
 
 void RenderingManager::updateSeconds(double variableDeltaTime) {
 	// call LATEUPDATE() for all behaviour scripts...
-	for (std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
+	std::vector<std::shared_ptr<Entity>> entitiesCopy = _broker->getPhysicsManager()->getActiveScene()->_entities;
+	for (std::shared_ptr<Entity> &entity : entitiesCopy) {
 		std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
 		if (comp != nullptr) {
 			std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
@@ -445,6 +446,32 @@ void RenderingManager::push3DObjects() {
 				geoWheel.drawMode = GL_TRIANGLES;
 				_objects.push_back(geoWheel);
 			}
+
+			// TODO: put color indicators above carts (match color to _inputID?, but AI have inpoutID 0 i think..., I could init theirs to -1, -2, -3, etc.)
+
+			// add hot potato model above cart if it has it...
+
+			std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
+			if (playerScript->_hasHotPotato) {
+				Geometry geoPotato = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::HOT_POTATO_GEO_NO_INDEX));
+				geoPotato.color = glm::vec3(0.0f, 0.0f, 0.0f);
+
+				glm::mat4 model;
+				PxMat44 rotation = PxMat44(rot);
+				PxVec3 potatoOffset(0.0f, 5.0f, 0.0f);
+				PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos + potatoOffset);
+				PxMat44	pxModel = translation * rotation;
+				model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+					glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+					glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+					glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+				geoPotato.model = model;
+
+				geoPotato.drawMode = GL_TRIANGLES;
+				_objects.push_back(geoPotato);
+
+			}
 			break;
 		}
 		case EntityTypes::GROUND:
@@ -495,6 +522,20 @@ void RenderingManager::push3DObjects() {
 		case EntityTypes::BROCCOLI:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::BROCCOLI_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			break;
+		}
+		case EntityTypes::MYSTERY_BAG:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::MYSTERY_BAG_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
+			//geo.color = glm::vec3(0.05f, 0.5f, 0.2f);
+			break;
+		}
+		case EntityTypes::COOKIE:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::COOKIE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
+			//geo.color = glm::vec3(0.05f, 0.5f, 0.2f);
 			break;
 		}
 		case EntityTypes::SPARE_CHANGE:
@@ -617,6 +658,15 @@ void RenderingManager::init3DTextures() {
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/green.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(BROCCOLI_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(MYSTERY_BAG_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(COOKIE_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(HOT_POTATO_GEO_NO_INDEX)->texture = texture;
 }
 
 

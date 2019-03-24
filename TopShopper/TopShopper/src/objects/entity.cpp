@@ -24,7 +24,7 @@ void Entity::addComponent(ComponentTypes componentType) {
 	if (componentType == ComponentTypes::NUMBER_OF_COMPONENT_TYPES) return; // NONSENSE!
 	if (componentType == ComponentTypes::BEHAVIOUR_SCRIPT) return; // NONSENSE!
 
-	int index = (componentType == ComponentTypes::PICKUP_SCRIPT | componentType == ComponentTypes::PLAYER_SCRIPT) ? ComponentTypes::BEHAVIOUR_SCRIPT : componentType;
+	int index = (componentType == ComponentTypes::MYSTERY_BAG_SCRIPT || componentType == ComponentTypes::PICKUP_SCRIPT || componentType == ComponentTypes::PLAYER_SCRIPT) ? ComponentTypes::BEHAVIOUR_SCRIPT : componentType;
 
 	// block adding an existing component type
 	if (_components.at(index) != nullptr) {
@@ -48,6 +48,9 @@ void Entity::addComponent(ComponentTypes componentType) {
 		//case ComponentTypes::NAV_MESH_AGENT:
 			//_components.at(index) = std::make_shared<NavMeshAgent>(this);
 			//break;
+		case ComponentTypes::MYSTERY_BAG_SCRIPT:
+			_components.at(index) = std::make_shared<MysteryBagScript>(this);
+			break;
 		case ComponentTypes::PICKUP_SCRIPT:
 			_components.at(index) = std::make_shared<PickupScript>(this);
 			break;
@@ -63,9 +66,9 @@ std::shared_ptr<Component> Entity::getComponent(ComponentTypes componentType) {
 	// input safety check...
 	if (componentType == ComponentTypes::NUMBER_OF_COMPONENT_TYPES) return nullptr; // NONSENSE!
 
-	int index = (componentType == ComponentTypes::PICKUP_SCRIPT | componentType == ComponentTypes::PLAYER_SCRIPT) ? ComponentTypes::BEHAVIOUR_SCRIPT : componentType;
+	int index = (componentType == ComponentTypes::MYSTERY_BAG_SCRIPT || componentType == ComponentTypes::PICKUP_SCRIPT || componentType == ComponentTypes::PLAYER_SCRIPT) ? ComponentTypes::BEHAVIOUR_SCRIPT : componentType;
 
-	if (componentType == ComponentTypes::PICKUP_SCRIPT | componentType == ComponentTypes::PLAYER_SCRIPT) {
+	if (componentType == ComponentTypes::MYSTERY_BAG_SCRIPT || componentType == ComponentTypes::PICKUP_SCRIPT || componentType == ComponentTypes::PLAYER_SCRIPT) {
 		return (_components.at(index) != nullptr && _components.at(index)->_tag == componentType ? _components.at(index) : nullptr);
 	}
 	else {

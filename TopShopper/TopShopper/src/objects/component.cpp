@@ -20,6 +20,42 @@ BehaviourScript::BehaviourScript(Entity *entity, ComponentTypes tag) : Component
 
 
 ////////////////////////////
+MysteryBagScript::MysteryBagScript(Entity *entity) : BehaviourScript(entity, ComponentTypes::MYSTERY_BAG_SCRIPT) {}
+
+void MysteryBagScript::onSpawn() {}
+void MysteryBagScript::fixedUpdate(double fixedDeltaTime) {}
+void MysteryBagScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
+void MysteryBagScript::onCollisionExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
+
+void MysteryBagScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity) {
+	if (otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+		ShoppingCartPlayer *player = static_cast<ShoppingCartPlayer*>(otherEntity);
+		std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
+
+		int rng = rand() % 100; // 0-99
+		if (rng < _cookiePercent) { // IT WAS A COOKIE!...
+			std::cout << "MYSTERY BAG REVEALED... A COOKIE!" << std::endl;
+			//TODO: display some UI notification (cookie sprite)
+			playerScript->addPoints(_cookiePoints); // increase player points by this pickup's value
+		}
+		else { // IT WAS A HOT POTATO!...
+			std::cout << "MYSTERY BAG REVEALED... A HOT POTATO!" << std::endl;
+			//TODO: display some UI notification (hot potato sprite) - this may be unnecessary since hot potato sprite will show up next to player list?
+			playerScript->giveHotPotato(_hotPotatoDuration);
+		}
+
+		_entity->destroy(); // destroy this mystery bag
+		Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND));
+	}
+}
+
+void MysteryBagScript::onTriggerExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity) {}
+void MysteryBagScript::update(double variableDeltaTime) {}
+void MysteryBagScript::lateUpdate(double variableDeltaTime) {}
+void MysteryBagScript::onDestroy() {}
+
+
+////////////////////////////
 PickupScript::PickupScript(Entity *entity) : BehaviourScript(entity, ComponentTypes::PICKUP_SCRIPT) {}
 
 void PickupScript::onSpawn() {}
@@ -92,7 +128,7 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 				PxReal reverse = glm::clamp(((pad->leftTrigger + 1) / 2), 0.0f, 1.0f);
 				PxReal handbrake = pad->xButton ? 1.0f : 0.0f;
 				PxReal steer = glm::clamp(pad->leftStickX *-1, -1.0f, 1.0f); // must be negated otherwise steering is backwards
-				bool turboButtonPressed = pad->bButton; // this function doesnt work as intended yet...
+				bool turboButtonPressed = (_hasHotPotato || pad->bButton);
 				if (turboButtonPressed && !(turboState)) {
 					Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TURBO_SOUND));
 					turboState = true;
@@ -119,7 +155,7 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 					bool handbrakeKeyPressed = kam->leftShiftKey;
 					bool steerLeftKeyPressed = kam->dKey; // NOTE: the steer keys have to be reversed here
 					bool steerRightKeyPressed = kam->aKey;
-					bool turboKeyPressed = kam->spaceKey;
+					bool turboKeyPressed = (_hasHotPotato || kam->spaceKey);
 					if (turboKeyPressed && !(turboState)) {
 						Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TURBO_SOUND));
 						turboState = true;
@@ -189,6 +225,10 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 
 		if (player->_shoppingCartBase->IsBashProtected()) {
 			player->_shoppingCartBase->tickBashProtectionTimer(fixedDeltaTime);
+		}
+
+		if (_hasHotPotato) {
+			tickHotPotatoTimer(fixedDeltaTime);
 		}
 	}
 }
@@ -260,6 +300,11 @@ void PlayerScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape *ot
 		if (localCart->_shoppingCartBase->IsTurboing() && !otherCart->_shoppingCartBase->IsBashProtected()) {
 			std::shared_ptr<PlayerScript> otherScript = std::static_pointer_cast<PlayerScript>(otherCart->getComponent(ComponentTypes::PLAYER_SCRIPT));
 			otherScript->bashed();
+			if (_hasHotPotato) {
+				otherScript->giveHotPotato(_hotPotatoTimer);
+				_hasHotPotato = false;
+				_hotPotatoTimer = -1.0;
+			}
 		}
 		
 	}
@@ -417,6 +462,61 @@ void PlayerScript::bashed() {
 
 
 
+// BUG: I THINK I UNDERSTAND THE BUG NOW!!!, This function gets called as a result of fixedupdate(),
+// since I instantiate spare change inside here, but I am also inside a loop over all entities, the vector gets changed so the iterator is screwed up!
+// FIX: MAKE SURE THAT ENTITIES LIST IS DEEP COPIED BEFORE ITERATING OVER DEEP COPY OR MAKE SURE THAT NO INSTANTIATE CALLS/ REMOVE FROM SCENE CALLS ARE MADE INSIDE A LOOP OVER ENTITIES
+// IT WORKED!
+void PlayerScript::coinExplosion() {
+	ShoppingCartPlayer *cart = static_cast<ShoppingCartPlayer*>(_entity);
+	//Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND));
+
+	std::vector<EntityTypes> lostItems;
+	for (int i = 0; i < 12; i++) {
+		lostItems.push_back(EntityTypes::SPARE_CHANGE);
+	}
+
+	PxRigidDynamic *cartDyn = cart->_actor->is<PxRigidDynamic>();
+	PxTransform cartTransform = cartDyn->getGlobalPose();
+	PxVec3 cartPos = cartTransform.p;
+
+	PxVec3 nextSpawnPos = cartPos + PxVec3(0.0f, 11.0f, 0.0f); // NOTE: I'm setting the y-value on the assumption that bashed() will spawn 2 pickups
+
+	std::vector<PxVec3> forces = { PxVec3(0.0f, 40.0f, 20.0f), PxVec3(0.0f, 40.0f, -20.0f), PxVec3(20.0f, 40.0f, 0.0f), PxVec3(-20.0f, 40.0f, 0.0f), PxVec3(0.0f, 40.0f, 30.0f), PxVec3(0.0f, 40.0f, -30.0f), PxVec3(30.0f, 40.0f, 0.0f), PxVec3(-30.0f, 40.0f, 0.0f), PxVec3(0.0f, 40.0f, 40.0f), PxVec3(0.0f, 40.0f, -40.0f), PxVec3(40.0f, 40.0f, 0.0f), PxVec3(-40.0f, 40.0f, 0.0f) };
+	int forceIndex = 0;
+
+	for (EntityTypes item : lostItems) {
+
+		// spawn new item of this type above cart, apply an impulse to each in a different direction
+		std::shared_ptr<Entity> spawnedItem = Broker::getInstance()->getPhysicsManager()->instantiateEntity(item, PxTransform(nextSpawnPos), "LostItem");
+
+		// now enable gravity on item
+		// make item solid until it hits the ground somewhere (onCollisionEnter - which will then set item to trigger and disable gravity)
+		// apply an impulse in xz-plane at a different (maybe random) rotation (0, 90, 180, 270) - can keep cycling through this
+
+		PxRigidDynamic *spawnedItemDyn = spawnedItem->_actor->is<PxRigidDynamic>();
+		PxShape* shapeBuffer[1];
+		spawnedItemDyn->getShapes(shapeBuffer, 1);
+		PxShape* spawnedItemShape = shapeBuffer[0];
+
+		// make it solid...
+		spawnedItemShape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, false);
+		spawnedItemShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
+
+		// enable gravity
+		spawnedItemDyn->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, false);
+
+		// apply a force vector in a different direction...
+		spawnedItemDyn->addForce(forces.at(forceIndex), PxForceMode::eIMPULSE);
+		forceIndex++;
+		if (forceIndex >= forces.size()) forceIndex = 0;
+
+		nextSpawnPos += PxVec3(0.0f, 3.0f, 0.0f); 
+	}
+
+}
+
+
+
 // NOTE: the bots should be raycasting every single frame to prevent slowing down and getting stuck
 void PlayerScript::navigate() {
 
@@ -437,14 +537,31 @@ void PlayerScript::navigate() {
 	PxVec3 diffNoY;
 	PxVec3 diffNormalized;
 
+	bool targetOnHill = false;
+	bool targetOnWall = false;
+	bool forcedTurbo = false;
+	// ~~~NOTE: this depends on the map staying the same size! AND being symmetrically round!
+	const PxVec3 mapCenterPos = PxVec3(0.0f, 0.0f, 0.0f);
+	const float hillRadius = 50.0f; // rounding up to be safe (its alround 48.?)
+	const float wallStartRadius = 165.0f; // rounding down to be safe (its around 168.?)
 	if (_targets.size() > 0) {
 		PxVec3 targetPos = _targets.at(0);
 		PxVec3 diff = targetPos - pos;
 		diffNoY = PxVec3(diff.x, 0.0f, diff.z);
 		diffNormalized = diff.getNormalized();
+
+		PxVec3 targetPosNoY = PxVec3(targetPos.x, 0.0f, targetPos.z);
+		float targetDistance = (targetPosNoY - mapCenterPos).magnitude();
+		if (targetDistance <= hillRadius) targetOnHill = true;
+		else if (targetDistance >= wallStartRadius) targetOnWall = true;
+
+		PxVec3 posNoY = PxVec3(pos.x, 0.0f, pos.z);
+		float posDistance = (posNoY - mapCenterPos).magnitude();
+		
+		if ((targetOnHill && posDistance <= hillRadius) || (targetOnWall && posDistance >= wallStartRadius)) forcedTurbo = true;
 	}
 
-
+	
 	// 5 raycasts (FarLeft, MidLeft, Center, MidRight, FarRight)
 
 	// 1. find the forward vector...
@@ -485,7 +602,7 @@ void PlayerScript::navigate() {
 	bool farRightStatus = Broker::getInstance()->getPhysicsManager()->raycast(farRightOrigin, farRightUnitDir, farRightDistance, farRightHit);
 
 
-
+	bool redirected = false;
 	if (farLeftStatus || midLeftStatus || centerStatus || midRightStatus || farRightStatus) {
 
 		int turnDir = 0;
@@ -493,32 +610,72 @@ void PlayerScript::navigate() {
 		if (farLeftStatus) {
 			if (farLeftHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(farLeftHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
-					if (fabs(farLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+				if (entityHit->getTag() == EntityTypes::GROUND) {
+					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
+					PxVec3 hitPosNoY = PxVec3(farLeftHit.block.position.x, 0.0f, farLeftHit.block.position.z);
+					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
+					if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+						if (fabs(farLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+						redirected = true;
+					}
+				}
+				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+					turnDir += 1;
+					redirected = true;
 				}
 			}
 		}
 		if (midLeftStatus) {
 			if (midLeftHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(midLeftHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
-					if (fabs(midLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+				if (entityHit->getTag() == EntityTypes::GROUND) {
+					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
+					PxVec3 hitPosNoY = PxVec3(midLeftHit.block.position.x, 0.0f, midLeftHit.block.position.z);
+					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
+					if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+						if (fabs(midLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+						redirected = true;
+					}
+				}
+				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+					turnDir += 2;
+					redirected = true;
 				}
 			}
 		}
 		if (midRightStatus) {
 			if (midRightHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(midRightHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
-					if (fabs(midRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+				if (entityHit->getTag() == EntityTypes::GROUND) {
+					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
+					PxVec3 hitPosNoY = PxVec3(midRightHit.block.position.x, 0.0f, midRightHit.block.position.z);
+					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
+					if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+						if (fabs(midRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+						redirected = true;
+					}
+				}
+				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+					turnDir -= 2;
+					redirected = true;
 				}
 			}
 		}
 		if (farRightStatus) {
 			if (farRightHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(farRightHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
-					if (fabs(farRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+				if (entityHit->getTag() == EntityTypes::GROUND) {
+					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
+					PxVec3 hitPosNoY = PxVec3(farRightHit.block.position.x, 0.0f, farRightHit.block.position.z);
+					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
+					if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+						if (fabs(farRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+						redirected = true;
+					}
+				}
+				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+					turnDir -= 1;
+					redirected = true;
 				}
 			}
 		}
@@ -529,87 +686,60 @@ void PlayerScript::navigate() {
 			if (centerStatus) {
 				if (centerHit.hasBlock) {
 					Entity *entityHit = static_cast<Entity*>(centerHit.block.actor->userData);
-					if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::GROUND || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
-						if (fabs(centerHit.block.normal.y - 1.0f) >= 0.0001f) turnDir = 3; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
-						//TODO: change this to use the hit normal instead (e.g. hit wall like \ go left, / go right) 
+					if (entityHit->getTag() == EntityTypes::GROUND) {
+						// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
+						PxVec3 hitPosNoY = PxVec3(centerHit.block.position.x, 0.0f, centerHit.block.position.z);
+						float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
+						if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+							if (fabs(centerHit.block.normal.y - 1.0f) >= 0.0001f) turnDir = 3; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+							redirected = true;
+						}
+					}
+					else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+						turnDir = 3;
+						redirected = true;
 					}
 				}
 			}
 		}
 
+		if (redirected) {
+			PxReal accel = 1.0f;
+			PxReal reverse = 0.0f;
+			PxReal handbrake = 0.0f;
+			PxReal steer;
 
-		PxReal accel = 1.0f;
-		PxReal reverse = 0.0f;
-		PxReal handbrake = 0.0f;
+			switch (turnDir) {
+			case -3:
+				steer = 1.0f;
+				break;
+			case -2:
+				steer = 0.65f;
+				break;
+			case -1:
+				steer = 0.35f;
+				break;
+			case 0:
+				steer = 0.0f;
+				break;
+			case 1:
+				steer = -0.35f;
+				break;
+			case 2:
+				steer = -0.65f;
+				break;
+			case 3:
+				steer = -1.0f;
+				break;
+			}
 
-		// REMEMBER: steering is reverse (-1.0 is clockwise)
+			bool turboButtonPressed = (_hasHotPotato || forcedTurbo);
 
-		//PxReal steer = turnDir >= 0 ? -0.5f : 0.5f;
-
-		//PxReal steer = turnDir >= 0 ? -1.0f : 1.0f;
-		/*
-		PxReal steer;
-		if (turnDir > 0) steer = -1.0f;
-		else if (turnDir == 0) steer = 0.0f;
-		else steer = 1.0f;
-		*/
-
-
-		// THIS IS SO UGLY, i'll use math later...
-		
-		PxReal steer;
-
-		switch (turnDir) {
-		case -3:
-			steer = 1.0f;
-			break;
-		case -2:
-			steer = 0.65f;
-			break;
-		case -1:
-			steer = 0.35f;
-			break;
-		case 0:
-			steer = 0.0f;
-			break;
-		case 1:
-			steer = -0.35f;
-			break;
-		case 2:
-			steer = -0.65f;
-			break;
-		case 3:
-			steer = -1.0f;
-			break;
+			player->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
 		}
-		
-
-
-		bool turboButtonPressed = false;
-
-		player->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
-
-
-
-
-
-		// if any hit returns true, do this...
-
-		// cases::
-
-		// FL only, steer = 1.0
-		// FL + ML, steer = 1.0
-		// FL + ML + C, steer = 1.0
-		// FL + ML + C + MR, steer = 1.0
-		// FL + ML + C + MR + FR, steer = 1.0 (use this randomly)
-
-
-
-
-
 
 	}
-	else {
+	if (!redirected) {
 		if (_targets.size() == 0) { // if bot doesnt have a current target for some reason...
 			//std::cout << "BOT WITHOUT A JOB!" << std::endl;
 			//player->_shoppingCartBase->processRawInputDataController(0.0f, 0.0f, 1.0f, 0.0f, false); // put bot into a braking mode
@@ -645,8 +775,8 @@ void PlayerScript::navigate() {
 		else steer = isCCW ? 1.0f : -1.0f;
 
 
-		bool turboButtonPressed = false;
-		//bool turboButtonPressed = true;
+		bool turboButtonPressed = (_hasHotPotato || forcedTurbo);
+		
 
 		player->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
 	}
@@ -662,3 +792,30 @@ void PlayerScript::navigate() {
 	}
 	
 }
+
+
+void PlayerScript::giveHotPotato(double remainingDuration) {
+	_hasHotPotato = true;
+	_hotPotatoTimer = remainingDuration;
+}
+
+void PlayerScript::tickHotPotatoTimer(double fixedDeltaTime) {
+	_hotPotatoTimer -= fixedDeltaTime;
+	if (_hotPotatoTimer <= 0.0) {
+		explodeHotPotato();
+	}
+}
+
+void PlayerScript::explodeHotPotato() {
+	_hasHotPotato = false;
+	_hotPotatoTimer = -1.0;
+	const int hotPotatoLostPoints = 75;
+	subPoints(75);
+	bashed();
+	//TODO: UI indicator that you exploded/points were lost???
+	coinExplosion();
+}
+
+
+
+

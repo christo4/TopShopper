@@ -113,18 +113,44 @@ AIManager::~AIManager() {
 }
 
 void AIManager::init() {
-
+	_startingCookie = std::dynamic_pointer_cast<Cookie>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::COOKIE, _startingCookieSpawnPoint, "startingCookie"));
 }
 
 void AIManager::updateSeconds(double variableDeltaTime) {
 	// call UPDATE() for all behaviour scripts...
-	for (std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
+	std::vector<std::shared_ptr<Entity>> entitiesCopy = _broker->getPhysicsManager()->getActiveScene()->_entities;
+	for (std::shared_ptr<Entity> &entity : entitiesCopy) {
 		std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
 		if (comp != nullptr) {
 			std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
 			script->update(variableDeltaTime);
 		}
 	}
+
+	// STARTING COOKIE SPAWNING...
+	// check if the cookie has been picked up yet (destroyed)...
+	if (_startingCookie != nullptr && _startingCookie->getDestroyFlag()) {
+		removeDeletedTarget(_startingCookieSpawnPoint.p);
+		_startingCookie = nullptr;
+		_mysteryBagCanSpawn = true; // mystery bag can now spawn after this 1st cookie has been picked up
+	}
+
+	// MYSTERY BAG SPAWNING...
+	// check if the mystery bag has been picked up yet (destroyed)...
+	if (_mysteryBag != nullptr && _mysteryBag->getDestroyFlag()) {
+		removeDeletedTarget(_mysteryBagSpawnPoint.p);
+		_mysteryBag = nullptr;
+		_mysteryBagSpawnTimer = ((rand() % 31) + 30); // 30-60 range
+	}
+
+	// check if next mystery bag is ready to be spawned in...
+	if (_mysteryBagCanSpawn && _mysteryBag == nullptr) {
+		_mysteryBagSpawnTimer -= variableDeltaTime;
+		if (_mysteryBagSpawnTimer <= 0.0) {
+			_mysteryBag = std::dynamic_pointer_cast<MysteryBag>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::MYSTERY_BAG, _mysteryBagSpawnPoint, "mysteryBag"));
+		}
+	}
+
 
 	// SPARE CHANGE SPAWNING...
 	// check if any spawn-point spare change have been picked up in this frame (destroyed)...
@@ -338,6 +364,12 @@ void AIManager::setNewAITargets() {
 		std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 		if (playerScript->_playerType == PlayerScript::BOT) {
 			if (playerScript->_targets.size() == 0) {
+
+				// at start of round, all AIs will head towards center hill (starting cookie)
+				if (_startingCookie != nullptr) {
+					playerScript->_targets.push_back(_startingCookieSpawnPoint.p);
+				}
+
 				// find a new final target (pickup on your list for now)
 				PxVec3 playerPos = player->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
 
