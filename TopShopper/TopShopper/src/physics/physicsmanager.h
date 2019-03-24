@@ -20,6 +20,7 @@
 #include "objects/obstacle1.h"
 #include "objects/obstacle2.h"
 #include "objects/cookie.h"
+#include "objects/mysterybag.h"
 
 
 class Broker;

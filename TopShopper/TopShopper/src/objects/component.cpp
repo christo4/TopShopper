@@ -20,6 +20,42 @@ BehaviourScript::BehaviourScript(Entity *entity, ComponentTypes tag) : Component
 
 
 ////////////////////////////
+MysteryBagScript::MysteryBagScript(Entity *entity) : BehaviourScript(entity, ComponentTypes::MYSTERY_BAG_SCRIPT) {}
+
+void MysteryBagScript::onSpawn() {}
+void MysteryBagScript::fixedUpdate(double fixedDeltaTime) {}
+void MysteryBagScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
+void MysteryBagScript::onCollisionExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
+
+void MysteryBagScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity) {
+	if (otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+		ShoppingCartPlayer *player = static_cast<ShoppingCartPlayer*>(otherEntity);
+		std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
+
+		int rng = rand() % 100; // 0-99
+		if (rng < _cookiePercent) { // IT WAS A COOKIE!...
+			std::cout << "MYSTERY BAG REVEALED... A COOKIE!" << std::endl;
+			//TODO: display some UI notification (cookie sprite)
+			playerScript->addPoints(_cookiePoints); // increase player points by this pickup's value
+		}
+		else { // IT WAS A HOT POTATO!...
+			std::cout << "MYSTERY BAG REVEALED... A HOT POTATO!" << std::endl;
+			//TODO: display some UI notification (hot potato sprite) - this may be unnecessary since hot potato sprite will show up next to player list?
+			playerScript->giveHotPotato(_hotPotatoDuration);
+		}
+
+		_entity->destroy(); // destroy this mystery bag
+		Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND));
+	}
+}
+
+void MysteryBagScript::onTriggerExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity) {}
+void MysteryBagScript::update(double variableDeltaTime) {}
+void MysteryBagScript::lateUpdate(double variableDeltaTime) {}
+void MysteryBagScript::onDestroy() {}
+
+
+////////////////////////////
 PickupScript::PickupScript(Entity *entity) : BehaviourScript(entity, ComponentTypes::PICKUP_SCRIPT) {}
 
 void PickupScript::onSpawn() {}
@@ -90,7 +126,7 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 				PxReal reverse = glm::clamp(((pad->leftTrigger + 1) / 2), 0.0f, 1.0f);
 				PxReal handbrake = pad->xButton ? 1.0f : 0.0f;
 				PxReal steer = glm::clamp(pad->leftStickX *-1, -1.0f, 1.0f); // must be negated otherwise steering is backwards
-				bool turboButtonPressed = pad->bButton; // this function doesnt work as intended yet...
+				bool turboButtonPressed = (_hasHotPotato || pad->bButton);
 				if (turboButtonPressed && !(turboState)) {
 					Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TURBO_SOUND));
 					turboState = true;
@@ -109,7 +145,7 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 					bool handbrakeKeyPressed = kam->leftShiftKey;
 					bool steerLeftKeyPressed = kam->dKey; // NOTE: the steer keys have to be reversed here
 					bool steerRightKeyPressed = kam->aKey;
-					bool turboKeyPressed = kam->spaceKey;
+					bool turboKeyPressed = (_hasHotPotato || kam->spaceKey);
 					if (turboKeyPressed && !(turboState)) {
 						Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TURBO_SOUND));
 						turboState = true;
@@ -132,6 +168,10 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 		if (player->_shoppingCartBase->IsBashProtected()) {
 			player->_shoppingCartBase->tickBashProtectionTimer(fixedDeltaTime);
 		}
+
+		if (_hasHotPotato) {
+			tickHotPotatoTimer(fixedDeltaTime);
+		}
 	}
 }
 
@@ -151,6 +191,11 @@ void PlayerScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape *ot
 		if (localCart->_shoppingCartBase->IsTurboing() && !otherCart->_shoppingCartBase->IsBashProtected()) {
 			std::shared_ptr<PlayerScript> otherScript = std::static_pointer_cast<PlayerScript>(otherCart->getComponent(ComponentTypes::PLAYER_SCRIPT));
 			otherScript->bashed();
+			if (_hasHotPotato) {
+				otherScript->giveHotPotato(_hotPotatoTimer);
+				_hasHotPotato = false;
+				_hotPotatoTimer = -1.0;
+			}
 		}
 		
 	}
@@ -267,6 +312,61 @@ void PlayerScript::bashed() {
 
 
 	//std::cout << "BASH EVENT" << std::endl;
+}
+
+
+
+// BUG: I THINK I UNDERSTAND THE BUG NOW!!!, This function gets called as a result of fixedupdate(),
+// since I instantiate spare change inside here, but I am also inside a loop over all entities, the vector gets changed so the iterator is screwed up!
+// FIX: MAKE SURE THAT ENTITIES LIST IS DEEP COPIED BEFORE ITERATING OVER DEEP COPY OR MAKE SURE THAT NO INSTANTIATE CALLS/ REMOVE FROM SCENE CALLS ARE MADE INSIDE A LOOP OVER ENTITIES
+// IT WORKED!
+void PlayerScript::coinExplosion() {
+	ShoppingCartPlayer *cart = static_cast<ShoppingCartPlayer*>(_entity);
+	//Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND));
+
+	std::vector<EntityTypes> lostItems;
+	for (int i = 0; i < 12; i++) {
+		lostItems.push_back(EntityTypes::SPARE_CHANGE);
+	}
+
+	PxRigidDynamic *cartDyn = cart->_actor->is<PxRigidDynamic>();
+	PxTransform cartTransform = cartDyn->getGlobalPose();
+	PxVec3 cartPos = cartTransform.p;
+
+	PxVec3 nextSpawnPos = cartPos + PxVec3(0.0f, 11.0f, 0.0f); // NOTE: I'm setting the y-value on the assumption that bashed() will spawn 2 pickups
+
+	std::vector<PxVec3> forces = { PxVec3(0.0f, 40.0f, 20.0f), PxVec3(0.0f, 40.0f, -20.0f), PxVec3(20.0f, 40.0f, 0.0f), PxVec3(-20.0f, 40.0f, 0.0f), PxVec3(0.0f, 40.0f, 30.0f), PxVec3(0.0f, 40.0f, -30.0f), PxVec3(30.0f, 40.0f, 0.0f), PxVec3(-30.0f, 40.0f, 0.0f), PxVec3(0.0f, 40.0f, 40.0f), PxVec3(0.0f, 40.0f, -40.0f), PxVec3(40.0f, 40.0f, 0.0f), PxVec3(-40.0f, 40.0f, 0.0f) };
+	int forceIndex = 0;
+
+	for (EntityTypes item : lostItems) {
+
+		// spawn new item of this type above cart, apply an impulse to each in a different direction
+		std::shared_ptr<Entity> spawnedItem = Broker::getInstance()->getPhysicsManager()->instantiateEntity(item, PxTransform(nextSpawnPos), "LostItem");
+
+		// now enable gravity on item
+		// make item solid until it hits the ground somewhere (onCollisionEnter - which will then set item to trigger and disable gravity)
+		// apply an impulse in xz-plane at a different (maybe random) rotation (0, 90, 180, 270) - can keep cycling through this
+
+		PxRigidDynamic *spawnedItemDyn = spawnedItem->_actor->is<PxRigidDynamic>();
+		PxShape* shapeBuffer[1];
+		spawnedItemDyn->getShapes(shapeBuffer, 1);
+		PxShape* spawnedItemShape = shapeBuffer[0];
+
+		// make it solid...
+		spawnedItemShape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, false);
+		spawnedItemShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
+
+		// enable gravity
+		spawnedItemDyn->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, false);
+
+		// apply a force vector in a different direction...
+		spawnedItemDyn->addForce(forces.at(forceIndex), PxForceMode::eIMPULSE);
+		forceIndex++;
+		if (forceIndex >= forces.size()) forceIndex = 0;
+
+		nextSpawnPos += PxVec3(0.0f, 3.0f, 0.0f); 
+	}
+
 }
 
 
@@ -487,7 +587,7 @@ void PlayerScript::navigate() {
 				break;
 			}
 
-			bool turboButtonPressed = forcedTurbo;
+			bool turboButtonPressed = (_hasHotPotato || forcedTurbo);
 
 			player->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
 		}
@@ -529,7 +629,7 @@ void PlayerScript::navigate() {
 		else steer = isCCW ? 1.0f : -1.0f;
 
 
-		bool turboButtonPressed = forcedTurbo;
+		bool turboButtonPressed = (_hasHotPotato || forcedTurbo);
 		
 
 		player->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
@@ -546,3 +646,30 @@ void PlayerScript::navigate() {
 	}
 	
 }
+
+
+void PlayerScript::giveHotPotato(double remainingDuration) {
+	_hasHotPotato = true;
+	_hotPotatoTimer = remainingDuration;
+}
+
+void PlayerScript::tickHotPotatoTimer(double fixedDeltaTime) {
+	_hotPotatoTimer -= fixedDeltaTime;
+	if (_hotPotatoTimer <= 0.0) {
+		explodeHotPotato();
+	}
+}
+
+void PlayerScript::explodeHotPotato() {
+	_hasHotPotato = false;
+	_hotPotatoTimer = -1.0;
+	const int hotPotatoLostPoints = 75;
+	subPoints(75);
+	bashed();
+	//TODO: UI indicator that you exploded/points were lost???
+	coinExplosion();
+}
+
+
+
+

@@ -118,7 +118,8 @@ void AIManager::init() {
 
 void AIManager::updateSeconds(double variableDeltaTime) {
 	// call UPDATE() for all behaviour scripts...
-	for (std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
+	std::vector<std::shared_ptr<Entity>> entitiesCopy = _broker->getPhysicsManager()->getActiveScene()->_entities;
+	for (std::shared_ptr<Entity> &entity : entitiesCopy) {
 		std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
 		if (comp != nullptr) {
 			std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
@@ -131,7 +132,25 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 	if (_startingCookie != nullptr && _startingCookie->getDestroyFlag()) {
 		removeDeletedTarget(_startingCookieSpawnPoint.p);
 		_startingCookie = nullptr;
+		_mysteryBagCanSpawn = true; // mystery bag can now spawn after this 1st cookie has been picked up
 	}
+
+	// MYSTERY BAG SPAWNING...
+	// check if the mystery bag has been picked up yet (destroyed)...
+	if (_mysteryBag != nullptr && _mysteryBag->getDestroyFlag()) {
+		removeDeletedTarget(_mysteryBagSpawnPoint.p);
+		_mysteryBag = nullptr;
+		_mysteryBagSpawnTimer = ((rand() % 31) + 30); // 30-60 range
+	}
+
+	// check if next mystery bag is ready to be spawned in...
+	if (_mysteryBagCanSpawn && _mysteryBag == nullptr) {
+		_mysteryBagSpawnTimer -= variableDeltaTime;
+		if (_mysteryBagSpawnTimer <= 0.0) {
+			_mysteryBag = std::dynamic_pointer_cast<MysteryBag>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::MYSTERY_BAG, _mysteryBagSpawnPoint, "mysteryBag"));
+		}
+	}
+
 
 	// SPARE CHANGE SPAWNING...
 	// check if any spawn-point spare change have been picked up in this frame (destroyed)...

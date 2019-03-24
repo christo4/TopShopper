@@ -36,6 +36,7 @@ enum ComponentTypes {
 	NUMBER_OF_COMPONENT_TYPES,
 
 	// CHILD SCRIPT NAMES DECLARED BELOW HERE SO THAT THEY DONT SCREW UP THE INDEXING...
+	MYSTERY_BAG_SCRIPT,
 	PICKUP_SCRIPT,
 	PLAYER_SCRIPT
 };
@@ -97,6 +98,31 @@ struct BehaviourScript : Component {
 };
 
 
+struct MysteryBagScript : BehaviourScript {
+	MysteryBagScript(Entity *entity);
+
+	void onSpawn() override;
+	void fixedUpdate(double fixedDeltaTime) override;
+
+	void onCollisionEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) override;
+	void onCollisionExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) override;
+	void onTriggerEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity) override;
+	void onTriggerExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity) override;
+
+	void update(double variableDeltaTime) override;
+	void lateUpdate(double variableDeltaTime) override;
+	void onDestroy() override;
+
+	// SPECIFICS...
+
+	const int _cookiePoints = 75; // ~~~~NOTE: always make sure this matches Cookie.cpp _points value!
+	const int _cookiePercent = 35;
+	// NOTE: Hot Potato percent = 100 - cookiePercent, so make sure cookie Percent is in range [0,100]
+
+	const double _hotPotatoDuration = 15.0; // 15 seconds...
+};
+
+
 struct PickupScript : BehaviourScript {
 	PickupScript(Entity *entity);
 
@@ -118,7 +144,6 @@ struct PickupScript : BehaviourScript {
 	double _rotationSpeed = 0.0;
 
 };
-
 
 
 struct PlayerScript : BehaviourScript {
@@ -163,6 +188,8 @@ struct PlayerScript : BehaviourScript {
 	static const int SHOPPING_LIST_COMPLETED_POINTS = 50;
 
 	void bashed();
+	void coinExplosion();
+
 
 
 	// AI STUFF...
@@ -173,6 +200,16 @@ struct PlayerScript : BehaviourScript {
 
 
 	void navigate();
+
+
+
+
+	bool _hasHotPotato = false;
+	double _hotPotatoTimer = -1.0;
+	void giveHotPotato(double remainingDuration);
+	void tickHotPotatoTimer(double fixedDeltaTime);
+	void explodeHotPotato();
+
 
 };
 

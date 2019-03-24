@@ -473,7 +473,8 @@ void PhysicsManager::switchToScene1() {
 
 void PhysicsManager::updateSeconds(double fixedDeltaTime) {
 	// call FIXEDUPDATE() for all behaviour scripts...
-	for (std::shared_ptr<Entity> &entity : _activeScene->_entities) {
+	std::vector<std::shared_ptr<Entity>> entitiesCopy = _activeScene->_entities;
+	for (std::shared_ptr<Entity> &entity : entitiesCopy) {
 		std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
 		if (comp != nullptr) {
 			std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
@@ -912,6 +913,30 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 
 		// ENTITY...
 		entity = std::make_shared<Broccoli>(actor);
+		break;
+	}
+	case EntityTypes::MYSTERY_BAG:
+	{
+		PxReal radius = 1.5f;
+		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eTRIGGER_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createSphereCollider(radius, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidDynamic *actor = gPhysics->createRigidDynamic(transform);
+		actor->setName(name);
+		actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<MysteryBag>(actor);
 		break;
 	}
 	case EntityTypes::COOKIE:

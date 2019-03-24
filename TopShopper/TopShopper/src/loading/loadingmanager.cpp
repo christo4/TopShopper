@@ -25,6 +25,8 @@ Geometry* BroccoliGeo = new Geometry();
 Geometry* Obstacle1Geo = new Geometry();
 Geometry* Obstacle2Geo = new Geometry();
 Geometry* CookieGeo = new Geometry();
+Geometry* MysteryBagGeo = new Geometry();
+Geometry* HotPotatoGeo = new Geometry();
 
 Geometry* VehicleChassisGeoNoIndex = new Geometry();
 Geometry* VehicleWheelGeoNoIndex = new Geometry();
@@ -42,6 +44,8 @@ Geometry* BroccoliGeoNoIndex = new Geometry();
 Geometry* Obstacle1GeoNoIndex = new Geometry();
 Geometry* Obstacle2GeoNoIndex = new Geometry();
 Geometry* CookieGeoNoIndex = new Geometry();
+Geometry* MysteryBagGeoNoIndex = new Geometry();
+Geometry* HotPotatoGeoNoIndex = new Geometry();
 
 LoadingManager::LoadingManager(Broker *broker) 
 	: _broker(broker)
@@ -310,7 +314,7 @@ void LoadingManager::init() {
 
 
 	//cola
-	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+	loadObject("../TopShopper/resources/Objects/Cola.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 
 
 	ColaGeo->verts = returnVertices;
@@ -439,7 +443,7 @@ void LoadingManager::init() {
 	normalIndex.clear();
 
 	//Eggplant
-	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+	loadObject("../TopShopper/resources/Objects/Eggplant.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 
 
 	EggplantGeo->verts = returnVertices;
@@ -472,7 +476,7 @@ void LoadingManager::init() {
 
 
 	//Broccoli
-	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+	loadObject("../TopShopper/resources/Objects/Broccoli.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 
 
 	BroccoliGeo->verts = returnVertices;
@@ -504,8 +508,41 @@ void LoadingManager::init() {
 	normalIndex.clear();
 
 
+	//MysteryBag
+	loadObject("../TopShopper/resources/Objects/Bag.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	MysteryBagGeo->verts = returnVertices;
+	MysteryBagGeo->uvs = returnUV;
+	MysteryBagGeo->normals = returnNormal;
+	MysteryBagGeo->vIndex = vIndex;
+	MysteryBagGeo->uvIndex = uvIndex;
+	MysteryBagGeo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		MysteryBagGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		MysteryBagGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		MysteryBagGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+
 	//Cookie
-	loadObject("../TopShopper/resources/Objects/Collider.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+	loadObject("../TopShopper/resources/Objects/Cookie.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 
 
 	CookieGeo->verts = returnVertices;
@@ -526,6 +563,39 @@ void LoadingManager::init() {
 
 	for (unsigned int i = 0; i < normalIndex.size(); i++) {
 		CookieGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+
+	//HOTPOTATO
+	loadObject("../TopShopper/resources/Objects/Potato.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	HotPotatoGeo->verts = returnVertices;
+	HotPotatoGeo->uvs = returnUV;
+	HotPotatoGeo->normals = returnNormal;
+	HotPotatoGeo->vIndex = vIndex;
+	HotPotatoGeo->uvIndex = uvIndex;
+	HotPotatoGeo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		HotPotatoGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		HotPotatoGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		HotPotatoGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
 	}
 
 
@@ -727,8 +797,12 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return EggplantGeo;
 	case GeometryTypes::BROCCOLI_GEO:
 		return BroccoliGeo;
+	case GeometryTypes::MYSTERY_BAG_GEO:
+		return MysteryBagGeo;
 	case GeometryTypes::COOKIE_GEO:
 		return CookieGeo;
+	case GeometryTypes::HOT_POTATO_GEO:
+		return HotPotatoGeo;
 	case GeometryTypes::OBSTACLE1_GEO:
 		return Obstacle1Geo;
 	case GeometryTypes::OBSTACLE2_GEO:
@@ -759,8 +833,12 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return EggplantGeoNoIndex;
 	case GeometryTypes::BROCCOLI_GEO_NO_INDEX:
 		return BroccoliGeoNoIndex;
+	case GeometryTypes::MYSTERY_BAG_GEO_NO_INDEX:
+		return MysteryBagGeoNoIndex;
 	case GeometryTypes::COOKIE_GEO_NO_INDEX:
 		return CookieGeoNoIndex;
+	case GeometryTypes::HOT_POTATO_GEO_NO_INDEX:
+		return HotPotatoGeoNoIndex;
 	case GeometryTypes::OBSTACLE1_GEO_NO_INDEX:
 		return Obstacle1GeoNoIndex;
 	case GeometryTypes::OBSTACLE2_GEO_NO_INDEX:
