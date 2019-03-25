@@ -100,8 +100,8 @@ private:
 	GLFWwindow *_window = nullptr;
 	std::vector<Geometry> _objects;
 	unsigned int _lightDepthFBO;
-	unsigned int _shadowWidth = 1024;
-	unsigned int _shadowHeight = 1024;
+	unsigned int _shadowWidth = 2048;
+	unsigned int _shadowHeight = 2048;
 	unsigned int _depthMapTex;
 
 
