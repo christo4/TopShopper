@@ -642,17 +642,27 @@ void PlayerScript::navigate() {
 				}
 				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
 					// supress raycasts with another cart that has the same target as you...
+					// also supress raycasts if you have hot potato and hit cart is not bash protected...
 					ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
 					std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
-					if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
-						if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+
+					if (_hasHotPotato) {
+						if (hitPlayer->_shoppingCartBase->IsBashProtected()) {
 							turnDir += 1;
 							redirected = true;
 						}
 					}
-					else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
-						turnDir += 1;
-						redirected = true;
+					else {
+						if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
+							if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+								turnDir += 1;
+								redirected = true;
+							}
+						}
+						else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
+							turnDir += 1;
+							redirected = true;
+						}
 					}
 				}
 				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
@@ -675,17 +685,27 @@ void PlayerScript::navigate() {
 				}
 				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
 					// supress raycasts with another cart that has the same target as you...
+					// also supress raycasts if you have hot potato and hit cart is not bash protected...
 					ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
 					std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
-					if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
-						if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+
+					if (_hasHotPotato) {
+						if (hitPlayer->_shoppingCartBase->IsBashProtected()) {
 							turnDir += 2;
 							redirected = true;
 						}
 					}
-					else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
-						turnDir += 2;
-						redirected = true;
+					else {
+						if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
+							if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+								turnDir += 2;
+								redirected = true;
+							}
+						}
+						else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
+							turnDir += 2;
+							redirected = true;
+						}
 					}
 				}
 				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
@@ -708,17 +728,27 @@ void PlayerScript::navigate() {
 				}
 				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
 					// supress raycasts with another cart that has the same target as you...
+					// also supress raycasts if you have hot potato and hit cart is not bash protected...
 					ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
 					std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
-					if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
-						if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+
+					if (_hasHotPotato) {
+						if (hitPlayer->_shoppingCartBase->IsBashProtected()) {
 							turnDir -= 2;
 							redirected = true;
 						}
 					}
-					else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
-						turnDir -= 2;
-						redirected = true;
+					else {
+						if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
+							if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+								turnDir -= 2;
+								redirected = true;
+							}
+						}
+						else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
+							turnDir -= 2;
+							redirected = true;
+						}
 					}
 				}
 				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
@@ -741,17 +771,27 @@ void PlayerScript::navigate() {
 				}
 				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
 					// supress raycasts with another cart that has the same target as you...
+					// also supress raycasts if you have hot potato and hit cart is not bash protected...
 					ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
 					std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
-					if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
-						if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+
+					if (_hasHotPotato) {
+						if (hitPlayer->_shoppingCartBase->IsBashProtected()) {
 							turnDir -= 1;
 							redirected = true;
 						}
 					}
-					else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
-						turnDir -= 1;
-						redirected = true;
+					else {
+						if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
+							if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+								turnDir -= 1;
+								redirected = true;
+							}
+						}
+						else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
+							turnDir -= 1;
+							redirected = true;
+						}
 					}
 				}
 				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
@@ -778,17 +818,27 @@ void PlayerScript::navigate() {
 					}
 					else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
 						// supress raycasts with another cart that has the same target as you...
+						// also supress raycasts if you have hot potato and hit cart is not bash protected...
 						ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
 						std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
-						if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
-							if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+
+						if (_hasHotPotato) {
+							if (hitPlayer->_shoppingCartBase->IsBashProtected()) {
 								turnDir = 3;
 								redirected = true;
 							}
 						}
-						else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
-							turnDir = 3;
-							redirected = true;
+						else {
+							if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
+								if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+									turnDir = 3;
+									redirected = true;
+								}
+							}
+							else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
+								turnDir = 3;
+								redirected = true;
+							}
 						}
 					}
 					else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
