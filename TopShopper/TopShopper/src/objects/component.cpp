@@ -5,6 +5,7 @@
 #include "core/broker.h"
 #include <iostream>
 #include <cstdlib>
+#include "utility/utility.h"
 
 
 
@@ -632,7 +633,22 @@ void PlayerScript::navigate() {
 						redirected = true;
 					}
 				}
-				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+					// supress raycasts with another cart that has the same target as you...
+					ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
+					std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
+					if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
+						if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+							turnDir += 1;
+							redirected = true;
+						}
+					}
+					else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
+						turnDir += 1;
+						redirected = true;
+					}
+				}
+				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
 					turnDir += 1;
 					redirected = true;
 				}
@@ -650,7 +666,22 @@ void PlayerScript::navigate() {
 						redirected = true;
 					}
 				}
-				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+					// supress raycasts with another cart that has the same target as you...
+					ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
+					std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
+					if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
+						if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+							turnDir += 2;
+							redirected = true;
+						}
+					}
+					else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
+						turnDir += 2;
+						redirected = true;
+					}
+				}
+				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
 					turnDir += 2;
 					redirected = true;
 				}
@@ -668,7 +699,22 @@ void PlayerScript::navigate() {
 						redirected = true;
 					}
 				}
-				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+					// supress raycasts with another cart that has the same target as you...
+					ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
+					std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
+					if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
+						if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+							turnDir -= 2;
+							redirected = true;
+						}
+					}
+					else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
+						turnDir -= 2;
+						redirected = true;
+					}
+				}
+				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
 					turnDir -= 2;
 					redirected = true;
 				}
@@ -686,7 +732,22 @@ void PlayerScript::navigate() {
 						redirected = true;
 					}
 				}
-				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+					// supress raycasts with another cart that has the same target as you...
+					ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
+					std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
+					if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
+						if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+							turnDir -= 1;
+							redirected = true;
+						}
+					}
+					else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
+						turnDir -= 1;
+						redirected = true;
+					}
+				}
+				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
 					turnDir -= 1;
 					redirected = true;
 				}
@@ -708,7 +769,22 @@ void PlayerScript::navigate() {
 							redirected = true;
 						}
 					}
-					else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+					else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+						// supress raycasts with another cart that has the same target as you...
+						ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
+						std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
+						if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
+							if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+								turnDir = 3;
+								redirected = true;
+							}
+						}
+						else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
+							turnDir = 3;
+							redirected = true;
+						}
+					}
+					else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
 						turnDir = 3;
 						redirected = true;
 					}

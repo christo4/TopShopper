@@ -368,6 +368,13 @@ void AIManager::setNewAITargets() {
 				// at start of round, all AIs will head towards center hill (starting cookie)
 				if (_startingCookie != nullptr) {
 					playerScript->_targets.push_back(_startingCookieSpawnPoint.p);
+					continue;
+				}
+
+				// if mystery bag on field, go for it...
+				if (_mysteryBag != nullptr) {
+					playerScript->_targets.push_back(_mysteryBagSpawnPoint.p);
+					continue;
 				}
 
 				// find a new final target (pickup on your list for now)

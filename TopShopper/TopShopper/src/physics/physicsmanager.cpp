@@ -438,7 +438,7 @@ void PhysicsManager::switchToScene1() {
 	std::shared_ptr<Obstacle2> obstacle2_2 = std::dynamic_pointer_cast<Obstacle2>(instantiateEntity(EntityTypes::OBSTACLE2, PxTransform(70.0f, 0.0f, -90.0f, PxQuat(PxIdentity)), "obstacle2_2"));
 
 	// VEHICLE 1:
-	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-160.0f, 5.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
+	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 5.0f, -160.0f, PxQuat(PxIdentity)), "vehicle1"));
 	std::shared_ptr<PlayerScript> player1Script = std::static_pointer_cast<PlayerScript>(vehicle1->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	player1Script->_playerType = PlayerScript::PlayerTypes::HUMAN;
 	player1Script->_inputID = 1;
@@ -451,13 +451,13 @@ void PhysicsManager::switchToScene1() {
 
 	// BOT 1:
 
-	std::shared_ptr<ShoppingCartPlayer> bot1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 5.0f, -160.0f, PxQuat(PxIdentity)), "bot1"));
+	std::shared_ptr<ShoppingCartPlayer> bot1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-10.0f, 5.0f, -67.0f, PxQuat(PxIdentity)), "bot1"));
 	std::shared_ptr<PlayerScript> bot1Script = std::static_pointer_cast<PlayerScript>(bot1->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	bot1Script->_playerType = PlayerScript::PlayerTypes::BOT;
 
 	// BOT 2:
 
-	std::shared_ptr<ShoppingCartPlayer> bot2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 5.0f, 160.0f, PxQuat(PxIdentity)), "bot2"));
+	std::shared_ptr<ShoppingCartPlayer> bot2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(10.0f, 5.0f, -67.0f, PxQuat(PxIdentity)), "bot2"));
 	std::shared_ptr<PlayerScript> bot2Script = std::static_pointer_cast<PlayerScript>(bot2->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	bot2Script->_playerType = PlayerScript::PlayerTypes::BOT;
 
