@@ -232,7 +232,7 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 				Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1));
 			}
 			else if (_inputID = -2) {
-				printf("play bot 2 distance: %f\n", distanceBetween);
+				//printf("play bot 2 distance: %f\n", distanceBetween);
 				Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI2), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI2)->volume*(speed / 60));
 				Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI2), (distanceBetween), angle);
 
