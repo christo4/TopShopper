@@ -298,6 +298,7 @@ void RenderingManager::renderHud() {
 	std::shared_ptr<ShoppingCartPlayer> player = players[0];
 	std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
 	int points = script->_points;
+	int boost = script->getNBBoosts();
 	
 	renderSprite(*_borderSprite, 852, 100, 1068, 172);
 	int offset = 72;
@@ -355,6 +356,13 @@ void RenderingManager::renderHud() {
 
 	std::string timeString = _broker->getAIManager()->getMatchTimePrettyFormat();
 	renderText(timeString, 870, 1010, 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
+
+	renderText("Boost:", 100, 100, 1.5f, glm::vec3(0.0f, 0.0f, 0.0f));
+
+	for (int i = 0; i < boost; i++) {
+		renderSprite(*_boostSprite, 300 + (i * 105), 50, 450 + (i * 105), 200);
+	}
+
 }
 
 
@@ -715,7 +723,7 @@ void RenderingManager::initSpriteTextures() {
 	InitializeTexture(_watermelonSprite, "../TopShopper/resources/Sprites/Watermelon.png", GL_TEXTURE_2D);
 	InitializeTexture(_clockSprite, "../TopShopper/resources/Sprites/clock.png", GL_TEXTURE_2D);
 	InitializeTexture(_checkMarkSprite, "../TopShopper/resources/Sprites/Check_Mark.png", GL_TEXTURE_2D);
-
+	InitializeTexture(_boostSprite, "../TopShopper/resources/Sprites/Boost.png", GL_TEXTURE_2D);
 }
 
 void RenderingManager::init3DTextures() {
