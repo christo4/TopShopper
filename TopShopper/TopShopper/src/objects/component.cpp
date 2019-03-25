@@ -205,7 +205,9 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 			physx::PxVec3 myVelocity = (dynamic_cast<ShoppingCartPlayer*>(_entity))->_actor->is<physx::PxRigidDynamic>()->getLinearVelocity();
 
 			float speed = myVelocity.magnitude();
-			float distanceBetween = (myPos - playerPos).magnitude();
+			float distanceBetween = (myPos - playerPos).magnitude() + 20;
+			if (distanceBetween >= 255)
+				distanceBetween = 255;
 
 			physx::PxQuat playerRot = player1->_actor->is<physx::PxRigidDynamic>()->getGlobalPose().q;
 			physx::PxVec3 forward(0.0f, 0.0f, 1.0f); // on spawn the forward vector of a cart is pointing in the +z direction
@@ -216,19 +218,26 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 			physx::PxVec3 forwardNoYNormalized = physx::PxVec3(forward.x, 0.0f, forward.z).getNormalized();
 			//physx::PxVec3 myPosNormalized = myPos;
 			physx::PxVec3 myPosNormalized = physx::PxVec3(myPos.x, 0.0f, myPos.z).getNormalized();
-			//float angle = acos(((forwardNoYNormalized.x*myPosNormalized.x) + (forwardNoYNormalized.z*myPosNormalized.z))
-			//	/ (sqrt((forwardNoYNormalized.x * forwardNoYNormalized.x) + (forwardNoYNormalized.z*forwardNoYNormalized.z))
-			//		*sqrt((myPosNormalized.x*myPosNormalized.x) + (myPosNormalized.z*myPosNormalized.z))));
+			
 			float angle = acos(((forwardNoYNormalized.x*myPosNormalized.x) + (forwardNoYNormalized.z*myPosNormalized.z)));
 			angle = (angle / 3.1415926) * 180;
 			PxVec3 crossprod = forwardNoYNormalized.cross(myPosNormalized);
 			bool isCCW = crossprod.y <= 0.0f;
 			if (!isCCW) angle = 360 - angle;
 			//std::cout << "Angle: " << angle << std::endl;
-			Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1)->volume*(speed / 60));
-			Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1), (distanceBetween / 255), angle);
+			if (_inputID == -1) {
+				Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1)->volume*(speed / 60));
+				Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1), (distanceBetween), angle);
 
-			Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1));
+				Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1));
+			}
+			else if (_inputID = -2) {
+				printf("play bot 2 distance: %f\n", distanceBetween);
+				Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI2), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI2)->volume*(speed / 60));
+				Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI2), (distanceBetween), angle);
+
+				Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI2));
+			}
 			
 
 			navigate();
@@ -264,7 +273,9 @@ void PlayerScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *
 	physx::PxVec3 myVelocity = (dynamic_cast<ShoppingCartPlayer*>(_entity))->_actor->is<physx::PxRigidDynamic>()->getLinearVelocity();
 
 	float speed = myVelocity.magnitude();
-	float distanceBetween = (myPos - playerPos).magnitude();
+	float distanceBetween = (myPos - playerPos).magnitude() + 20;
+	if (distanceBetween >= 255)
+		distanceBetween = 255;
 
 	physx::PxQuat playerRot = player1->_actor->is<physx::PxRigidDynamic>()->getGlobalPose().q;
 	physx::PxVec3 forward(0.0f, 0.0f, 1.0f); // on spawn the forward vector of a cart is pointing in the +z direction
@@ -287,17 +298,10 @@ void PlayerScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *
 	//Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1));
 	
 	if (otherEntity->getTag() == EntityTypes::OBSTACLE1 || otherEntity->getTag() == EntityTypes::OBSTACLE2 || otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
-		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND), (distanceBetween / 255), angle);
+		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND), distanceBetween, angle);
 		Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND));
 	}
-	else if (otherEntity->getTag() == EntityTypes::APPLE || otherEntity->getTag() == EntityTypes::BANANA ||
-		otherEntity->getTag() == EntityTypes::MILK || otherEntity->getTag() == EntityTypes::MYSTERY_BAG ||
-		otherEntity->getTag() == EntityTypes::EGGPLANT || otherEntity->getTag() == EntityTypes::CARROT ||
-		otherEntity->getTag() == EntityTypes::COLA || otherEntity->getTag() == EntityTypes::BROCCOLI ||
-		otherEntity->getTag() == EntityTypes::SPARE_CHANGE) {
-		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND), (distanceBetween / 255), angle);
-		Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND));
-	}
+	
 }
 void PlayerScript::onCollisionExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
 
@@ -382,7 +386,9 @@ void PlayerScript::pickedUpItem(EntityTypes pickupType) {
 	physx::PxVec3 myVelocity = (dynamic_cast<ShoppingCartPlayer*>(_entity))->_actor->is<physx::PxRigidDynamic>()->getLinearVelocity();
 
 	float speed = myVelocity.magnitude();
-	float distanceBetween = (myPos - playerPos).magnitude();
+	float distanceBetween = (myPos - playerPos).magnitude() + 20;
+	if (distanceBetween >= 255)
+		distanceBetween = 255;
 
 	physx::PxQuat playerRot = player1->_actor->is<physx::PxRigidDynamic>()->getGlobalPose().q;
 	physx::PxVec3 forward(0.0f, 0.0f, 1.0f); // on spawn the forward vector of a cart is pointing in the +z direction
@@ -399,7 +405,8 @@ void PlayerScript::pickedUpItem(EntityTypes pickupType) {
 	PxVec3 crossprod = forwardNoYNormalized.cross(myPosNormalized);
 	bool isCCW = crossprod.y <= 0.0f;
 	if (!isCCW) angle = 360 - angle;
-	Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND), (distanceBetween / 255), angle);
+	if(!(_playerType == PlayerTypes::HUMAN))
+		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND), distanceBetween, angle);
 	Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND));
 	for (int i = 0; i < 3; i++) { // loop through shopping list...
 		if (_shoppingList_Types.at(i) == pickupType) { // if we just picked up item on our list...

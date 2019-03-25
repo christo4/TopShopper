@@ -35,6 +35,8 @@ AudioManager::SoundEffect* AudioManager::getSoundEffect(SoundEffectTypes sound) 
 		return rollingSound_player1;
 	case SoundEffectTypes::ROLL_SOUND_AI1:
 		return rollingSound_ai1;
+	case SoundEffectTypes::ROLL_SOUND_AI2:
+		return rollingSound_ai2;
 	case SoundEffectTypes::HITWALL_SOUND:
 		return hitWallSound;
 	case SoundEffectTypes::PICKITEM_SOUND:
@@ -154,6 +156,10 @@ void AudioManager::init() {
 	rollingSound_ai1->filename = "../TopShopper/resources/sfx/rollCart.wav";
 	rollingSound_ai1->sfx = loadSFX(rollingSound_ai1->filename);
 	rollingSound_ai1->channel = 5;
+
+	rollingSound_ai2->filename = "../TopShopper/resources/sfx/rollCart.wav";
+	rollingSound_ai2->sfx = loadSFX(rollingSound_ai2->filename);
+	rollingSound_ai2->channel = 6;
 	
 
 	hitWallSound->filename = "../TopShopper/resources/sfx/cartHitWall.wav";
