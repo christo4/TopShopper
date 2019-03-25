@@ -78,6 +78,8 @@ public:
 	GLuint textShaderProgram;
 	GLuint spriteShaderProgram;
 	GLuint shaderProgramNoTex;
+	GLuint depthBufferShaderProgram;
+	GLuint quadTestShaderProgram;
 
 	GLFWwindow* getWindow();
 
@@ -97,9 +99,11 @@ private:
 	Broker *_broker = nullptr;
 	GLFWwindow *_window = nullptr;
 	std::vector<Geometry> _objects;
-	GLuint _lightDepthFBO;
+	unsigned int _lightDepthFBO;
 	unsigned int _shadowWidth = 1024;
 	unsigned int _shadowHeight = 1024;
+	unsigned int _depthMapTex;
+
 
 
 	void openWindow();

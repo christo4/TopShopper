@@ -250,5 +250,17 @@
     <None Include="resources\shaders\vertexSprite.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="resources\shaders\depthBufferFragment.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\shaders\depthBufferVertex.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\shaders\quadTestFragment.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\shaders\quadTestVertex.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

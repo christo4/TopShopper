@@ -48,6 +48,17 @@ void RenderingManager::init() {
 		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
 		return;
 	}
+	depthBufferShaderProgram = ShaderTools::InitializeShaders(std::string("depthBufferVertex"), std::string("depthBufferFragment"));
+	if (depthBufferShaderProgram == 0) {
+		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
+		return;
+	}
+
+	quadTestShaderProgram = ShaderTools::InitializeShaders(std::string("quadTestVertex"), std::string("quadTestFragment"));
+	if (quadTestShaderProgram == 0) {
+		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
+		return;
+	}
 
 	glUseProgram(shaderProgram);
 
@@ -134,9 +145,9 @@ void RenderingManager::RenderScene() {
 	// NOTE: I could change this to perform the glm::mix(t=0.5f) over all vectors, but the current solution seems to work
 
 	float radius = 30.0f; // FIXED (for now)
-	float camX = -1*radius * vehicleRotationVecSum.x;
+	float camX = -1 * radius * vehicleRotationVecSum.x;
 	float camY = 20.0f;
-	float camZ = -1*radius * vehicleRotationVecSum.z;
+	float camZ = -1 * radius * vehicleRotationVecSum.z;
 
 
 
@@ -148,14 +159,19 @@ void RenderingManager::RenderScene() {
 	);
 
 
-	GLuint ModelID = glGetUniformLocation(shaderProgram, "Model");
-	GLuint ViewID = glGetUniformLocation(shaderProgram, "View");
-	GLuint ProjectionID = glGetUniformLocation(shaderProgram, "Projection");
-	GLuint cameraID = glGetUniformLocation(shaderProgram, "CameraPos");
 
 
+	GLuint ModelID;
+	GLuint ViewID;
+	GLuint ProjectionID;
+	GLuint cameraID;
+	GLuint LightViewID;
+	GLuint LightProjectionID;
 
-	//View = glm::lookAt(glm::vec3(0.0f, 200.0f, 0.0f), glm::vec3(0.5f,15.0f,0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	
+
+	glm::mat4 lightProjection = glm::ortho(-200.0f, 200.0f, -200.0f, 200.0f, 1.0f, 500.0f);
+	glm::mat4 lightView = glm::lookAt(glm::vec3(0.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 
 
@@ -163,36 +179,18 @@ void RenderingManager::RenderScene() {
 	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	for (Geometry& g : _objects) {
-	
-		
+	ModelID = glGetUniformLocation(depthBufferShaderProgram, "Model");
+	ViewID = glGetUniformLocation(depthBufferShaderProgram, "View");
+	ProjectionID = glGetUniformLocation(depthBufferShaderProgram, "Projection");
 
-	
-	}
+	//render the scene from the light and fill the depth buffer
+	for (Geometry& g : _objects) {	
 
+		glUseProgram(depthBufferShaderProgram);
 
-
-	
-
-
-	glViewport(0, 0, (GLuint)width, (GLuint)height);	//reset the viewport to the full window to render from the camera pov
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-	for (Geometry& g : _objects) {
-
-		glUseProgram(shaderProgram);					//use the default shader program
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(g.texture.target, g.texture.textureID);
-		GLuint uniformLocation = glGetUniformLocation(shaderProgram, "imageTexture");
-
-		glUniform1i(uniformLocation, 0);
-		glUniform3f(cameraID, camPos.x, camPos.y, camPos.z);
 		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
-		glUniformMatrix4fv(ViewID, 1, GL_FALSE, &View[0][0]);
-		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &Projection[0][0]);
+		glUniformMatrix4fv(ViewID, 1, GL_FALSE, &lightView[0][0]);
+		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &lightProjection[0][0]);
 
 		glBindVertexArray(g.vao);
 		assignBuffers(g);
@@ -201,7 +199,88 @@ void RenderingManager::RenderScene() {
 		glBindVertexArray(0);
 	}
 
+	
+	/*
+	glViewport(0, 0, (GLuint)1920, (GLuint)1080);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(quadTestShaderProgram);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, _depthMapTex);
+	GLuint memeID = glGetUniformLocation(quadTestShaderProgram, "depthMap");
+	glUniform1i(memeID, 0);
+
+	Geometry quad;
+	quad.verts.push_back(glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f));
+	quad.verts.push_back(glm::vec4(1.0f, -1.0f, 0.0f, 1.0f));
+	quad.verts.push_back(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
+	quad.verts.push_back(glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f));
+	quad.verts.push_back(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
+	quad.verts.push_back(glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f));
+
+	quad.uvs.push_back(glm::vec2(0.0f, 0.0f));
+	quad.uvs.push_back(glm::vec2(1.0f, 0.0f));
+	quad.uvs.push_back(glm::vec2(1.0f, 1.0f));
+	quad.uvs.push_back(glm::vec2(0.0f, 0.0f));
+	quad.uvs.push_back(glm::vec2(1.0f, 1.0f));
+	quad.uvs.push_back(glm::vec2(0.0f, 1.0f));
+
+	glBindVertexArray(quad.vao);
+	assignBuffers(quad);
+	setBufferData(quad);
+	glDrawArrays(GL_TRIANGLES, 0, quad.verts.size());
+	glBindVertexArray(0);
+	deleteBufferData(quad);
+	*/
+
+
+	glViewport(0, 0, (GLuint)width, (GLuint)height);	//reset the viewport to the full window to render from the camera pov
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	ModelID = glGetUniformLocation(shaderProgram, "Model");				//TODO: Probably dont need to do this everytime
+	ViewID = glGetUniformLocation(shaderProgram, "View");
+	ProjectionID = glGetUniformLocation(shaderProgram, "Projection");
+	cameraID = glGetUniformLocation(shaderProgram, "CameraPos");
+	LightViewID = glGetUniformLocation(shaderProgram, "LightView");
+	LightProjectionID = glGetUniformLocation(shaderProgram, "LightProjection");
+
+
+	for (Geometry& g : _objects) {
+
+		glUseProgram(shaderProgram);					//use the default shader program
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(g.texture.target, g.texture.textureID);
+		GLuint imageTexUniLocation = glGetUniformLocation(shaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
+		glUniform1i(imageTexUniLocation, 0);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, (GLuint) _depthMapTex);
+		GLuint shadowTexUniLocation = glGetUniformLocation(shaderProgram, "shadowMap");		//pass the shadow map into the fragment shader
+		glUniform1i(shadowTexUniLocation, 1);
+
+
+
+		glUniform3f(cameraID, camPos.x, camPos.y, camPos.z);
+		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
+		glUniformMatrix4fv(ViewID, 1, GL_FALSE, &View[0][0]);
+		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &Projection[0][0]);
+		glUniformMatrix4fv(LightViewID, 1, GL_FALSE, &lightView[0][0]);
+		glUniformMatrix4fv(LightProjectionID, 1, GL_FALSE, &lightProjection[0][0]);
+
+		glBindVertexArray(g.vao);
+		//assignBuffers(g);		//already done in the first rendering pass
+		//setBufferData(g);
+		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
+		glBindVertexArray(0);
+	}
+
+	
 	renderHud();
+
 	CheckGLErrors();
 }
 
@@ -575,21 +654,20 @@ void RenderingManager::push3DObjects() {
 void RenderingManager::initFrameBuffers() {
 	glGenFramebuffers(1, &_lightDepthFBO);
 
-	unsigned int depthMap;
 
-	glGenTextures(1, &depthMap);								//init the texture for the depth map information
-	glBindTexture(GL_TEXTURE_2D, depthMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _shadowWidth, _shadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glGenTextures(1, &_depthMapTex);								//init the texture for the depth map information
+	glBindTexture(GL_TEXTURE_2D, _depthMapTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);			//configure the frame buffer to retain depth info
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthMapTex, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);						//rebind the frame buffer to default			
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);						//rebind the frame buffer to default		
 }
 
 
@@ -743,7 +821,6 @@ void RenderingManager::deleteBufferData(Geometry& geometry) {
 	glDeleteBuffers(1, &geometry.vertexBuffer);
 	glDeleteBuffers(1, &geometry.normalBuffer);
 	glDeleteBuffers(1, &geometry.uvBuffer);
-	glDeleteBuffers(1, &geometry.colorBuffer);
 	glDeleteVertexArrays(1, &geometry.vao);
 }
 

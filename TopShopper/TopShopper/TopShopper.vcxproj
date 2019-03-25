@@ -162,9 +162,13 @@
     <ClInclude Include="src\vehicle\VehicleShoppingCart.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\shaders\depthBufferFragment.glsl" />
+    <None Include="resources\shaders\depthBufferVertex.glsl" />
     <None Include="resources\shaders\fragment.glsl" />
     <None Include="resources\shaders\fragmentSprite.glsl" />
     <None Include="resources\shaders\fragmentText.glsl" />
+    <None Include="resources\shaders\quadTestFragment.glsl" />
+    <None Include="resources\shaders\quadTestVertex.glsl" />
     <None Include="resources\shaders\vertex.glsl" />
     <None Include="resources\shaders\vertexSprite.glsl" />
     <None Include="resources\shaders\vertexText.glsl" />
