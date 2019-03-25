@@ -197,7 +197,12 @@ void RenderingManager::RenderScene() {
 		assignBuffers(g);
 		setBufferData(g);
 
-		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
+		Geometry geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::ROOF_GEO_NO_INDEX));
+
+		if (g.verts.size() != geo.verts.size()) {
+			glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
+		}
+
 		glBindVertexArray(0);
 	}
 
@@ -743,7 +748,7 @@ void RenderingManager::init3DTextures() {
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(GROUND_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background3-wood.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(ROOF_GEO_NO_INDEX)->texture = texture;
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
