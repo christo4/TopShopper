@@ -186,6 +186,7 @@ void RenderingManager::RenderScene() {
 	//render the scene from the light and fill the depth buffer
 	for (Geometry& g : _objects) {	
 
+
 		glUseProgram(depthBufferShaderProgram);
 
 		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
@@ -195,6 +196,7 @@ void RenderingManager::RenderScene() {
 		glBindVertexArray(g.vao);
 		assignBuffers(g);
 		setBufferData(g);
+
 		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
 		glBindVertexArray(0);
 	}
@@ -235,6 +237,8 @@ void RenderingManager::RenderScene() {
 	deleteBufferData(quad);
 	*/
 
+
+	
 
 	glViewport(0, 0, (GLuint)width, (GLuint)height);	//reset the viewport to the full window to render from the camera pov
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -279,7 +283,9 @@ void RenderingManager::RenderScene() {
 	}
 
 	
+	
 	renderHud();
+	
 
 	CheckGLErrors();
 }
@@ -499,6 +505,23 @@ void RenderingManager::push3DObjects() {
 			geo.color = glm::vec3(0.2f, 0.65f, 0.95f);
 
 			std::shared_ptr<ShoppingCartPlayer> player = std::dynamic_pointer_cast<ShoppingCartPlayer>(entity);
+			std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+			int playerInputID = script->_inputID;
+
+
+			if (playerInputID == 1) {					//TODO: make this less hacky
+				geo.texture = *_shoppingCartRed;
+			}
+
+			if (playerInputID == -1) {
+				geo.texture = *_shoppingCartBlue;
+			}
+			if (playerInputID == -2) {
+				geo.texture = *_shoppingCartGreen;
+			}
+
+
+
 			const std::vector<PxShape*> &wheelShapes = player->_shoppingCartBase->_wheelShapes;
 
 			for (PxShape *wheelShape : wheelShapes) {
@@ -745,6 +768,12 @@ void RenderingManager::init3DTextures() {
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(HOT_POTATO_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(_shoppingCartBlue, "../TopShopper/resources/Textures/CartBlue.jpg", GL_TEXTURE_2D);
+	InitializeTexture(_shoppingCartGreen, "../TopShopper/resources/Textures/CartGreen.jpg", GL_TEXTURE_2D);
+	InitializeTexture(_shoppingCartRed, "../TopShopper/resources/Textures/CartRed.jpg", GL_TEXTURE_2D);
+
+
 }
 
 

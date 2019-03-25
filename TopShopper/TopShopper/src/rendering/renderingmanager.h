@@ -122,6 +122,10 @@ private:
 	MyTexture *_watermelonSprite = new MyTexture();
 	MyTexture *_clockSprite = new MyTexture();
 	MyTexture *_checkMarkSprite = new MyTexture();
+
+	MyTexture *_shoppingCartBlue = new MyTexture();
+	MyTexture *_shoppingCartRed = new MyTexture();
+	MyTexture *_shoppingCartGreen = new MyTexture();
 };
 
 #endif // RENDERINGMANAGER_H_
