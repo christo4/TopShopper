@@ -288,11 +288,88 @@ void RenderingManager::RenderScene() {
 	}
 
 	
-	
-	renderHud();
+	if (!(_broker->_isEnd || _broker->_isPaused)) {
+		renderHud();
+	}
+	else if (_broker->_isEnd){
+		renderEndScreen();
+	}
+	else {
+		renderPauseScreen();
+	}
 	
 
 	CheckGLErrors();
+}
+
+void RenderingManager::renderEndScreen() {
+	std::vector<std::shared_ptr<ShoppingCartPlayer>> players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
+	std::shared_ptr<ShoppingCartPlayer> player = players[0];
+	std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	int p1points = script->_points;
+	std::string p1 = "Player1 ";
+
+	player = players[1];
+	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	int p2points = script->_points;
+	std::string p2 = "Opp2 ";
+
+	player = players[2];
+	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	int p3points = script->_points;
+	std::string p3 = "Opp3 ";
+
+	//int topPlayer = std::max(p1points, p2points, p3points);
+	int meme = std::max(p1points, p2points);
+	int topPlayer = std::max(meme, p3points);
+	std::vector<std::string> playerScore;
+	if (topPlayer == p1points) {
+		playerScore.push_back(p1 + std::to_string(p1points));
+		if (p2points > p3points) {
+			playerScore.push_back(p2 + std::to_string(p2points));
+			playerScore.push_back(p3 + std::to_string(p3points));
+		}
+		else {
+			playerScore.push_back(p3 + std::to_string(p3points));
+			playerScore.push_back(p2 + std::to_string(p2points));
+		}
+	}
+	else if (topPlayer == p2points){
+		playerScore.push_back(p2 + std::to_string(p2points));
+		if (p1points > p3points) {
+			playerScore.push_back(p1 + std::to_string(p1points));
+			playerScore.push_back(p3 + std::to_string(p3points));
+		}
+		else {
+			playerScore.push_back(p3 + std::to_string(p3points));
+			playerScore.push_back(p1 + std::to_string(p1points));
+		}
+	}
+	else {
+		playerScore.push_back(p3 + std::to_string(p3points));
+		if (p1points > p2points) {
+			playerScore.push_back(p1 + std::to_string(p1points));
+			playerScore.push_back(p2 + std::to_string(p2points));
+		}
+		else {
+			playerScore.push_back(p2 + std::to_string(p2points));
+			playerScore.push_back(p1 + std::to_string(p1points));
+		}
+	}
+	
+	renderText("Shopper Ranks", 680, 680, 2.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+
+	renderText("1st: " + playerScore[0], 680, 590, 1.5f, glm::vec3(0.93f, 0.84f, 0.03f));
+
+	renderText("2nd: " + playerScore[1], 680, 500, 1.5f, glm::vec3(0.65f, 0.65f, 0.65f));
+
+	renderText("3rd: " + playerScore[2], 680, 410, 1.5f, glm::vec3(0.70f, 0.36f, 0.0f));
+
+}
+
+void RenderingManager::renderPauseScreen() {
+	//960 540
+	renderText("PAUSED", 710, 490, 3.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
 
@@ -367,7 +444,6 @@ void RenderingManager::renderHud() {
 	for (int i = 0; i < boost; i++) {
 		renderSprite(*_boostSprite, 300 + (i * 105), 50, 450 + (i * 105), 200);
 	}
-
 }
 
 

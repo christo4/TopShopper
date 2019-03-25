@@ -27,6 +27,7 @@ public:
 
 
 	bool _isPaused = false; // is the game paused currently?
+	bool _isEnd = false; // is the game paused currently?
 
 private:
 	static Broker* _instance;

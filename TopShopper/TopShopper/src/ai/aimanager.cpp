@@ -322,7 +322,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 	_matchTimer -= variableDeltaTime;
 	if (_matchTimer <= 0.0) {
 		_matchTimer = 0.0; // clamp at 0 so rendering doesnt screw up
-		_broker->_isPaused = true; // FOR NOW, we pause the game when match is over
+		_broker->_isEnd = true; // FOR NOW, we pause the game when match is over
 		//std::cout << "MATCH END" << std::endl;
 	}
 }

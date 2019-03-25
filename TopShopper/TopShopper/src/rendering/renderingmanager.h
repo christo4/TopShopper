@@ -55,6 +55,8 @@ public:
 	void renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
 	void renderSprite(MyTexture spriteTex, int bottomLeftX, int bottomLeftY, int topRightX, int topRightY);
 	void renderHud();
+	void renderEndScreen();
+	void renderPauseScreen();
 	void initTextRender();
 	void initSpriteTextures();
 	void init3DTextures();
