@@ -14,6 +14,8 @@
 #include "objects/sparechange.h"
 #include <cstdlib>
 #include "utility/utility.h"
+#include "objects/shoppingcartplayer.h"
+#include "vehicle/VehicleShoppingCart.h"
 
 using namespace physx;
 
@@ -363,7 +365,36 @@ void AIManager::setNewAITargets() {
 	for (std::shared_ptr<ShoppingCartPlayer> player : players) {
 		std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 		if (playerScript->_playerType == PlayerScript::BOT) {
-			if (playerScript->_targets.size() == 0) {
+
+			if (playerScript->_hasHotPotato) {
+				playerScript->_targets.clear();
+				
+				// find the nearest other cart in this frame (that isn't bashed protected!)...
+				PxVec3 playerPos = player->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
+
+				std::shared_ptr<ShoppingCartPlayer> closestCart = nullptr;
+				PxVec3 closestCartPos;
+				float smallestSeparation = FLT_MAX;
+
+				for (std::shared_ptr<ShoppingCartPlayer> otherPlayer : players) {
+					if (player == otherPlayer) continue; // ignore comparison with self...
+					if (otherPlayer->_shoppingCartBase->IsBashProtected()) continue; // ignore comparison with bash protected carts...
+
+					PxVec3 otherPlayerPos = otherPlayer->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
+
+					float separation = (otherPlayerPos - playerPos).magnitude();
+					if (separation < smallestSeparation) {
+						smallestSeparation = separation;
+						closestCart = otherPlayer;
+						closestCartPos = otherPlayerPos;
+					}
+				}
+
+				if (closestCart != nullptr) { // target found...
+					playerScript->_targets.push_back(closestCartPos);
+				}
+			}
+			else if (playerScript->_targets.size() == 0) {
 
 				// at start of round, all AIs will head towards center hill (starting cookie)
 				if (_startingCookie != nullptr) {
