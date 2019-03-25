@@ -172,7 +172,10 @@ struct PlayerScript : BehaviourScript {
 
 	PlayerTypes _playerType;
 
-	int _inputID = -1; // 1, 2, 3, or 4 (unique)
+	// EACH ID WILL BE UNIQUE TO A CART... (set in physicsmanager)
+	// NEW DEFINITION: AI1.id = -1, AI2.id = -2, etc., HUMAN1.id = 1, HUMAN2.id =2, etc. DEFAULT ID = 0 (UNUSED)
+	int _inputID = 0;
+
 	int _points = 0; // amount of points this player has
 	// NOTE: maybe init this array with a special NONE enum value?
 	std::array<EntityTypes, 3> _shoppingList_Types; // e.g. MILK, APPLE, CARROT
