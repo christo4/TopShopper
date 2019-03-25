@@ -428,6 +428,9 @@ void PhysicsManager::switchToScene1() {
 	// GROUND:
 	std::shared_ptr<Ground> ground = std::dynamic_pointer_cast<Ground>(instantiateEntity(EntityTypes::GROUND, PxTransform(0.0f, 0.0f, 0.0f, PxQuat(PxIdentity)), "ground"));
 
+	// ROOF:
+	std::shared_ptr<Roof> roof = std::dynamic_pointer_cast<Roof>(instantiateEntity(EntityTypes::ROOF, PxTransform(0.0f, 0.0f, 0.0f, PxQuat(PxIdentity)), "roof"));
+
 	// OBSTACLE1.1:
 	std::shared_ptr<Obstacle1> obstacle1_1 = std::dynamic_pointer_cast<Obstacle1>(instantiateEntity(EntityTypes::OBSTACLE1, PxTransform(-115.0f, 0.0f, -4.0f, PxQuat(PxIdentity)), "obstacle1_1"));
 
@@ -650,6 +653,30 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 
 		// ENTITY...
 		entity = std::make_shared<Ground>(actor);
+		break;
+	}
+	case EntityTypes::ROOF:
+	{
+		std::vector<PxVec3> verts = castVectorOfGLMVec4ToVectorOfPxVec3(_broker->getLoadingManager()->getGeometry(GeometryTypes::ROOF_GEO)->verts);
+		std::vector<PxU32> indices = _broker->getLoadingManager()->getGeometry(GeometryTypes::ROOF_GEO)->vIndex;
+		PxMaterial *material = gPhysics->createMaterial(0.5f, 0.5f, 0.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_OBSTACLE, CollisionFlags::COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eSIMULATION_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createTriMeshCollider(verts, indices, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidStatic *actor = gPhysics->createRigidStatic(transform);
+		actor->setName(name);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Roof>(actor);
 		break;
 	}
 	case EntityTypes::OBSTACLE1:

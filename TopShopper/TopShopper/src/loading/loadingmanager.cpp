@@ -12,6 +12,7 @@
 Geometry* VehicleChassisGeo = new Geometry();
 Geometry* VehicleWheelGeo = new Geometry();
 Geometry* GroundGeo = new Geometry();
+Geometry* RoofGeo = new Geometry();
 Geometry* SpareChangeGeo = new Geometry();
 Geometry* BananaGeo = new Geometry();
 Geometry* MilkGeo = new Geometry();
@@ -31,6 +32,7 @@ Geometry* HotPotatoGeo = new Geometry();
 Geometry* VehicleChassisGeoNoIndex = new Geometry();
 Geometry* VehicleWheelGeoNoIndex = new Geometry();
 Geometry* GroundGeoNoIndex = new Geometry();
+Geometry* RoofGeoNoIndex = new Geometry();
 Geometry* SpareChangeGeoNoIndex = new Geometry();
 Geometry* BananaGeoNoIndex = new Geometry();
 Geometry* MilkGeoNoIndex = new Geometry();
@@ -166,6 +168,40 @@ void LoadingManager::init() {
 
 	for (unsigned int i = 0; i < normalIndex.size(); i++) {
 		GroundGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+
+	//////////////////
+
+	// ROOF GEOMETRY:
+	loadObject("../TopShopper/resources/Objects/StoreRoof.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	RoofGeo->verts = returnVertices;
+	RoofGeo->uvs = returnUV;
+	RoofGeo->normals = returnNormal;
+	RoofGeo->vIndex = vIndex;
+	RoofGeo->uvIndex = uvIndex;
+	RoofGeo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		RoofGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		RoofGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		RoofGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
 	}
 
 	returnVertices.clear();
@@ -777,6 +813,8 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return VehicleWheelGeo;
 	case GeometryTypes::GROUND_GEO:
 		return GroundGeo;
+	case GeometryTypes::ROOF_GEO:
+		return RoofGeo;
 	case GeometryTypes::SPARE_CHANGE_GEO:
 		return SpareChangeGeo;
 	case GeometryTypes::BANANA_GEO:
@@ -813,6 +851,8 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return VehicleWheelGeoNoIndex;
 	case GeometryTypes::GROUND_GEO_NO_INDEX:
 		return GroundGeoNoIndex;
+	case GeometryTypes::ROOF_GEO_NO_INDEX:
+		return RoofGeoNoIndex;
 	case GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX:
 		return SpareChangeGeoNoIndex;
 	case GeometryTypes::BANANA_GEO_NO_INDEX:
