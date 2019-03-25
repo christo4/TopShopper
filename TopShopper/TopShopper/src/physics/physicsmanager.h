@@ -7,6 +7,7 @@
 
 #include "objects/shoppingcartplayer.h"
 #include "objects/ground.h"
+#include "objects/roof.h"
 #include "objects/milk.h"
 #include "objects/water.h"
 #include "objects/cola.h"

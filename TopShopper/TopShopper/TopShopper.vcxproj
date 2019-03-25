@@ -108,6 +108,7 @@
     <ClCompile Include="src\objects\mysterybag.cpp" />
     <ClCompile Include="src\objects\obstacle1.cpp" />
     <ClCompile Include="src\objects\obstacle2.cpp" />
+    <ClCompile Include="src\objects\roof.cpp" />
     <ClCompile Include="src\objects\shoppingcartplayer.cpp" />
     <ClCompile Include="src\objects\sparechange.cpp" />
     <ClCompile Include="src\objects\water.cpp" />
@@ -145,6 +146,7 @@
     <ClInclude Include="src\objects\mysterybag.h" />
     <ClInclude Include="src\objects\obstacle1.h" />
     <ClInclude Include="src\objects\obstacle2.h" />
+    <ClInclude Include="src\objects\roof.h" />
     <ClInclude Include="src\objects\shoppingcartplayer.h" />
     <ClInclude Include="src\objects\sparechange.h" />
     <ClInclude Include="src\objects\water.h" />

@@ -65,7 +65,8 @@ enum EntityTypes {
 
 	// ENVIRONMENT...
 	GROUND,								// COMPONENTS = MESH
-	WALL,								// COMPONENTS = MESH
+	ROOF,
+	//WALL,								// COMPONENTS = MESH
 	//OBSTACLE,							// COMPONENTS = MESH
 	OBSTACLE1,
 	OBSTACLE2,

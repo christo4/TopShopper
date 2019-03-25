@@ -123,6 +123,9 @@
     <ClCompile Include="src\objects\mysterybag.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\objects\roof.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ai\aimanager.h">
@@ -228,6 +231,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\objects\mysterybag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\objects\roof.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
