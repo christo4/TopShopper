@@ -130,7 +130,8 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 				PxReal handbrake = pad->xButton ? 1.0f : 0.0f;
 				PxReal steer = glm::clamp(pad->leftStickX *-1, -1.0f, 1.0f); // must be negated otherwise steering is backwards
 				bool turboButtonPressed = (_hasHotPotato || pad->bButton);
-				if (turboButtonPressed && !(turboState)) {
+				bool turboTank = PlayerScript::getNBBoosts() > 0;
+				if (turboButtonPressed && !(turboState) && turboTank) {
 					Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TURBO_SOUND));
 					turboState = true;
 				}
@@ -157,7 +158,8 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 					bool steerLeftKeyPressed = kam->dKey; // NOTE: the steer keys have to be reversed here
 					bool steerRightKeyPressed = kam->aKey;
 					bool turboKeyPressed = (_hasHotPotato || kam->spaceKey);
-					if (turboKeyPressed && !(turboState)) {
+					bool turboTank = PlayerScript::getNBBoosts() > 0;
+					if (turboKeyPressed && !(turboState) && turboTank) {
 						Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TURBO_SOUND));
 						turboState = true;
 					}
