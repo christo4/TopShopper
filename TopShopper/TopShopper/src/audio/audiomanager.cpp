@@ -16,6 +16,7 @@ AudioManager::SoundEffect* hitWallSound = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* dropItemSound = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* pickItemSound = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* turboSound = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* explosionSound = new AudioManager::SoundEffect();
 
 
 AudioManager::AudioManager(Broker *broker)
@@ -45,6 +46,8 @@ AudioManager::SoundEffect* AudioManager::getSoundEffect(SoundEffectTypes sound) 
 		return dropItemSound;
 	case SoundEffectTypes::TURBO_SOUND:
 		return turboSound;
+	case SoundEffectTypes::EXPLOSION_SOUND:
+		return explosionSound;
 	default:
 		return nullptr;
 	}
@@ -173,7 +176,6 @@ void AudioManager::init() {
 	dropItemSound->filename = "../TopShopper/resources/sfx/itemDrop.wav";
 	dropItemSound->sfx = loadSFX(dropItemSound->filename);
 	dropItemSound->distance = 0;
-
 	dropItemSound->channel = 3;
 
 	turboSound->filename = "../TopShopper/resources/sfx/turbo.wav";
@@ -182,7 +184,9 @@ void AudioManager::init() {
 	turboSound->channel = 4;
 	changeVolumeSFX(turboSound, 20);
 
-
+	explosionSound->filename = "../TopShopper/resources/sfx/explosion.wav";
+	explosionSound->sfx = loadSFX(explosionSound->filename);
+	explosionSound->channel = 7;
 
 
 

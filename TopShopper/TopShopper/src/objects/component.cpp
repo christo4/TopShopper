@@ -1041,9 +1041,9 @@ void PlayerScript::explodeHotPotato() {
 	bool isCCW = crossprod.y <= 0.0f;
 	if (!isCCW) angle = 360 - angle;
 	if (!(_playerType == PlayerTypes::HUMAN))
-		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::DROPITEM_SOUND), distanceBetween, angle);
+		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::EXPLOSION_SOUND), distanceBetween, angle);
 
-	Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::DROPITEM_SOUND));
+	Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::EXPLOSION_SOUND));
 
 	coinExplosion();
 }

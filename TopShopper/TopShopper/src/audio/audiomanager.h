@@ -20,7 +20,8 @@ enum SoundEffectTypes {
 	HITWALL_SOUND,
 	PICKITEM_SOUND,
 	DROPITEM_SOUND,
-	TURBO_SOUND
+	TURBO_SOUND,
+	EXPLOSION_SOUND
 };
 
 class AudioManager {
