@@ -7,6 +7,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <foundation/PxVec3.h>
+#include <foundation/PxQuat.h>
 
 
 physx::PxVec3 castGLMVec4ToPxVec3(glm::vec4 glmVec);
@@ -16,8 +17,9 @@ std::vector<physx::PxVec3> castVectorOfGLMVec4ToVectorOfPxVec3(std::vector<glm::
 
 bool isApproxEqual(physx::PxVec3 v1, physx::PxVec3 v2);
 
+physx::PxQuat toQuaternion(double yaw, double pitch, double roll);
+void toEulerAngle(const physx::PxQuat& q, double& roll, double& pitch, double& yaw);
 
-//void toEulerAngles(const physx::PxQuat& q, double& roll, double& pitch, double& yaw);
 
 
 #endif // UTILITY_H_
