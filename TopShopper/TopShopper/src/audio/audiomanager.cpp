@@ -17,6 +17,7 @@ AudioManager::SoundEffect* dropItemSound = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* pickItemSound = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* turboSound = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* explosionSound = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* tickingSound = new AudioManager::SoundEffect();
 
 
 AudioManager::AudioManager(Broker *broker)
@@ -48,6 +49,8 @@ AudioManager::SoundEffect* AudioManager::getSoundEffect(SoundEffectTypes sound) 
 		return turboSound;
 	case SoundEffectTypes::EXPLOSION_SOUND:
 		return explosionSound;
+	case SoundEffectTypes::TICKING_SOUND:
+		return tickingSound;
 	default:
 		return nullptr;
 	}
@@ -177,6 +180,7 @@ void AudioManager::init() {
 	dropItemSound->sfx = loadSFX(dropItemSound->filename);
 	dropItemSound->distance = 0;
 	dropItemSound->channel = 3;
+	changeVolumeSFX(dropItemSound, 150);
 
 	turboSound->filename = "../TopShopper/resources/sfx/turbo.wav";
 	turboSound->sfx = loadSFX(turboSound->filename);
@@ -187,6 +191,11 @@ void AudioManager::init() {
 	explosionSound->filename = "../TopShopper/resources/sfx/explosion.wav";
 	explosionSound->sfx = loadSFX(explosionSound->filename);
 	explosionSound->channel = 7;
+
+	tickingSound->filename = "../TopShopper/resources/sfx/ticking.wav";
+	tickingSound->sfx = loadSFX(tickingSound->filename);
+	tickingSound->channel = 8;
+	tickingSound->loop = 2;
 
 
 

@@ -43,6 +43,8 @@ void MysteryBagScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape
 			std::cout << "MYSTERY BAG REVEALED... A HOT POTATO!" << std::endl;
 			//TODO: display some UI notification (hot potato sprite) - this may be unnecessary since hot potato sprite will show up next to player list?
 			playerScript->giveHotPotato(_hotPotatoDuration);
+			// start the sound here
+			Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TICKING_SOUND));
 		}
 
 		_entity->destroy(); // destroy this mystery bag
@@ -991,6 +993,44 @@ void PlayerScript::giveHotPotato(double remainingDuration) {
 }
 
 void PlayerScript::tickHotPotatoTimer(double fixedDeltaTime) {
+	std::vector<std::shared_ptr<ShoppingCartPlayer>> carts = Broker::getInstance()->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
+	std::shared_ptr<ShoppingCartPlayer> player1 = nullptr;
+	for (const std::shared_ptr<ShoppingCartPlayer> &cart : carts) {
+		std::shared_ptr<PlayerScript> cartScript = std::static_pointer_cast<PlayerScript>(cart->getComponent(ComponentTypes::PLAYER_SCRIPT));
+		if (cartScript->_playerType == PlayerTypes::HUMAN && cartScript->_inputID == 1) {
+			player1 = cart;
+			break;
+		}
+	}
+
+	physx::PxVec3 playerPos = player1->_actor->is<physx::PxRigidDynamic>()->getGlobalPose().p;
+
+	physx::PxVec3 myPos = (dynamic_cast<ShoppingCartPlayer*>(_entity))->_actor->is<physx::PxRigidDynamic>()->getGlobalPose().p;
+	physx::PxVec3 myVelocity = (dynamic_cast<ShoppingCartPlayer*>(_entity))->_actor->is<physx::PxRigidDynamic>()->getLinearVelocity();
+
+	float speed = myVelocity.magnitude();
+	float distanceBetween = (myPos - playerPos).magnitude() + 20;
+	if (distanceBetween >= 255)
+		distanceBetween = 255;
+
+	physx::PxQuat playerRot = player1->_actor->is<physx::PxRigidDynamic>()->getGlobalPose().q;
+	physx::PxVec3 forward(0.0f, 0.0f, 1.0f); // on spawn the forward vector of a cart is pointing in the +z direction
+	forward = playerRot.rotate(forward); // now forward has been rotated to match the cart's rotation
+	// this forward vector is the player's direction
+	// if you only need the vector in the xz-plane you can do
+	//physx::PxVec3 forwardNoYNormalized = forward;
+	physx::PxVec3 forwardNoYNormalized = physx::PxVec3(forward.x, 0.0f, forward.z).getNormalized();
+	//physx::PxVec3 myPosNormalized = myPos;
+	physx::PxVec3 myPosNormalized = physx::PxVec3(myPos.x, 0.0f, myPos.z).getNormalized();
+	float angle = acos(((forwardNoYNormalized.x*myPosNormalized.x) + (forwardNoYNormalized.z*myPosNormalized.z)));
+	angle = (angle / 3.1415926) * 180;
+
+	PxVec3 crossprod = forwardNoYNormalized.cross(myPosNormalized);
+	bool isCCW = crossprod.y <= 0.0f;
+	if (!isCCW) angle = 360 - angle;
+	if (!(_playerType == PlayerTypes::HUMAN))
+		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TICKING_SOUND), distanceBetween, angle);
+
 	_hotPotatoTimer -= fixedDeltaTime;
 	if (_hotPotatoTimer <= 0.0) {
 		explodeHotPotato();
@@ -1044,6 +1084,7 @@ void PlayerScript::explodeHotPotato() {
 		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::EXPLOSION_SOUND), distanceBetween, angle);
 
 	Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::EXPLOSION_SOUND));
+	Broker::getInstance()->getAudioManager()->haltSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TICKING_SOUND));
 
 	coinExplosion();
 }

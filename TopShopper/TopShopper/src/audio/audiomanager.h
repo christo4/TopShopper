@@ -21,7 +21,8 @@ enum SoundEffectTypes {
 	PICKITEM_SOUND,
 	DROPITEM_SOUND,
 	TURBO_SOUND,
-	EXPLOSION_SOUND
+	EXPLOSION_SOUND,
+	TICKING_SOUND
 };
 
 class AudioManager {
