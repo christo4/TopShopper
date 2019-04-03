@@ -528,6 +528,12 @@ void PhysicsManager::updateSeconds(double fixedDeltaTime) {
 	_activeScene->_physxScene->simulate(fixedDeltaTime);
 	_activeScene->_physxScene->fetchResults(true); // wait for results to come in before moving on to next system
 
+	// RESET HIT FLAG...
+	for (std::shared_ptr<ShoppingCartPlayer> &shoppingCartPlayer : shoppingCartPlayers) {
+		shoppingCartPlayer->_shoppingCartBase->_wasHitFrameTimer--;
+		if (shoppingCartPlayer->_shoppingCartBase->_wasHitFrameTimer < 0) shoppingCartPlayer->_shoppingCartBase->_wasHitFrameTimer = 0;
+	}
+
 	// now that fetchResults() has cached all collision events in the 2 vectors, call the proper events
 	for (ContactCollision &collision : gContactCollisions) {
 		if (collision._collisionType == ContactCollision::ContactCollisionTypes::ENTER) {
@@ -547,6 +553,17 @@ void PhysicsManager::updateSeconds(double fixedDeltaTime) {
 		}
 	}
 
+	// ANTI-FLIP OVER...
+	// ~~~~~~NOTE: should this be moved to before simulate() ???????
+	for (std::shared_ptr<ShoppingCartPlayer> &cart : shoppingCartPlayers) {
+		PxVec3 cartPos = cart->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
+		PxQuat cartRot = cart->_actor->is<PxRigidDynamic>()->getGlobalPose().q;
+
+		PxQuat clampedRot(glm::clamp(cartRot.x, -0.3f, 0.3f), cartRot.y, glm::clamp(cartRot.z, -0.3f, 0.3f), cartRot.w);
+		clampedRot = clampedRot.getNormalized();
+
+		cart->_actor->is<PxRigidDynamic>()->setGlobalPose(PxTransform(cartPos, clampedRot));
+	}
 }
 
 

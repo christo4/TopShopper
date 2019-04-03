@@ -1,6 +1,5 @@
 #include "utility.h"
 
-//#include <foundation/PxQuat.h>
 
 physx::PxVec3 castGLMVec4ToPxVec3(glm::vec4 glmVec) {
 	return physx::PxVec3(glmVec.x, glmVec.y, glmVec.z);
@@ -25,11 +24,33 @@ bool isApproxEqual(physx::PxVec3 v1, physx::PxVec3 v2) {
 	return true;
 }
 
-/*
-void toEulerAngles(const physx::PxQuat& q, double& roll, double& pitch, double& yaw)
+
+//SOURCE: https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+
+// EULER ANGLES -> QUATERNION...
+physx::PxQuat toQuaternion(double yaw, double pitch, double roll) // yaw (Z), pitch (Y), roll (X)
+{
+	// Abbreviations for the various angular functions
+	double cy = cos(yaw * 0.5);
+	double sy = sin(yaw * 0.5);
+	double cp = cos(pitch * 0.5);
+	double sp = sin(pitch * 0.5);
+	double cr = cos(roll * 0.5);
+	double sr = sin(roll * 0.5);
+
+	physx::PxQuat q;
+	q.w = cy * cp * cr + sy * sp * sr;
+	q.x = cy * cp * sr - sy * sp * cr;
+	q.y = sy * cp * sr + cy * sp * cr;
+	q.z = sy * cp * cr - cy * sp * sr;
+	return q;
+}
+
+
+// QUATERNION -> EULER ANGLES...
+void toEulerAngle(const physx::PxQuat& q, double& roll, double& pitch, double& yaw)
 {
 	// roll (x-axis rotation)
-
 	double sinr_cosp = +2.0 * (q.w * q.x + q.y * q.z);
 	double cosr_cosp = +1.0 - 2.0 * (q.x * q.x + q.y * q.y);
 	roll = atan2(sinr_cosp, cosr_cosp);
@@ -46,4 +67,3 @@ void toEulerAngles(const physx::PxQuat& q, double& roll, double& pitch, double& 
 	double cosy_cosp = +1.0 - 2.0 * (q.y * q.y + q.z * q.z);
 	yaw = atan2(siny_cosp, cosy_cosp);
 }
-*/

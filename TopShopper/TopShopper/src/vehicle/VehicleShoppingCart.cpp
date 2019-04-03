@@ -198,7 +198,9 @@ void VehicleShoppingCart::processRawInputDataKeyboard(const bool accelKeyPressed
 		float turboSpeed = 75.0f;
 		PxVec3 forward(0.0f, 0.0f, turboSpeed);
 		forward = quat.rotate(forward);
-		_vehicle4W->getRigidDynamicActor()->setLinearVelocity(forward); // NOTE: maybe set a high acceleration instead? (also maybe make it so that cart has to be grounded to boost)
+		if (!_isAirborne && _wasHitFrameTimer < 1) {
+			_vehicle4W->getRigidDynamicActor()->setLinearVelocity(forward); // NOTE: maybe set a high acceleration instead? (also maybe make it so that cart has to be grounded to boost)
+		}
 	}
 	else if (accelKeyPressed && reverseKeyPressed) {
 		_isTurboing = false;
@@ -293,7 +295,9 @@ void VehicleShoppingCart::processRawInputDataController(const PxReal accel, cons
 		float turboSpeed = 75.0f;
 		PxVec3 forward(0.0f, 0.0f, turboSpeed);
 		forward = quat.rotate(forward);
-		_vehicle4W->getRigidDynamicActor()->setLinearVelocity(forward); // NOTE: maybe set a high acceleration instead? (also maybe make it so that cart has to be grounded to boost)
+		if (!_isAirborne && _wasHitFrameTimer < 1) {
+			_vehicle4W->getRigidDynamicActor()->setLinearVelocity(forward); // NOTE: maybe set a high acceleration instead? (also maybe make it so that cart has to be grounded to boost)
+		}
 	}
 	else if (accel >= reverse) {
 		_isTurboing = false;
