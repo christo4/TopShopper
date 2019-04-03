@@ -27,7 +27,7 @@ class VehicleShoppingCart {
 		bool getIsAirborne() { return _isAirborne; }
 		void setIsAirborne(bool isAirborne) { _isAirborne = isAirborne; }
 
-	
+
 		physx::PxVehicleDrive4WRawInputData getRawInputData() { return _rawInputData; }
 		void processRawInputDataKeyboard(const bool accelKeyPressed, const bool reverseKeyPressed, const bool handbrakeKeyPressed, const bool steerLeftKeyPressed, const bool steerRightKeyPressed, const bool turboKeyPressed);
 		void processRawInputDataController(const physx::PxReal accel, const physx::PxReal reverse, const physx::PxReal handbrake, const physx::PxReal steer, const bool turboButtonPressed);
@@ -60,6 +60,7 @@ class VehicleShoppingCart {
 
 
 
+		int _wasHitFrameTimer = 0;
 	private:
 		physx::PxVehicleDrive4WRawInputData _rawInputData;
 		bool _isAirborne;

@@ -303,7 +303,25 @@ void PlayerScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *
 		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND), distanceBetween, angle);
 		Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND));
 	}
-	
+
+	if (otherEntity->getTag() == EntityTypes::OBSTACLE1 || otherEntity->getTag() == EntityTypes::OBSTACLE2 || otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER || otherEntity->getTag() == EntityTypes::ROOF) {
+		
+		PxVec3 impulseDir = contacts->normal;
+		// now, make sure the collision normal points towards the cart body...
+		PxVec3 contactPosToCartCenter = (_entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p - contacts->position).getNormalized();
+		if (impulseDir.dot(contactPosToCartCenter) < 0) impulseDir *= -1; // switch normal direction to point in same hemispehere as cart body
+		
+		float impulseMag;
+		if (otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+			impulseMag = 10000.0f;
+		}
+		else {
+			impulseMag = 25000.0f;
+		}
+		_entity->_actor->is<PxRigidDynamic>()->addForce(impulseMag * impulseDir, PxForceMode::eIMPULSE);
+		ShoppingCartPlayer *localCart = static_cast<ShoppingCartPlayer*>(_entity);
+		localCart->_shoppingCartBase->_wasHitFrameTimer = 10; // magic number for now
+	}
 }
 void PlayerScript::onCollisionExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
 

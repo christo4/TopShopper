@@ -186,12 +186,13 @@ void setupWheelsSimulationData
 	PxVehicleAntiRollBarData barFront;
 	barFront.mWheel0 = PxVehicleDrive4WWheelOrder::eFRONT_LEFT;
 	barFront.mWheel1 = PxVehicleDrive4WWheelOrder::eFRONT_RIGHT;
-	barFront.mStiffness = 10000.0f;
+	// http://gameworksdocs.nvidia.com/PhysX/4.0/documentation/PhysXGuide/Manual/Vehicles.html
+	barFront.mStiffness = 10000.0f; // NOTE: increase this stiffness to reduce over-steer
 	wheelsSimData->addAntiRollBarData(barFront);
 	PxVehicleAntiRollBarData barRear;
 	barRear.mWheel0 = PxVehicleDrive4WWheelOrder::eREAR_LEFT;
 	barRear.mWheel1 = PxVehicleDrive4WWheelOrder::eREAR_RIGHT;
-	barRear.mStiffness = 10000.0f;
+	barRear.mStiffness = 10000.0f; // NOTE: increase this stiffness to reduce under-steer
 	wheelsSimData->addAntiRollBarData(barRear);
 }
 
@@ -281,7 +282,8 @@ PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehicle4WDesc, PxPhysics* p
 		//Engine
 		PxVehicleEngineData engine;
 		engine.mPeakTorque=500.0f;
-		engine.mMaxOmega=600.0f;//approx 6000 rpm
+		// NOTE: this leads to top speed of ~56 in FIRST gear in current simulation
+		engine.mMaxOmega=900.0f;//approx 9000 rpm
 		driveSimData.setEngineData(engine);
 
 		//Gears
