@@ -104,6 +104,7 @@ void LoadingManager::init() {
 
 	//////////////////
 
+
 	// WHEEL GEOMETRY:
 
 	loadObject("../TopShopper/resources/Objects/Wheel.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);

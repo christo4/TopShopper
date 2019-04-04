@@ -28,6 +28,8 @@ RenderingManager::~RenderingManager() {
 }
 
 
+//Initializes the Rendering Manager by compiling all shaders and textures while also setting the inital state of openGL
+//Called upon the start of the game, to set the state of OpenGL and all subsequent rendering passes
 void RenderingManager::init() {
 	openWindow();
 	initTextRender();
@@ -69,7 +71,9 @@ void RenderingManager::init() {
 
 }
 
-
+//UpdateSeconds called every frame from the main loop
+//handles the deletion of objects after completing the rendering of each frame as well as the updating of model positions
+//calls render scene after pushing back the 3d objects in order to render the scene again. 
 void RenderingManager::updateSeconds(double variableDeltaTime) {
 	// call LATEUPDATE() for all behaviour scripts...
 	std::vector<std::shared_ptr<Entity>> entitiesCopy = _broker->getPhysicsManager()->getActiveScene()->_entities;
@@ -85,7 +89,6 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		deleteBufferData(geoDel);
 	}
 
-
 	_objects.clear();
 	push3DObjects();
 	RenderScene();
@@ -93,13 +96,13 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 }
 
 
+
+//RenderScene utilizes the current array of objects in the rendering manager, setting and assigning the buffers for each geometry,
+//then sending the vertex info down the openGL pipeline, while utilizing the approprite shaders tied to the geometry.
+//performs multiple rendering passes in order to create shadowsm, while calculating the camera information each time it is called.
 void RenderingManager::RenderScene() {
 	//Clears the screen to a light grey background
 	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
-
-
-	// bind our shader program and the vertex array object containing our
-	// scene geometry, then tell OpenGL to draw our geometry
 
 	float fov = 60.0f;
 	int width;
@@ -107,59 +110,7 @@ void RenderingManager::RenderScene() {
 	glfwGetWindowSize(_window, &width, &height);
 
 	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 1.0f, 500.0f);
-
-	// NOTE: later on... for right thumbstick, the cmaera position will curl around the circle proportional to -1.0 to 1.0 (post-process over the theta)
-	std::shared_ptr<ShoppingCartPlayer> player = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers().at(0);
-	PxRigidDynamic* playerDyn = player->_actor->is<PxRigidDynamic>();
-	PxTransform playerTransform = playerDyn->getGlobalPose();
-	PxVec3 playerPos = playerTransform.p;
-	PxQuat playerRot = playerTransform.q;
-
-	PxVec3 forward(0.0f, 0.0f, 1.0f);
-	forward = playerRot.rotate(forward);
-	PxVec3 forwardNoYNorm = PxVec3(forward.x, 0.0f, forward.z).getNormalized();
-	float theta = acos(forwardNoYNorm.dot(PxVec3(0.0f, 0.0f, 1.0f))); // theta in [0, pi]
-
-	// now use cross product to figure out which side (sign of theta)...
-	// +ve theta if CCW, -ve theta if CW
-
-	PxVec3 crossprod = forwardNoYNorm.cross(PxVec3(0.0f, 0.0f, 1.0f));
-	bool isCCW = crossprod.y <= 0.0f;
-	if (!isCCW) theta *= -1;
-
-	// now theta in [-pi, 0] or [0, pi]
-
-	gVehicleThetas.pop_front(); // pop the oldest frame
-	gVehicleThetas.push_back(theta); // push current vehicle rotation (around +y-axis)
-
-	// get the average vehicle rotation in last 10 frames (incl. this one) 
-	// have to use vectors since thetas have edge case problems (e.g. going from pi to -pi)
-	PxVec3 vehicleRotationVecSum(0.0f, 0.0f, 0.0f);
-	for (float t : gVehicleThetas) {
-		// assume a radius of 1 for this calculation (scale later by our intended radius)
-		// also assume a y of 0.0f (can set y later)
-		vehicleRotationVecSum += PxVec3(sin(t), 0.0f, cos(t));
-	}
-	vehicleRotationVecSum /= gVehicleThetas.size();
-
-	// NOTE: I could change this to perform the glm::mix(t=0.5f) over all vectors, but the current solution seems to work
-
-	float radius = 30.0f; // FIXED (for now)
-	float camX = -1 * radius * vehicleRotationVecSum.x;
-	float camY = 20.0f;
-	float camZ = -1 * radius * vehicleRotationVecSum.z;
-
-
-
-	glm::vec3 camPos(playerPos.x + camX, playerPos.y + camY, playerPos.z + camZ);
-	glm::mat4 View = glm::lookAt(
-		camPos, // camera position
-		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at 
-		glm::vec3(0.0f, 1.0f, 0.0f)  // up vector
-	);
-
-
-
+	glm::mat4 View = computeCameraPosition(0);
 
 	GLuint ModelID;
 	GLuint ViewID;
@@ -172,8 +123,6 @@ void RenderingManager::RenderScene() {
 
 	glm::mat4 lightProjection = glm::ortho(-200.0f, 200.0f, -200.0f, 200.0f, 1.0f, 500.0f);
 	glm::mat4 lightView = glm::lookAt(glm::vec3(70.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-
 
 	glViewport(0, 0, (GLuint)_shadowWidth, (GLuint)_shadowHeight);
 	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);
@@ -243,8 +192,6 @@ void RenderingManager::RenderScene() {
 	*/
 
 
-	
-
 	glViewport(0, 0, (GLuint)width, (GLuint)height);	//reset the viewport to the full window to render from the camera pov
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -272,8 +219,10 @@ void RenderingManager::RenderScene() {
 		glUniform1i(shadowTexUniLocation, 1);
 
 
+		glm::vec3 meme = glm::vec3(View[0].x, View[1].x, View[2].x);
 
-		glUniform3f(cameraID, camPos.x, camPos.y, camPos.z);
+
+		glUniform3f(cameraID, meme.x,meme.y,meme.z);
 		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
 		glUniformMatrix4fv(ViewID, 1, GL_FALSE, &View[0][0]);
 		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &Projection[0][0]);
@@ -301,6 +250,78 @@ void RenderingManager::RenderScene() {
 
 	CheckGLErrors();
 }
+
+
+//Computes the cameraPosition of an  particular player in the game (represented by their player id) using an averaging technique to smooth the camera
+//returns a mat4 representing the lookat matrix of the camera for the input player to be used to represent where the scene will be rendered from
+glm::mat4 RenderingManager::computeCameraPosition(int playerID){
+	// NOTE: later on... for right thumbstick, the cmaera position will curl around the circle proportional to -1.0 to 1.0 (post-process over the theta)
+	std::shared_ptr<ShoppingCartPlayer> player = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers().at(playerID);
+	PxRigidDynamic* playerDyn = player->_actor->is<PxRigidDynamic>();
+	PxTransform playerTransform = playerDyn->getGlobalPose();
+	PxVec3 playerPos = playerTransform.p;
+	PxQuat playerRot = playerTransform.q;
+
+	PxVec3 forward(0.0f, 0.0f, 1.0f);
+	forward = playerRot.rotate(forward);
+	PxVec3 forwardNoYNorm = PxVec3(forward.x, 0.0f, forward.z).getNormalized();
+	float theta = acos(forwardNoYNorm.dot(PxVec3(0.0f, 0.0f, 1.0f))); // theta in [0, pi]
+
+	// now use cross product to figure out which side (sign of theta)...
+	// +ve theta if CCW, -ve theta if CW
+
+	PxVec3 crossprod = forwardNoYNorm.cross(PxVec3(0.0f, 0.0f, 1.0f));
+	bool isCCW = crossprod.y <= 0.0f;
+	if (!isCCW) theta *= -1;
+
+	// now theta in [-pi, 0] or [0, pi]
+
+	gVehicleThetas.pop_front(); // pop the oldest frame
+	gVehicleThetas.push_back(theta); // push current vehicle rotation (around +y-axis)
+
+	// get the average vehicle rotation in last 10 frames (incl. this one) 
+	// have to use vectors since thetas have edge case problems (e.g. going from pi to -pi)
+	PxVec3 vehicleRotationVecSum(0.0f, 0.0f, 0.0f);
+	for (float t : gVehicleThetas) {
+		// assume a radius of 1 for this calculation (scale later by our intended radius)
+		// also assume a y of 0.0f (can set y later)
+		vehicleRotationVecSum += PxVec3(sin(t), 0.0f, cos(t));
+	}
+	vehicleRotationVecSum /= gVehicleThetas.size();
+
+	// NOTE: I could change this to perform the glm::mix(t=0.5f) over all vectors, but the current solution seems to work
+
+	float radius = 30.0f; // FIXED (for now)
+	float camX = -1 * radius * vehicleRotationVecSum.x;
+	float camY = 20.0f;
+	float camZ = -1 * radius * vehicleRotationVecSum.z;
+	
+
+	glm::vec3 camPos(playerPos.x + camX, playerPos.y + camY, playerPos.z + camZ);
+
+	glm::mat4 View = glm::lookAt(
+		camPos, // camera position
+		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at 
+		glm::vec3(0.0f, 1.0f, 0.0f)  // up vector
+	);
+
+	 return View;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void RenderingManager::renderEndScreen() {
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
@@ -366,6 +387,7 @@ void RenderingManager::renderEndScreen() {
 	renderText("3rd: " + playerScore[2], 680, 410, 1.5f, glm::vec3(0.70f, 0.36f, 0.0f));
 
 }
+
 
 void RenderingManager::renderPauseScreen() {
 	//960 540
@@ -609,8 +631,6 @@ void RenderingManager::push3DObjects() {
 				geo.texture = *_shoppingCartGreen;
 			}
 
-
-
 			const std::vector<PxShape*> &wheelShapes = player->_shoppingCartBase->_wheelShapes;
 
 			for (PxShape *wheelShape : wheelShapes) {
@@ -770,8 +790,6 @@ void RenderingManager::push3DObjects() {
 
 void RenderingManager::initFrameBuffers() {
 	glGenFramebuffers(1, &_lightDepthFBO);
-
-
 	glGenTextures(1, &_depthMapTex);								//init the texture for the depth map information
 	glBindTexture(GL_TEXTURE_2D, _depthMapTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _shadowWidth, _shadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);

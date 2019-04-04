@@ -34,6 +34,9 @@ void InputManager::updateSeconds(double variableDeltaTime) {
 		buttonArray = glfwGetJoystickButtons(_joySticks[i], &numButtons);	//get the state of the buttons for curr gamepad
 
 		//update the state of the current gamepad's axes
+
+	
+
 		_gamePads[i]->leftStickX = axesArray[0];
 		_gamePads[i]->leftStickY = axesArray[1];
 		_gamePads[i]->rightStickX = axesArray[2];

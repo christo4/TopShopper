@@ -52,6 +52,7 @@ public:
 
 	//Renders each object
 	void RenderScene();
+	glm::mat4 computeCameraPosition(int playerID);
 	void renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
 	void renderSprite(MyTexture spriteTex, int bottomLeftX, int bottomLeftY, int topRightX, int topRightY);
 	void renderHud();
