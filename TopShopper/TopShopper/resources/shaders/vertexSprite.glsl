@@ -7,12 +7,10 @@ layout(location = 1) in vec2 VertexUV;
 
 out vec2 uv;
 
-uniform mat4 projection;
-
 void main()
 {
 
-    gl_Position = projection * VertexPosition;
+    gl_Position = VertexPosition;
 
     uv = VertexUV;
 

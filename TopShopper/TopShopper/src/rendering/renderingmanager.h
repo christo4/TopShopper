@@ -60,8 +60,8 @@ public:
 	void RenderScene();
 	glm::mat4 computeCameraPosition(int playerID, glm::vec3 &camera);
 	void renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
-	void renderSprite(MyTexture spriteTex, int bottomLeftX, int bottomLeftY, int topRightX, int topRightY);
-	void renderHud();
+	void renderSprite(MyTexture spriteTex, float bottomLeftX, float bottomLeftY, float topRightX, float topRightY);
+	void renderHud(int playerID);
 	void renderEndScreen();
 	void renderPauseScreen();
 	void initTextRender();
@@ -100,7 +100,8 @@ public:
 
 	std::map<GLchar, Character> Characters;
 
-
+	int windowHeight;
+	int windowWidth;
 
 
 private:

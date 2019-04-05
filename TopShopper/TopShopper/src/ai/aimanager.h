@@ -154,7 +154,7 @@ private:
 	void setNewAITargets();
 
 
-	double _matchTimer = 5; // 5min (300s) match
+	double _matchTimer = 300; // 5min (300s) match
 
 
 };
