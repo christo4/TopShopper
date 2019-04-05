@@ -110,7 +110,9 @@ void RenderingManager::RenderScene() {
 	glfwGetWindowSize(_window, &width, &height);
 
 	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 1.0f, 500.0f);
-	glm::mat4 View = computeCameraPosition(0);
+
+	glm::vec3 cameraPos;
+	glm::mat4 View = computeCameraPosition(0, cameraPos);	//compute the cameraPosition and view matrix for player 0
 
 	GLuint ModelID;
 	GLuint ViewID;
@@ -120,7 +122,6 @@ void RenderingManager::RenderScene() {
 	GLuint LightProjectionID;
 
 	
-
 	glm::mat4 lightProjection = glm::ortho(-200.0f, 200.0f, -200.0f, 200.0f, 1.0f, 500.0f);
 	glm::mat4 lightView = glm::lookAt(glm::vec3(70.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -135,7 +136,6 @@ void RenderingManager::RenderScene() {
 	//render the scene from the light and fill the depth buffer
 	for (Geometry& g : _objects) {	
 
-
 		glUseProgram(depthBufferShaderProgram);
 
 		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
@@ -149,7 +149,7 @@ void RenderingManager::RenderScene() {
 		Geometry geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::ROOF_GEO_NO_INDEX));
 
 		if (g.verts.size() != geo.verts.size()) {
-			glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
+			glDrawArrays(GL_TRIANGLES, 0, g.verts.size());	//ignore the roof in the shadow map
 		}
 
 		glBindVertexArray(0);
@@ -192,6 +192,8 @@ void RenderingManager::RenderScene() {
 	*/
 
 
+
+
 	glViewport(0, 0, (GLuint)width, (GLuint)height);	//reset the viewport to the full window to render from the camera pov
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -219,10 +221,7 @@ void RenderingManager::RenderScene() {
 		glUniform1i(shadowTexUniLocation, 1);
 
 
-		glm::vec3 meme = glm::vec3(View[0].x, View[1].x, View[2].x);
-
-
-		glUniform3f(cameraID, meme.x,meme.y,meme.z);
+		glUniform3f(cameraID, cameraPos.x, cameraPos.y, cameraPos.z);
 		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
 		glUniformMatrix4fv(ViewID, 1, GL_FALSE, &View[0][0]);
 		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &Projection[0][0]);
@@ -247,14 +246,14 @@ void RenderingManager::RenderScene() {
 		renderPauseScreen();
 	}
 	
-
 	CheckGLErrors();
 }
 
 
+
 //Computes the cameraPosition of an  particular player in the game (represented by their player id) using an averaging technique to smooth the camera
 //returns a mat4 representing the lookat matrix of the camera for the input player to be used to represent where the scene will be rendered from
-glm::mat4 RenderingManager::computeCameraPosition(int playerID){
+glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camera) {
 	// NOTE: later on... for right thumbstick, the cmaera position will curl around the circle proportional to -1.0 to 1.0 (post-process over the theta)
 	std::shared_ptr<ShoppingCartPlayer> player = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers().at(playerID);
 	PxRigidDynamic* playerDyn = player->_actor->is<PxRigidDynamic>();
@@ -304,6 +303,9 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID){
 		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at 
 		glm::vec3(0.0f, 1.0f, 0.0f)  // up vector
 	);
+
+
+	camera = camPos;
 
 	 return View;
 }
@@ -839,7 +841,7 @@ void RenderingManager::init3DTextures() {
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/background1-asphalt.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(VEHICLE_WHEEL_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/StoreFloor.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(GROUND_GEO_NO_INDEX)->texture = texture;
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);

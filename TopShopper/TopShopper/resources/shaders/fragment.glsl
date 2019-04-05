@@ -44,7 +44,9 @@ float ShadowCalculation(vec4 fragPosLightSpace, float bias)
 void main()
 {   
 
-	vec3 lightPos = vec3(0.0f, 30.0f, 0.0f);
+	//vec3 lightPos = vec3(0.0f, 30.0f, 0.0f);
+	vec3 lightPos = vec3(70.0f, 200.0f, 0.0f);
+
 
     vec3 color = texture(imageTexture, uv).rgb;
     vec3 normal = normalize(Normal);
