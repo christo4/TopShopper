@@ -105,12 +105,9 @@ void RenderingManager::RenderScene() {
 	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
 
 	float fov = 60.0f;
-	int width;
-	int height;
-	glfwGetWindowSize(_window, &width, &height);
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
 
-	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)width / (float)height, 1.0f, 500.0f);
+	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, 1.0f, 500.0f);
 
 	glm::vec3 cameraPos;
 	glm::mat4 View = computeCameraPosition(0, cameraPos);	//compute the cameraPosition and view matrix for player 0
@@ -195,7 +192,7 @@ void RenderingManager::RenderScene() {
 
 
 
-	glViewport(0, 0, (GLuint)width, (GLuint)height);	//reset the viewport to the full window to render from the camera pov
+	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -366,19 +363,19 @@ void RenderingManager::renderEndScreen() {
 	std::sort(scores, scores+3, compareStruct1);
 	
 	
-	renderText("Shopper Ranks", 680, 680, 2.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText("Shopper Ranks", windowWidth*0.35, windowHeight*0.63, 2.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 
-	renderText("1st: " + scores[0].player +  std::to_string(scores[0].score), 680, 590, 1.5f, glm::vec3(0.93f, 0.84f, 0.03f));
+	renderText("1st: " + scores[0].player + std::to_string(scores[0].score), windowWidth*0.35, windowHeight*0.55, 1.5f, glm::vec3(0.93f, 0.84f, 0.03f));
 
-	renderText("2nd: " + scores[1].player + std::to_string(scores[1].score), 680, 500, 1.5f, glm::vec3(0.65f, 0.65f, 0.65f));
+	renderText("2nd: " + scores[1].player + std::to_string(scores[1].score), windowWidth*0.35, windowHeight*0.46, 1.5f, glm::vec3(0.65f, 0.65f, 0.65f));
 
-	renderText("3rd: " + scores[2].player + std::to_string(scores[2].score), 680, 410, 1.5f, glm::vec3(0.70f, 0.36f, 0.0f));
+	renderText("3rd: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.38, 1.5f, glm::vec3(0.70f, 0.36f, 0.0f));
 
-	renderText("4th: " + scores[2].player + std::to_string(scores[2].score), 680, 355, 1.0f, glm::vec3(0, 0, 0));
+	renderText("4th: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.33, 1.0f, glm::vec3(0, 0, 0));
 
-	renderText("5th: " + scores[2].player + std::to_string(scores[2].score), 680, 310, 1.0f, glm::vec3(0, 0, 0));
+	renderText("5th: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.29, 1.0f, glm::vec3(0, 0, 0));
 
-	renderText("6th: " + scores[2].player + std::to_string(scores[2].score), 680, 265, 1.0f, glm::vec3(0, 0, 0));
+	renderText("6th: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.25, 1.0f, glm::vec3(0, 0, 0));
 
 }
 
@@ -392,7 +389,7 @@ bool compareStruct1(Player one, Player two) {
 
 void RenderingManager::renderPauseScreen() {
 	//960 540
-	renderText("PAUSED", 710, 490, 3.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText("PAUSED", windowWidth*0.37, windowHeight*0.45, 3.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
 
@@ -408,23 +405,10 @@ void RenderingManager::renderHud(int playerID) {
 
 	//render the input players boost meter
 
-	renderText("Your Score: ", windowWidth*0.81f, windowHeight*0.93f, 1.0f, glm::vec3(0.8f, 0.0f, 0.0f));
-
-
-
-
-
 	for (int i = 0; i < boost; i++) {
 		renderSprite(*_boostSprite, -0.95 + (i * 0.15), -0.95, -0.75 + (i * 0.15), -0.75);
 	}
 
-
-
-	/*
-	for (int i = 0; i < boost; i++) {
-		renderSprite(*_boostSprite, -0.9 + (i * 0.1), -0.9, -0.55 + (i * 0.1), -0.6);
-	}
-	*/
 
 	renderSprite(*_borderSprite, -0.20f, -0.9f, 0.20f, -0.7f);
 
@@ -440,12 +424,16 @@ void RenderingManager::renderHud(int playerID) {
 		i++;
 	}
 	i = 0;
+
+	std::string pointDisplay = std::to_string(points);
+	renderText("Your Score: " + pointDisplay, windowWidth*0.795, windowHeight*0.93, 1.0f, glm::vec3(0.8f, 0.0f, 0.0f));
 	
 
 	//render player 2's shopping list
 	renderSprite(*_borderSprite, 0.60f, 0.6f, 0.90f, 0.8f);
 	player = players[1];
 	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	points = script->_points;
 
 	offset = 0.1f;
 	for (EntityTypes eType : script->_shoppingList_Types) {
@@ -458,13 +446,16 @@ void RenderingManager::renderHud(int playerID) {
 	}
 	i = 0;
 
-
+	pointDisplay = std::to_string(points);
+	//renderText("Opp1 Score: " + pointDisplay, 1580, 950, 0.8f, glm::vec3(0.0f, 0.0f, 0.8f));
+	renderText("Opp1 Score: " + pointDisplay, windowWidth*0.82, windowHeight*0.88, 0.8f, glm::vec3(0.0f, 0.0f, 0.8f));
 
 
 	//render player 3's shopping list
 	renderSprite(*_borderSprite, 0.60f, 0.3f, 0.90f, 0.5f);
 	player = players[2];
 	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	points = script->_points;
 
 	offset = 0.1f;
 	for (EntityTypes eType : script->_shoppingList_Types) {
@@ -477,87 +468,18 @@ void RenderingManager::renderHud(int playerID) {
 	}
 	i = 0;
 
-	
-
-
-
-
-
-
-
-
-
-	/*
-	int offset = 72;
-	int i = 0;
-	for (EntityTypes eType : script->_shoppingList_Types) {
-		if (script->_shoppingList_Flags[i]) {
-			renderSprite(*getSpriteTexture(CHECK_MARK), -0.20f, -0.8f, -0.10, -0.6);
-		}		
-		renderSprite(*getSpriteTexture(eType), (856 + i * offset), 104, (920 + i * offset), 168);
-		i++;
-	}
-
-
-	/*
-
-
-	i = 0;
-	std::string pointDisplay = std::to_string(points);
-	renderText("Your Score: " + pointDisplay, 1550, 1000, 1.0f, glm::vec3(0.8f, 0.0f, 0.0f));
-
-	//player 2 hud elements
-	player = players[1];
-	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
-	points = script->_points;
-
-	renderSprite(*_borderSprite, 1580, 850, 1796, 922);
-
-	for (EntityTypes eType : script->_shoppingList_Types) {
-		if (script->_shoppingList_Flags[i]) {
-			renderSprite(*getSpriteTexture(CHECK_MARK), (1584 + i * offset), 854, (1648 + i * offset), 918);
-		}
-
-		renderSprite(*getSpriteTexture(eType), (1584 + i*offset), 854, (1648 + i*offset), 918);
-	
-		i++;
-	}
-	i = 0;
 	pointDisplay = std::to_string(points);
-	renderText("Opp1 Score: " + pointDisplay, 1580, 950, 0.8f, glm::vec3(0.0f, 0.0f, 0.8f));
+	//renderText("Opp2 Score: " + pointDisplay, 1580, 800, 0.8f, glm::vec3(0.0f, 0.8f, 0.0f));
+	renderText("Opp2 Score: " + pointDisplay, windowWidth*0.82, windowHeight*0.74, 0.8f, glm::vec3(0.0f, 0.8f, 0.0f));
 	
-	
-	//player 3 hud elements
-	player = players[2];
-	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
-	points = script->_points;
-
-	renderSprite(*_borderSprite, 1580, 700, 1796, 772);
-
-	for (EntityTypes eType : script->_shoppingList_Types) {
-		if (script->_shoppingList_Flags[i]) {
-			renderSprite(*getSpriteTexture(CHECK_MARK), (1584 + i * offset), 704, (1648 + i * offset), 768);
-		}
-		renderSprite(*getSpriteTexture(eType), (1584 + i * offset), 704, (1648 + i * offset), 768);
-		
-		i++;
-	}
-	i = 0;
-	pointDisplay = std::to_string(points);
-	renderText("Opp2 Score: " + pointDisplay, 1580, 800, 0.8f, glm::vec3(0.0f, 0.8f, 0.0f));
 
 	std::string timeString = _broker->getAIManager()->getMatchTimePrettyFormat();
-	renderText(timeString, 870, 1010, 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
+	//renderText(timeString, 870, 1010, 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText(timeString, windowWidth*0.45, windowHeight*0.94, 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
 
-	renderText("Boost:", 100, 100, 1.5f, glm::vec3(0.0f, 0.0f, 0.0f));
+	//renderText("Boost:", 100, 100, 1.5f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText("Boost:", windowWidth*0.04, windowHeight*0.101, 1.5f, glm::vec3(0.0f, 0.0f, 0.0f));
 
-	for (int i = 0; i < boost; i++) {
-		renderSprite(*_boostSprite, 300 + (i * 105), 50, 450 + (i * 105), 200);
-	}
-
-	
-
-	*/
 }
 
 
@@ -618,16 +540,8 @@ void RenderingManager::renderText(std::string text, GLfloat x, GLfloat y, GLfloa
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//int width;
-	//int height;
-
-
-	//GLint viewport[4];
-	//glGetIntegerv(GL_VIEWPORT, viewport);
-	int width;
-	int height;
-	glfwGetWindowSize(_window, &width, &height);
-	glm::mat4 projection = glm::ortho(0.0f, (float)width, 0.0f, (float)height);
+	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
+	glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth, 0.0f, (float)windowHeight);
 
 	glGenVertexArrays(1, &textVao);
 	glGenBuffers(1, &textVbo);
