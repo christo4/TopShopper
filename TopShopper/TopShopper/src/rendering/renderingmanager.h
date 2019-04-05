@@ -11,6 +11,7 @@
 #include "Geometry.h"
 #include <map>
 #include "../objects/entity.h"
+#include <algorithm>
 
 class Broker;
 struct GLFWwindow;
@@ -21,6 +22,11 @@ struct Character {
 	glm::ivec2 Size;       // Size of glyph
 	glm::ivec2 Bearing;    // Offset from baseline to left/top of glyph
 	GLuint     Advance;    // Offset to advance to next glyph
+};
+
+struct Player {
+	int score;
+	std::string player;
 };
 
 enum SpriteTexture {
@@ -133,4 +139,6 @@ private:
 	MyTexture *_shoppingCartGreen = new MyTexture();
 };
 
+bool compareStruct1(Player one, Player two);
 #endif // RENDERINGMANAGER_H_
+

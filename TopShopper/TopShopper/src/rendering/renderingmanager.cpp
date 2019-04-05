@@ -329,66 +329,64 @@ void RenderingManager::renderEndScreen() {
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
 	std::shared_ptr<ShoppingCartPlayer> player = players[0];
 	std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
-	int p1points = script->_points;
-	std::string p1 = "Player1 ";
+
+	Player scores[3];
+
+	scores[0].score = script->_points;
+	scores[0].player = "Player1 ";
 
 	player = players[1];
 	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
-	int p2points = script->_points;
-	std::string p2 = "Opp2 ";
+	scores[1].score = script->_points;
+	scores[1].player = "Opp2 "; // Check if its a human or cpu
 
+	
 	player = players[2];
 	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
-	int p3points = script->_points;
-	std::string p3 = "Opp3 ";
+	scores[2].score = script->_points;
+	scores[2].player = "Opp3 "; // Check if its a human or cpu
+	/*
+	player = players[3];
+	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	scores[3].score = script->_points;
+	scores[3].player = "Opp4 "; // Check if its a human or cpu
 
-	//int topPlayer = std::max(p1points, p2points, p3points);
-	int meme = std::max(p1points, p2points);
-	int topPlayer = std::max(meme, p3points);
-	std::vector<std::string> playerScore;
-	if (topPlayer == p1points) {
-		playerScore.push_back(p1 + std::to_string(p1points));
-		if (p2points > p3points) {
-			playerScore.push_back(p2 + std::to_string(p2points));
-			playerScore.push_back(p3 + std::to_string(p3points));
-		}
-		else {
-			playerScore.push_back(p3 + std::to_string(p3points));
-			playerScore.push_back(p2 + std::to_string(p2points));
-		}
-	}
-	else if (topPlayer == p2points){
-		playerScore.push_back(p2 + std::to_string(p2points));
-		if (p1points > p3points) {
-			playerScore.push_back(p1 + std::to_string(p1points));
-			playerScore.push_back(p3 + std::to_string(p3points));
-		}
-		else {
-			playerScore.push_back(p3 + std::to_string(p3points));
-			playerScore.push_back(p1 + std::to_string(p1points));
-		}
-	}
-	else {
-		playerScore.push_back(p3 + std::to_string(p3points));
-		if (p1points > p2points) {
-			playerScore.push_back(p1 + std::to_string(p1points));
-			playerScore.push_back(p2 + std::to_string(p2points));
-		}
-		else {
-			playerScore.push_back(p2 + std::to_string(p2points));
-			playerScore.push_back(p1 + std::to_string(p1points));
-		}
-	}
+	player = players[4];
+	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	scores[4].score = script->_points;
+	scores[4].player = "Opp5 ";
+
+	player = players[5];
+	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	scores[5].score = script->_points;
+	scores[5].player = "Opp6 ";
+	*/
+
+	std::sort(scores, scores+3, compareStruct1);
+	
 	
 	renderText("Shopper Ranks", 680, 680, 2.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 
-	renderText("1st: " + playerScore[0], 680, 590, 1.5f, glm::vec3(0.93f, 0.84f, 0.03f));
+	renderText("1st: " + scores[0].player +  std::to_string(scores[0].score), 680, 590, 1.5f, glm::vec3(0.93f, 0.84f, 0.03f));
 
-	renderText("2nd: " + playerScore[1], 680, 500, 1.5f, glm::vec3(0.65f, 0.65f, 0.65f));
+	renderText("2nd: " + scores[1].player + std::to_string(scores[1].score), 680, 500, 1.5f, glm::vec3(0.65f, 0.65f, 0.65f));
 
-	renderText("3rd: " + playerScore[2], 680, 410, 1.5f, glm::vec3(0.70f, 0.36f, 0.0f));
+	renderText("3rd: " + scores[2].player + std::to_string(scores[2].score), 680, 410, 1.5f, glm::vec3(0.70f, 0.36f, 0.0f));
+
+	renderText("4th: " + scores[2].player + std::to_string(scores[2].score), 680, 355, 1.0f, glm::vec3(0, 0, 0));
+
+	renderText("5th: " + scores[2].player + std::to_string(scores[2].score), 680, 310, 1.0f, glm::vec3(0, 0, 0));
+
+	renderText("6th: " + scores[2].player + std::to_string(scores[2].score), 680, 265, 1.0f, glm::vec3(0, 0, 0));
 
 }
+
+
+bool compareStruct1(Player one, Player two) {
+	return one.score > two.score;
+}
+
+
 
 
 void RenderingManager::renderPauseScreen() {
