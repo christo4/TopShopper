@@ -818,6 +818,25 @@ void RenderingManager::push3DObjects() {
 				_objects.push_back(geoPotato);
 
 			}
+			if (playerInputID == 1) {
+				Geometry geoPointer = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::POINTER_GEO_NO_INDEX));
+				geoPointer.color = glm::vec3(0, 0, 0);
+
+				glm::mat4 model;
+				PxMat44 rotation = PxMat44(rot);
+				PxVec3 pointerOffset(5.0f, 0.0f, 5.0f);
+				PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos + pointerOffset);
+				PxMat44	pxModel = translation * rotation;
+				model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+					glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+					glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+					glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+				geoPointer.model = model;
+
+				geoPointer.drawMode = GL_TRIANGLES;
+				_objects.push_back(geoPointer);
+			}
 			break;
 		}
 		case EntityTypes::GROUND:
@@ -1069,6 +1088,9 @@ void RenderingManager::init3DTextures() {
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(HOT_POTATO_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(POINTER_GEO_NO_INDEX)->texture = texture;
 
 	InitializeTexture(_shoppingCartBlue, "../TopShopper/resources/Textures/CartBlue.jpg", GL_TEXTURE_2D);
 	InitializeTexture(_shoppingCartGreen, "../TopShopper/resources/Textures/CartGreen.jpg", GL_TEXTURE_2D);
