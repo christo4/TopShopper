@@ -107,8 +107,12 @@ void RenderingManager::RenderScene() {
 	float fov = 60.0f;
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
 
-	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, 1.0f, 500.0f);
 
+	std::cout << windowWidth << " " << windowHeight << std::endl;
+
+
+
+	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, 1.0f, 500.0f);
 	glm::vec3 cameraPos;
 	glm::mat4 View = computeCameraPosition(0, cameraPos);	//compute the cameraPosition and view matrix for player 0
 
@@ -119,7 +123,6 @@ void RenderingManager::RenderScene() {
 	GLuint LightViewID;
 	GLuint LightProjectionID;
 
-	
 	glm::mat4 lightProjection = glm::ortho(-200.0f, 200.0f, -200.0f, 200.0f, 1.0f, 500.0f);
 	glm::mat4 lightView = glm::lookAt(glm::vec3(70.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -314,15 +317,6 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camer
 
 
 
-
-
-
-
-
-
-
-
-
 void RenderingManager::renderEndScreen() {
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
 	std::shared_ptr<ShoppingCartPlayer> player = players[0];
@@ -409,18 +403,16 @@ void RenderingManager::renderHud(int playerID) {
 		renderSprite(*_boostSprite, -0.95 + (i * 0.15), -0.95, -0.75 + (i * 0.15), -0.75);
 	}
 
-
-	renderSprite(*_borderSprite, -0.20f, -0.9f, 0.20f, -0.7f);
-
+	renderSprite(*_borderSprite, -0.15f, -0.9f, 0.15f, -0.75f);
 	//render the input players shopping list on the bottom of the screen
-	float offset = 0.132;
+	float offset = 0.10;
 	int i = 0;
 	for (EntityTypes eType : script->_shoppingList_Types) {
 
 		if (script->_shoppingList_Flags[i]) {
-			renderSprite(*getSpriteTexture(EntityTypes::CHECK_MARK), -0.20f + (offset*i), -0.9f, -0.07f + (offset*i), -0.7f);
+			renderSprite(*getSpriteTexture(EntityTypes::CHECK_MARK), -0.15f + (offset*i), -0.9f, -0.05f + (offset*i), -0.75f);
 		}
-		renderSprite(*getSpriteTexture(eType), -0.20f + (offset*i), -0.9f, -0.07f + (offset*i), -0.7f);
+		renderSprite(*getSpriteTexture(eType), -0.15f + (offset*i), -0.9f, -0.05f + (offset*i), -0.75f);
 		i++;
 	}
 	i = 0;
@@ -429,41 +421,49 @@ void RenderingManager::renderHud(int playerID) {
 	renderText("Your Score: " + pointDisplay, windowWidth*0.795, windowHeight*0.93, 1.0f, glm::vec3(0.8f, 0.0f, 0.0f));
 	
 
+
+
+
 	//render player 2's shopping list
-	renderSprite(*_borderSprite, 0.60f, 0.6f, 0.90f, 0.8f);
+	renderSprite(*_borderSprite, 0.69f, 0.55f, 0.90f, 0.70f);
 	player = players[1];
 	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
 	points = script->_points;
 
-	offset = 0.1f;
+	offset = 0.07f;
 	for (EntityTypes eType : script->_shoppingList_Types) {
 
 		if (script->_shoppingList_Flags[i]) {
-			renderSprite(*getSpriteTexture(EntityTypes::CHECK_MARK), 0.60f + (offset*i), 0.6f, 0.70f + (offset*i), 0.8f);
+
+			renderSprite(*getSpriteTexture(EntityTypes::CHECK_MARK), 0.69f + (offset*i), 0.55f, 0.76f + (offset*i), 0.70f);
 		}
-		renderSprite(*getSpriteTexture(eType), 0.60f + (offset*i), 0.6f, 0.70f + (offset*i), 0.8f);
+
+		renderSprite(*getSpriteTexture(eType), 0.69f + (offset*i), 0.55f, 0.76f + (offset*i), 0.70f);
 		i++;
 	}
 	i = 0;
 
+
+
+	
 	pointDisplay = std::to_string(points);
 	//renderText("Opp1 Score: " + pointDisplay, 1580, 950, 0.8f, glm::vec3(0.0f, 0.0f, 0.8f));
 	renderText("Opp1 Score: " + pointDisplay, windowWidth*0.82, windowHeight*0.88, 0.8f, glm::vec3(0.0f, 0.0f, 0.8f));
 
 
 	//render player 3's shopping list
-	renderSprite(*_borderSprite, 0.60f, 0.3f, 0.90f, 0.5f);
+	renderSprite(*_borderSprite, 0.69f, 0.30f, 0.90f, 0.45f);
 	player = players[2];
 	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
 	points = script->_points;
 
-	offset = 0.1f;
+	offset = 0.07f;
 	for (EntityTypes eType : script->_shoppingList_Types) {
 
 		if (script->_shoppingList_Flags[i]) {
-			renderSprite(*getSpriteTexture(EntityTypes::CHECK_MARK), 0.60f + (offset*i), 0.3f, 0.70f + (offset*i), 0.5f);
+			renderSprite(*getSpriteTexture(EntityTypes::CHECK_MARK), 0.69f + (offset*i), 0.30f, 0.76f + (offset*i), 0.45f);
 		}
-		renderSprite(*getSpriteTexture(eType), 0.60f + (offset*i), 0.3f, 0.70f + (offset*i), 0.5f);
+		renderSprite(*getSpriteTexture(eType), 0.69f + (offset*i), 0.30f, 0.76f + (offset*i), 0.45f);
 		i++;
 	}
 	i = 0;
@@ -479,7 +479,7 @@ void RenderingManager::renderHud(int playerID) {
 
 	//renderText("Boost:", 100, 100, 1.5f, glm::vec3(0.0f, 0.0f, 0.0f));
 	renderText("Boost:", windowWidth*0.04, windowHeight*0.101, 1.5f, glm::vec3(0.0f, 0.0f, 0.0f));
-
+	
 }
 
 
