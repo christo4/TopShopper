@@ -63,36 +63,29 @@ AIManager::AIManager(Broker *broker)
 	}
 
 
+	// WARNING: don't reduce the number of spawn points, otherwise you get a nullptr exception on instantiteEntity
 
-	drinkSpawnPoints.at(0) = PxTransform(-59.0f, 2.0f, -23.0f);
-	drinkSpawnPoints.at(1) = PxTransform(-86.0f, 2.0f, -23.0f);
-	drinkSpawnPoints.at(2) = PxTransform(-156.0f, 2.0f, -23.0f);
-	drinkSpawnPoints.at(3) = PxTransform(-117.0f, 2.0f, -95.0f);
-	drinkSpawnPoints.at(4) = PxTransform(-50.0f, 2.0f, -74.0f);
-	drinkSpawnPoints.at(5) = PxTransform(-81.0f, 2.0f, -135.0f);
-	drinkSpawnPoints.at(6) = PxTransform(-29.0f, 2.0f, -110.0f);
-	drinkSpawnPoints.at(7) = PxTransform(26.0f, 2.0f, -158.0f);
-	drinkSpawnPoints.at(8) = PxTransform(6.0f, 2.0f, -84.0f);
+	drinkSpawnPoints.at(0) = PxTransform(-48.0f, 2.0f, 94.0f);
+	drinkSpawnPoints.at(1) = PxTransform(-132.0f, 2.0f, 94.0f);
+	drinkSpawnPoints.at(2) = PxTransform(-13.0f, 2.0f, 161.0f);
+	drinkSpawnPoints.at(3) = PxTransform(-109.0f, 2.0f, 200.0f);
+	drinkSpawnPoints.at(4) = PxTransform(-220.0f, 2.0f, 82.0f);
+	drinkSpawnPoints.at(5) = PxTransform(43.0f, 2.0f, 237.0f);
 
-	fruitSpawnPoints.at(0) = PxTransform(-59.0f, 2.0f, 23.0f);
-	fruitSpawnPoints.at(1) = PxTransform(-86.0f, 2.0f, 23.0f);
-	fruitSpawnPoints.at(2) = PxTransform(-156.0f, 2.0f, 23.0f);
-	fruitSpawnPoints.at(3) = PxTransform(-117.0f, 2.0f, 95.0f);
-	fruitSpawnPoints.at(4) = PxTransform(-50.0f, 2.0f, 74.0f);
-	fruitSpawnPoints.at(5) = PxTransform(-81.0f, 2.0f, 135.0f);
-	fruitSpawnPoints.at(6) = PxTransform(-29.0f, 2.0f, 110.0f);
-	fruitSpawnPoints.at(7) = PxTransform(26.0f, 2.0f, 158.0f);
-	fruitSpawnPoints.at(8) = PxTransform(6.0f, 2.0f, 84.0f);
+	fruitSpawnPoints.at(0) = PxTransform(-45.0f, 2.0f, -94.0f);
+	fruitSpawnPoints.at(1) = PxTransform(-130.0f, 2.0f, -190.0f);
+	fruitSpawnPoints.at(2) = PxTransform(-155.0f, 2.0f, -112.0f);
+	fruitSpawnPoints.at(3) = PxTransform(-220.0f, 2.0f, -57.0f);
+	fruitSpawnPoints.at(4) = PxTransform(-35.0f, 2.0f, -194.0f);
+	fruitSpawnPoints.at(5) = PxTransform(55.0f, 2.0f, -217.0f);
 
-	veggieSpawnPoints.at(0) = PxTransform(33.0f, 2.0f, 50.0f);
-	veggieSpawnPoints.at(1) = PxTransform(33.0f, 2.0f, -50.0f);
-	veggieSpawnPoints.at(2) = PxTransform(77.0f, 2.0f, 145.0f);
-	veggieSpawnPoints.at(3) = PxTransform(77.0f, 2.0f, -145.0f);
-	veggieSpawnPoints.at(4) = PxTransform(133.0f, 2.0f, 66.0f);
-	veggieSpawnPoints.at(5) = PxTransform(133.0f, 2.0f, -66.0f);
-	veggieSpawnPoints.at(6) = PxTransform(103.0f, 2.0f, 42.0f);
-	veggieSpawnPoints.at(7) = PxTransform(103.0f, 2.0f, -42.0f);
-	veggieSpawnPoints.at(8) = PxTransform(63.0f, 2.0f, 0.0f);
+	veggieSpawnPoints.at(0) = PxTransform(91.0f, 2.0f, 0.0f);
+	veggieSpawnPoints.at(1) = PxTransform(161.0f, 2.0f, -40.0f);
+	veggieSpawnPoints.at(2) = PxTransform(161.0f, 2.0f, 40.0f);
+	veggieSpawnPoints.at(3) = PxTransform(238.0f, 2.0f, 0.0f);
+	veggieSpawnPoints.at(4) = PxTransform(158.0f, 2.0f, 161.0f);
+	veggieSpawnPoints.at(5) = PxTransform(158.0f, 2.0f, -161.0f);
+
 	
 	for (int i = 0; i < NB_DRINK_SPAWN_POINTS; i++) {
 		drinkInstances.at(i) = nullptr;

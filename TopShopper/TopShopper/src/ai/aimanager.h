@@ -54,12 +54,12 @@ private:
 
 	bool _cookieCanSpawn = true;
 	std::shared_ptr<Cookie> _startingCookie = nullptr; // ONLY SPAWNS ONCE AT START OF GAME
-	physx::PxTransform _startingCookieSpawnPoint = physx::PxTransform(0.0f, 14.0f, 0.0f, physx::PxQuat(physx::PxIdentity));
+	physx::PxTransform _startingCookieSpawnPoint = physx::PxTransform(0.0f, 19.0f, 0.0f, physx::PxQuat(physx::PxIdentity));
 
 
 	bool _mysteryBagCanSpawn = false;
 	std::shared_ptr<MysteryBag> _mysteryBag = nullptr; // ONLY BEGINS SPAWNING AFTER STARTING COOKIE GETS PICKED UP! 
-	physx::PxTransform _mysteryBagSpawnPoint = physx::PxTransform(0.0f, 14.0f, 0.0f, physx::PxQuat(physx::PxIdentity));
+	physx::PxTransform _mysteryBagSpawnPoint = physx::PxTransform(0.0f, 19.0f, 0.0f, physx::PxQuat(physx::PxIdentity));
 	double _mysteryBagSpawnTimer = 30.0; // this will vary from spawn to spawn in range 30-60 secs
 
 
@@ -71,15 +71,15 @@ private:
 
 
 
-	static const int NB_DRINK_SPAWN_POINTS = 9;
+	static const int NB_DRINK_SPAWN_POINTS = 6;
 	std::array<std::shared_ptr<Entity>, NB_DRINK_SPAWN_POINTS> drinkInstances;
 	std::array<physx::PxTransform, NB_DRINK_SPAWN_POINTS> drinkSpawnPoints;
 
-	static const int NB_FRUIT_SPAWN_POINTS = 9;
+	static const int NB_FRUIT_SPAWN_POINTS = 6;
 	std::array<std::shared_ptr<Entity>, NB_FRUIT_SPAWN_POINTS> fruitInstances;
 	std::array<physx::PxTransform, NB_FRUIT_SPAWN_POINTS> fruitSpawnPoints;
 
-	static const int NB_VEGGIE_SPAWN_POINTS = 9;
+	static const int NB_VEGGIE_SPAWN_POINTS = 6;
 	std::array<std::shared_ptr<Entity>, NB_VEGGIE_SPAWN_POINTS> veggieInstances;
 	std::array<physx::PxTransform, NB_VEGGIE_SPAWN_POINTS> veggieSpawnPoints;
 

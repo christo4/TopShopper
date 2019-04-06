@@ -25,6 +25,11 @@ Geometry* EggplantGeo = new Geometry();
 Geometry* BroccoliGeo = new Geometry();
 Geometry* Obstacle1Geo = new Geometry();
 Geometry* Obstacle2Geo = new Geometry();
+Geometry* Obstacle3Geo = new Geometry();
+Geometry* Obstacle4Geo = new Geometry();
+Geometry* Obstacle5Geo = new Geometry();
+Geometry* Obstacle6Geo = new Geometry();
+Geometry* Obstacle7Geo = new Geometry();
 Geometry* CookieGeo = new Geometry();
 Geometry* MysteryBagGeo = new Geometry();
 Geometry* HotPotatoGeo = new Geometry();
@@ -45,6 +50,11 @@ Geometry* EggplantGeoNoIndex = new Geometry();
 Geometry* BroccoliGeoNoIndex = new Geometry();
 Geometry* Obstacle1GeoNoIndex = new Geometry();
 Geometry* Obstacle2GeoNoIndex = new Geometry();
+Geometry* Obstacle3GeoNoIndex = new Geometry();
+Geometry* Obstacle4GeoNoIndex = new Geometry();
+Geometry* Obstacle5GeoNoIndex = new Geometry();
+Geometry* Obstacle6GeoNoIndex = new Geometry();
+Geometry* Obstacle7GeoNoIndex = new Geometry();
 Geometry* CookieGeoNoIndex = new Geometry();
 Geometry* MysteryBagGeoNoIndex = new Geometry();
 Geometry* HotPotatoGeoNoIndex = new Geometry();
@@ -645,7 +655,7 @@ void LoadingManager::init() {
 
 
 	//obstacle1
-	loadObject("../TopShopper/resources/Objects/Wall.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+	loadObject("../TopShopper/resources/Objects/BlueWallBot.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 
 
 	Obstacle1Geo->verts = returnVertices;
@@ -678,7 +688,7 @@ void LoadingManager::init() {
 
 
 	//obstacle2
-	loadObject("../TopShopper/resources/Objects/Wall2.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+	loadObject("../TopShopper/resources/Objects/BlueWallMid.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
 
 
 	Obstacle2Geo->verts = returnVertices;
@@ -699,6 +709,171 @@ void LoadingManager::init() {
 
 	for (unsigned int i = 0; i < normalIndex.size(); i++) {
 		Obstacle2GeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+
+	//obstacle3
+	loadObject("../TopShopper/resources/Objects/BlueWallTop.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	Obstacle3Geo->verts = returnVertices;
+	Obstacle3Geo->uvs = returnUV;
+	Obstacle3Geo->normals = returnNormal;
+	Obstacle3Geo->vIndex = vIndex;
+	Obstacle3Geo->uvIndex = uvIndex;
+	Obstacle3Geo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		Obstacle3GeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		Obstacle3GeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		Obstacle3GeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+
+	//obstacle4
+	loadObject("../TopShopper/resources/Objects/GreenWallBot.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	Obstacle4Geo->verts = returnVertices;
+	Obstacle4Geo->uvs = returnUV;
+	Obstacle4Geo->normals = returnNormal;
+	Obstacle4Geo->vIndex = vIndex;
+	Obstacle4Geo->uvIndex = uvIndex;
+	Obstacle4Geo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		Obstacle4GeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		Obstacle4GeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		Obstacle4GeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+
+	//obstacle5
+	loadObject("../TopShopper/resources/Objects/GreenWallTop.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	Obstacle5Geo->verts = returnVertices;
+	Obstacle5Geo->uvs = returnUV;
+	Obstacle5Geo->normals = returnNormal;
+	Obstacle5Geo->vIndex = vIndex;
+	Obstacle5Geo->uvIndex = uvIndex;
+	Obstacle5Geo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		Obstacle5GeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		Obstacle5GeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		Obstacle5GeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+
+	//obstacle6
+	loadObject("../TopShopper/resources/Objects/RedWallBot.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	Obstacle6Geo->verts = returnVertices;
+	Obstacle6Geo->uvs = returnUV;
+	Obstacle6Geo->normals = returnNormal;
+	Obstacle6Geo->vIndex = vIndex;
+	Obstacle6Geo->uvIndex = uvIndex;
+	Obstacle6Geo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		Obstacle6GeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		Obstacle6GeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		Obstacle6GeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+
+	//obstacle7
+	loadObject("../TopShopper/resources/Objects/RedWallTop.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	Obstacle7Geo->verts = returnVertices;
+	Obstacle7Geo->uvs = returnUV;
+	Obstacle7Geo->normals = returnNormal;
+	Obstacle7Geo->vIndex = vIndex;
+	Obstacle7Geo->uvIndex = uvIndex;
+	Obstacle7Geo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		Obstacle7GeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		Obstacle7GeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		Obstacle7GeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
 	}
 
 
@@ -846,6 +1021,16 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return Obstacle1Geo;
 	case GeometryTypes::OBSTACLE2_GEO:
 		return Obstacle2Geo;
+	case GeometryTypes::OBSTACLE3_GEO:
+		return Obstacle3Geo;
+	case GeometryTypes::OBSTACLE4_GEO:
+		return Obstacle4Geo;
+	case GeometryTypes::OBSTACLE5_GEO:
+		return Obstacle5Geo;
+	case GeometryTypes::OBSTACLE6_GEO:
+		return Obstacle6Geo;
+	case GeometryTypes::OBSTACLE7_GEO:
+		return Obstacle7Geo;
 	case GeometryTypes::VEHICLE_CHASSIS_GEO_NO_INDEX:
 		return VehicleChassisGeoNoIndex;
 	case GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX:
@@ -884,6 +1069,16 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return Obstacle1GeoNoIndex;
 	case GeometryTypes::OBSTACLE2_GEO_NO_INDEX:
 		return Obstacle2GeoNoIndex;
+	case GeometryTypes::OBSTACLE3_GEO_NO_INDEX:
+		return Obstacle3GeoNoIndex;
+	case GeometryTypes::OBSTACLE4_GEO_NO_INDEX:
+		return Obstacle4GeoNoIndex;
+	case GeometryTypes::OBSTACLE5_GEO_NO_INDEX:
+		return Obstacle5GeoNoIndex;
+	case GeometryTypes::OBSTACLE6_GEO_NO_INDEX:
+		return Obstacle6GeoNoIndex;
+	case GeometryTypes::OBSTACLE7_GEO_NO_INDEX:
+		return Obstacle7GeoNoIndex;
 	default:
 		return nullptr;
 	}

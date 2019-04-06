@@ -20,6 +20,11 @@
 #include "objects/sparechange.h"
 #include "objects/obstacle1.h"
 #include "objects/obstacle2.h"
+#include "objects/obstacle3.h"
+#include "objects/obstacle4.h"
+#include "objects/obstacle5.h"
+#include "objects/obstacle6.h"
+#include "objects/obstacle7.h"
 #include "objects/cookie.h"
 #include "objects/mysterybag.h"
 
