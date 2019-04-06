@@ -90,17 +90,179 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	}
 
 	_objects.clear();
-	push3DObjects();
-	RenderScene();
+
+	if (_broker->_scene == GAME || _broker->_scene == PAUSED || _broker->_scene == END_SCREEN) {
+		push3DObjects();
+		RenderGameScene();
+	}
+	else if (_broker->_scene == MAIN_MENU) {
+		RenderMainMenu();
+	}
+	else if (_broker->_scene == LOADING) {
+		RenderLoading();
+	}
+	else if (_broker->_scene == SETUP) {
+		RenderSetup();
+	}
+	else if (_broker->_scene == CREDITS) {
+		RenderCredits();
+	}
+	else if (_broker->_scene == CONTROLS) {
+		RenderControls();
+	}
+	
 	glfwSwapBuffers(_window);
 }
 
+
+void RenderingManager::RenderMainMenu() {
+	//Clears the screen to a light grey background
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_CULL_FACE);
+
+	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
+
+	renderText("Start", GLfloat(windowWidth*0.47), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(0, 0, 0));
+	renderText("Controls", GLfloat(windowWidth*0.45), GLfloat(windowHeight* 0.3564), 1.0f, glm::vec3(0, 0, 0));
+	renderText("Credits", GLfloat(windowWidth*0.455), GLfloat(windowHeight* 0.2314), 1.0f, glm::vec3(0, 0, 0));
+	renderText("Quit", GLfloat(windowWidth*0.47), GLfloat(windowHeight* 0.1064), 1.0f, glm::vec3(0, 0, 0));
+
+	switch (_broker->_cursorPositionStart) {
+	case (0):// Quit highlighted
+		renderSprite(*_buttonSprite, -0.15, -0.1, 0.15, 0.1);
+		renderSprite(*_buttonSprite, -0.15, -0.35, 0.15, -0.15);
+		renderSprite(*_buttonSprite, -0.15, -0.6, 0.15, -0.4);
+		renderSprite(*_buttonHighlightSprite, -0.15, -0.85, 0.15, -0.65);
+		break;
+	case(1):
+		renderSprite(*_buttonSprite, -0.15, -0.1, 0.15, 0.1);
+		renderSprite(*_buttonSprite, -0.15, -0.35, 0.15, -0.15);
+		renderSprite(*_buttonHighlightSprite, -0.15, -0.6, 0.15, -0.4);
+		renderSprite(*_buttonSprite, -0.15, -0.85, 0.15, -0.65);
+		break;
+	case(2):
+		renderSprite(*_buttonSprite, -0.15, -0.1, 0.15, 0.1);
+		renderSprite(*_buttonHighlightSprite, -0.15, -0.35, 0.15, -0.15);
+		renderSprite(*_buttonSprite, -0.15, -0.6, 0.15, -0.4);
+		renderSprite(*_buttonSprite, -0.15, -0.85, 0.15, -0.65);
+		break;
+	case(3):
+		renderSprite(*_buttonHighlightSprite, -0.15, -0.1, 0.15, 0.1);
+		renderSprite(*_buttonSprite, -0.15, -0.35, 0.15, -0.15);
+		renderSprite(*_buttonSprite, -0.15, -0.6, 0.15, -0.4);
+		renderSprite(*_buttonSprite, -0.15, -0.85, 0.15, -0.65);
+		break;
+	}
+
+	renderSprite(*_titleScreenSprite, -1, -1, 1, 1);
+
+	CheckGLErrors();
+}
+
+void RenderingManager::RenderLoading() {
+	//Clears the screen to a light grey background
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_CULL_FACE);
+
+	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
+
+	renderText("Loading.. Press A", GLfloat(windowWidth*0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
+	renderSprite(*_backgroundSprite, -1, -1, 1, 1);
+
+	CheckGLErrors();
+}
+
+void RenderingManager::RenderSetup() {
+	//Clears the screen to a light grey background
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_CULL_FACE);
+
+	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
+	if (_broker->_cursorPositionSetup == 2) {
+		renderText("Map < name >", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
+	}
+	else {
+		renderText("Map < name >", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(0, 0, 0));
+	}
+	if (_broker->_cursorPositionSetup == 1) {
+		renderText("Number of Human Players: 1", GLfloat(windowWidth* 0.3385), GLfloat(windowHeight* 0.3842), 1.0f, glm::vec3(1, 0, 1));
+	}
+	else {
+		renderText("Number of Human Players: 1", GLfloat(windowWidth* 0.3385), GLfloat(windowHeight* 0.3842), 1.0f, glm::vec3(0, 0, 0));
+	}
+
+	renderText("Start Game", GLfloat(windowWidth* 0.4348), GLfloat(windowHeight* 0.2314), 1.0f, glm::vec3(0, 0, 0));
+
+	if (_broker->_cursorPositionSetup == 0) {
+		renderSprite(*_buttonHighlightSprite, -0.15, -0.6, 0.15, -0.4);
+	}
+	else {
+		renderSprite(*_buttonSprite, -0.15, -0.6, 0.15, -0.4);
+	}
+
+	renderSprite(*_titleScreenSprite, -1, -1, 1, 1);
+
+	CheckGLErrors();
+}
+
+void RenderingManager::RenderCredits() {
+	//Clears the screen to a light grey background
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_CULL_FACE);
+
+	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
+
+	renderText("Credits here", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
+
+	renderSprite(*_backgroundSprite, -1, -1, 1, 1);
+
+	CheckGLErrors();
+}
+
+void RenderingManager::RenderControls() {
+	//Clears the screen to a light grey background
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_CULL_FACE);
+
+	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
+
+	renderText("Controls here", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
+
+	renderSprite(*_backgroundSprite, -1, -1, 1, 1);
+
+	CheckGLErrors();
+}
 
 
 //RenderScene utilizes the current array of objects in the rendering manager, setting and assigning the buffers for each geometry,
 //then sending the vertex info down the openGL pipeline, while utilizing the approprite shaders tied to the geometry.
 //performs multiple rendering passes in order to create shadowsm, while calculating the camera information each time it is called.
-void RenderingManager::RenderScene() {
+void RenderingManager::RenderGameScene() {
 	//Clears the screen to a light grey background
 	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
 	glEnable(GL_BLEND);
@@ -110,7 +272,6 @@ void RenderingManager::RenderScene() {
 
 	float fov = 60.0f;
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
-
 
 	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, 1.0f, 500.0f);
 	glm::vec3 cameraPos;
@@ -200,13 +361,13 @@ void RenderingManager::RenderScene() {
 	}
 
 	
-	if (!(_broker->_isEnd || _broker->_isPaused)) {
+	if (_broker->_scene == GAME) {
 		renderHud(0);
 	}
-	else if (_broker->_isEnd){
+	else if (_broker->_scene == END_SCREEN){
 		renderEndScreen();
 	}
-	else {
+	else if(_broker->_scene == PAUSED){
 		renderPauseScreen();
 	}
 	
@@ -316,7 +477,7 @@ void RenderingManager::renderEndScreen() {
 	std::sort(scores, scores+3, compareStruct1);
 	
 	
-	renderText("Shopper Ranks", windowWidth*0.35, windowHeight*0.63, 2.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+	//renderText("Shopper Ranks", windowWidth*0.35, windowHeight*0.63, 1.7f, glm::vec3(0.0f, 0.0f, 0.0f));
 
 	renderText("1st: " + scores[0].player + std::to_string(scores[0].score), windowWidth*0.35, windowHeight*0.55, 1.5f, glm::vec3(0.93f, 0.84f, 0.03f));
 
@@ -330,6 +491,9 @@ void RenderingManager::renderEndScreen() {
 
 	renderText("6th: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.25, 1.0f, glm::vec3(0, 0, 0));
 
+	renderText("Menu", GLfloat(windowWidth*0.466), GLfloat(windowHeight*0.106), 1.0f, glm::vec3(0, 0, 0));
+	renderSprite(*_buttonHighlightSprite, -0.15, -0.85, 0.15, -0.65);
+	renderSprite(*_resultsScreenSprite, -0.5, -0.77, 0.5, 1);
 }
 
 
@@ -341,6 +505,19 @@ bool compareStruct1(Player one, Player two) {
 void RenderingManager::renderPauseScreen() {
 	//960 540
 	renderText("PAUSED", windowWidth*0.37, windowHeight*0.45, 3.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText("Resume", GLfloat(windowWidth*0.455), GLfloat(windowHeight*0.23), 1.0f, glm::vec3(0, 0, 0));
+	renderText("Menu", GLfloat(windowWidth*0.466), GLfloat(windowHeight*0.106), 1.0f, glm::vec3(0, 0, 0));
+
+	switch (_broker->_cursorPositionPause) {
+	case (0):
+		renderSprite(*_buttonSprite, -0.15, -0.6, 0.15, -0.4);
+		renderSprite(*_buttonHighlightSprite, -0.15, -0.85, 0.15, -0.65);
+		break;
+	case(1):
+		renderSprite(*_buttonHighlightSprite, -0.15, -0.6, 0.15, -0.4);
+		renderSprite(*_buttonSprite, -0.15, -0.85, 0.15, -0.65);
+		break;
+	}
 }
 
 
@@ -422,6 +599,15 @@ void RenderingManager::renderHud(int playerID) {
 		shoppingListOffSetAccum += shoppingListYOffset;
 		scoreOffsetAccum += scoreYOffset;
 	}
+
+	std::string timeString = _broker->getAIManager()->getMatchTimePrettyFormat();
+	//renderText(timeString, 870, 1010, 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText(timeString, windowWidth*0.45, windowHeight*0.94, 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
+
+	//renderText("Boost:", 100, 100, 1.5f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText("Boost:", windowWidth*0.04, windowHeight*0.101, 1.5f, glm::vec3(0.0f, 0.0f, 0.0f));
+
+	renderSprite(*_timeBoxSprite, -0.18, 0.83, 0.13, 1);
 }
 
 
@@ -777,6 +963,12 @@ void RenderingManager::initSpriteTextures() {
 	InitializeTexture(_clockSprite, "../TopShopper/resources/Sprites/clock.png", GL_TEXTURE_2D);
 	InitializeTexture(_checkMarkSprite, "../TopShopper/resources/Sprites/Check_Mark.png", GL_TEXTURE_2D);
 	InitializeTexture(_boostSprite, "../TopShopper/resources/Sprites/Boost.png", GL_TEXTURE_2D);
+	InitializeTexture(_buttonSprite, "../TopShopper/resources/Sprites/Button.png", GL_TEXTURE_2D);
+	InitializeTexture(_buttonHighlightSprite, "../TopShopper/resources/Sprites/ButtonHighlight.png", GL_TEXTURE_2D);
+	InitializeTexture(_timeBoxSprite, "../TopShopper/resources/Sprites/TimeBox.png", GL_TEXTURE_2D);
+	InitializeTexture(_titleScreenSprite, "../TopShopper/resources/Sprites/TitleScreen.png", GL_TEXTURE_2D);
+	InitializeTexture(_resultsScreenSprite, "../TopShopper/resources/Sprites/ResultsScreen.png", GL_TEXTURE_2D);
+	InitializeTexture(_backgroundSprite, "../TopShopper/resources/Sprites/Background.png", GL_TEXTURE_2D);
 }
 
 void RenderingManager::init3DTextures() {

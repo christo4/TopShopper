@@ -21,27 +21,11 @@ int main() {
 
 	// call main loop
 	while (!glfwWindowShouldClose(window)) {
-
-		// if the pause button/key was pressed in last frame...
-		// right now, only player 1 (keyboard or gamepad1 can pause the game)
-		Gamepad *pad1 = broker->getInputManager()->getGamePad(1);
-		if (pad1 != nullptr) {
-			if (pad1->startButtonJustPressed) {
-				broker->_isPaused = !broker->_isPaused; // toggle pause state
-			}
-		}
-		else {
-			KeyboardAndMouse *kam = broker->getInputManager()->getKeyboardAndMouse();
-			if (kam->pKeyJustPressed) {
-				broker->_isPaused = !broker->_isPaused; // toggle pause state
-			}
-		}
-
 		double currentTime = glfwGetTime(); // gets time in SECONDS!!!
 		double variableDeltaTime = currentTime - prevTime;
 		prevTime = currentTime;
 
-		if (!broker->_isPaused) {
+		if (broker->_scene == GAME) {
 			accumulator += variableDeltaTime;
 		}
 

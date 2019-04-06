@@ -62,7 +62,12 @@ public:
 	void cleanup();
 
 	//Renders each object
-	void RenderScene();
+	void RenderGameScene();
+	void RenderMainMenu();
+	void RenderLoading();
+	void RenderSetup();
+	void RenderCredits();
+	void RenderControls();
 	glm::mat4 computeCameraPosition(int playerID, glm::vec3 &camera);
 	void renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
 	void renderSprite(MyTexture spriteTex, float bottomLeftX, float bottomLeftY, float topRightX, float topRightY);
@@ -143,6 +148,12 @@ private:
 	MyTexture *_clockSprite = new MyTexture();
 	MyTexture *_checkMarkSprite = new MyTexture();
 	MyTexture *_boostSprite = new MyTexture();
+	MyTexture *_buttonSprite = new MyTexture();
+	MyTexture *_buttonHighlightSprite = new MyTexture();
+	MyTexture *_timeBoxSprite = new MyTexture();
+	MyTexture *_titleScreenSprite = new MyTexture();
+	MyTexture *_resultsScreenSprite = new MyTexture();
+	MyTexture *_backgroundSprite = new MyTexture();
 	
 
 	MyTexture *_shoppingCartBlue = new MyTexture();
@@ -151,5 +162,5 @@ private:
 };
 
 bool compareStruct1(Player one, Player two);
-#endif // RENDERINGMANAGER_H_
+#endif RENDERINGMANAGER_H_
 
