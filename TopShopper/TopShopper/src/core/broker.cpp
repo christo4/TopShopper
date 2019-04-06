@@ -83,8 +83,8 @@ void Broker::updateAllSeconds(double& simTime, const double& fixedDeltaTime, dou
 
 void Broker::manageScene(double& accumulator, double vartime) {
 	//ADD DELAY
-	if (delayX < 0.2) { // NOTE: this should probably be changed to use time, to make it framerate independant... (also a delay of 200frames in game scene is longer than a delay of 200 in main menu, due to physics/ai updates) 
-		delayX += vartime;
+	if (delayX > 0) { // NOTE: this should probably be changed to use time, to make it framerate independant... (also a delay of 200frames in game scene is longer than a delay of 200 in main menu, due to physics/ai updates) 
+		delayX -= vartime;
 		return;
 	}
 	//std::cout << vartime << std::endl;
@@ -102,7 +102,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			else {
 				_cursorPositionStart += 1; 
 			}
-			delayX = 0;
+			delayX = 0.2;
 		}
 		else if (kam->sKey || (playerControlled && player1->leftStickY < -0.5)) {
 			if (_cursorPositionStart == 0) {
@@ -111,7 +111,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			else {
 				_cursorPositionStart -= 1;
 			}
-			delayX = 0;
+			delayX = 0.2;
 		}
 		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
 			switch (_cursorPositionStart) {
@@ -144,23 +144,23 @@ void Broker::manageScene(double& accumulator, double vartime) {
 		}
 		break;
 	case(SETUP):
-		if (kam->wKey || (playerControlled && player1->leftStickY > 0.02)) {
+		if (kam->wKey || (playerControlled && player1->leftStickY > 0.5)) {
 			if (_cursorPositionSetup == 2) {
 				_cursorPositionSetup = 0;
 			}
 			else {
 				_cursorPositionSetup += 1;
 			}
-			delayX = 0;
+			delayX = 0.2;
 		}
-		else if (kam->sKey || (playerControlled && player1->leftStickY < -0.02)) {
+		else if (kam->sKey || (playerControlled && player1->leftStickY < -0.5)) {
 			if (_cursorPositionSetup == 0) {
 				_cursorPositionSetup = 2;
 			}
 			else {
 				_cursorPositionSetup -= 1;
 			}
-			delayX = 0;
+			delayX = 0.2;
 		}
 
 		if ((kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) && _cursorPositionSetup == 0) {
@@ -183,23 +183,23 @@ void Broker::manageScene(double& accumulator, double vartime) {
 		}
 		break;
 	case(PAUSED):
-		if (kam->wKey || (playerControlled && player1->leftStickY > 0.02)) {
+		if (kam->wKey || (playerControlled && player1->leftStickY > 0.5)) {
 			if (_cursorPositionPause == 1) {
 				_cursorPositionPause = 0;
 			}
 			else {
 				_cursorPositionPause += 1;
 			}
-			delayX = 0;
+			delayX = 0.2;
 		}
-		else if (kam->sKey || (playerControlled && player1->leftStickY < -0.02)) {
+		else if (kam->sKey || (playerControlled && player1->leftStickY < -0.5)) {
 			if (_cursorPositionPause == 0) {
 				_cursorPositionPause = 1;
 			}
 			else {
 				_cursorPositionPause -= 1;
 			}
-			delayX = 0;
+			delayX = 0.2;
 		}
 		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
 			if (_cursorPositionPause == 1) {
