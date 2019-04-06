@@ -10,6 +10,15 @@
 #include <foundation/PxQuat.h>
 
 
+
+struct ItemLocation {
+	ItemLocation() {}
+	ItemLocation(physx::PxVec3 pos, bool inWorld) : _pos(pos), _inWorld(inWorld) {}
+	physx::PxVec3 _pos;
+	bool _inWorld; // either PHYSICALLY IN WORLD or ON A PLAYER
+};
+
+
 physx::PxVec3 castGLMVec4ToPxVec3(glm::vec4 glmVec);
 
 std::vector<physx::PxVec3> castVectorOfGLMVec4ToVectorOfPxVec3(std::vector<glm::vec4> v_glmVec);

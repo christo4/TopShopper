@@ -13,7 +13,6 @@
 #include "objects/broccoli.h"
 #include "objects/sparechange.h"
 #include <cstdlib>
-#include "utility/utility.h"
 #include "objects/shoppingcartplayer.h"
 #include "vehicle/VehicleShoppingCart.h"
 
@@ -94,8 +93,7 @@ AIManager::AIManager(Broker *broker)
 	veggieSpawnPoints.at(6) = PxTransform(103.0f, 2.0f, 42.0f);
 	veggieSpawnPoints.at(7) = PxTransform(103.0f, 2.0f, -42.0f);
 	veggieSpawnPoints.at(8) = PxTransform(63.0f, 2.0f, 0.0f);
-
-
+	
 	for (int i = 0; i < NB_DRINK_SPAWN_POINTS; i++) {
 		drinkInstances.at(i) = nullptr;
 	}
@@ -107,7 +105,7 @@ AIManager::AIManager(Broker *broker)
 	for (int i = 0; i < NB_VEGGIE_SPAWN_POINTS; i++) {
 		veggieInstances.at(i) = nullptr;
 	}
-
+	
 }
 
 AIManager::~AIManager() {
@@ -115,7 +113,7 @@ AIManager::~AIManager() {
 }
 
 void AIManager::init() {
-	_startingCookie = std::dynamic_pointer_cast<Cookie>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::COOKIE, _startingCookieSpawnPoint, "startingCookie"));
+
 }
 
 void AIManager::updateSeconds(double variableDeltaTime) {
@@ -129,193 +127,171 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		}
 	}
 
-	// STARTING COOKIE SPAWNING...
-	// check if the cookie has been picked up yet (destroyed)...
-	if (_startingCookie != nullptr && _startingCookie->getDestroyFlag()) {
-		removeDeletedTarget(_startingCookieSpawnPoint.p);
-		_startingCookie = nullptr;
-		_mysteryBagCanSpawn = true; // mystery bag can now spawn after this 1st cookie has been picked up
+
+	// FIND THE LOCATION OF EACH ITEM (COOKIE, MYSTERYBAG, SPARECHANGE, 9 LIST ITEMS) - EITHER IN WORLD OR ON A PLAYER...
+	updateLocations();
+
+	// HANDLE NEW SPAWNING...
+
+	if (_cookieCanSpawn && _startingCookie == nullptr) {
+		std::shared_ptr<Cookie> cookie = std::dynamic_pointer_cast<Cookie>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::COOKIE, _startingCookieSpawnPoint, "startingCookie"));
+		_startingCookie = cookie;
+		_cookieLocations.push_back(ItemLocation(_startingCookieSpawnPoint.p, true));
+
 	}
 
-	// MYSTERY BAG SPAWNING...
-	// check if the mystery bag has been picked up yet (destroyed)...
-	if (_mysteryBag != nullptr && _mysteryBag->getDestroyFlag()) {
-		removeDeletedTarget(_mysteryBagSpawnPoint.p);
-		_mysteryBag = nullptr;
-		_mysteryBagSpawnTimer = ((rand() % 31) + 30); // 30-60 range
-	}
-
-	// check if next mystery bag is ready to be spawned in...
 	if (_mysteryBagCanSpawn && _mysteryBag == nullptr) {
 		_mysteryBagSpawnTimer -= variableDeltaTime;
 		if (_mysteryBagSpawnTimer <= 0.0) {
-			_mysteryBag = std::dynamic_pointer_cast<MysteryBag>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::MYSTERY_BAG, _mysteryBagSpawnPoint, "mysteryBag"));
+			std::shared_ptr<MysteryBag> mysteryBag = std::dynamic_pointer_cast<MysteryBag>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::MYSTERY_BAG, _mysteryBagSpawnPoint, "mysteryBag"));
+			_mysteryBag = mysteryBag;
+			_mysteryBagLocations.push_back(ItemLocation(_mysteryBagSpawnPoint.p, true));
 		}
 	}
 
-
-	// SPARE CHANGE SPAWNING...
-	// check if any spawn-point spare change have been picked up in this frame (destroyed)...
-	for (int i = 0; i < NB_SPARE_CHANGE_SPAWN_POINTS; i++) {
-		if (spareChangeInstances.at(i) != nullptr && spareChangeInstances.at(i)->getDestroyFlag()) {
-			removeDeletedTarget(spareChangeSpawnPoints.at(i).p);
-			spareChangeInstances.at(i) = nullptr;
-			spareChangeSpawnTimers.at(i) = SPARE_CHANGE_RESPAWN_TIME;
-		}
-	}
 
 	// check if any open spawn points are ready to spawn a new spare change instance...
 	for (int i = 0; i < NB_SPARE_CHANGE_SPAWN_POINTS; i++) {
 		if (spareChangeInstances.at(i) == nullptr) {
 			spareChangeSpawnTimers.at(i) -= variableDeltaTime;
 			if (spareChangeSpawnTimers.at(i) <= 0.0) {
-				//std::cout << "AIMANAGER.CPP | NEW SPARE CHANGE SPAWN" << std::endl;
-				spareChangeInstances.at(i) = std::dynamic_pointer_cast<SpareChange>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::SPARE_CHANGE, spareChangeSpawnPoints.at(i), "SpareChangeSP"+i));
+				std::shared_ptr<SpareChange> spareChange = std::dynamic_pointer_cast<SpareChange>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::SPARE_CHANGE, spareChangeSpawnPoints.at(i), "SpareChangeSP" + i));
+				spareChangeInstances.at(i) = spareChange;
+				_spareChangeLocations.push_back(ItemLocation(spareChangeSpawnPoints.at(i).p, true));
 			}
 		}
 	}
 
 
-	// GROCERY ITEM SPAWNING...
+	// NOTE: I'm not worrying about the entity names since duplicates dont matter in our game
+	while (_milkLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
+		// spawn
+		int spawnIndex = getNextDrinkSpawnIndex();
+		if (-1 == spawnIndex) break; // fail the spawning for this frame
 
-	// check if any spawn-point grocery items have been picked up in this frame (destroyed)...
-	if (milkSpawnIndex != -1 && drinkInstances.at(milkSpawnIndex)->getDestroyFlag()) {
-		removeDeletedTarget(drinkSpawnPoints.at(milkSpawnIndex).p);
-		drinkInstances.at(milkSpawnIndex) = nullptr;
-		milkSpawnIndex = -1;
-		milkSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
-	}
-	if (waterSpawnIndex != -1 && drinkInstances.at(waterSpawnIndex)->getDestroyFlag()) {
-		removeDeletedTarget(drinkSpawnPoints.at(waterSpawnIndex).p);
-		drinkInstances.at(waterSpawnIndex) = nullptr;
-		waterSpawnIndex = -1;
-		waterSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
-	}
-	if (colaSpawnIndex != -1 && drinkInstances.at(colaSpawnIndex)->getDestroyFlag()) {
-		removeDeletedTarget(drinkSpawnPoints.at(colaSpawnIndex).p);
-		drinkInstances.at(colaSpawnIndex) = nullptr;
-		colaSpawnIndex = -1;
-		colaSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
-	}
+		std::shared_ptr<Entity> milk = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::MILK, drinkSpawnPoints.at(spawnIndex), "MilkSP"); 
+		drinkInstances.at(spawnIndex) = milk;
+		_milkLocations.push_back(ItemLocation(drinkSpawnPoints.at(spawnIndex).p, true));
 
-	if (appleSpawnIndex != -1 && fruitInstances.at(appleSpawnIndex)->getDestroyFlag()) {
-		removeDeletedTarget(fruitSpawnPoints.at(appleSpawnIndex).p);
-		fruitInstances.at(appleSpawnIndex) = nullptr;
-		appleSpawnIndex = -1;
-		appleSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
 	}
-	if (watermelonSpawnIndex != -1 && fruitInstances.at(watermelonSpawnIndex)->getDestroyFlag()) {
-		removeDeletedTarget(fruitSpawnPoints.at(watermelonSpawnIndex).p);
-		fruitInstances.at(watermelonSpawnIndex) = nullptr;
-		watermelonSpawnIndex = -1;
-		watermelonSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
+	while (_waterLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
+		// spawn
+		int spawnIndex = getNextDrinkSpawnIndex();
+		if (-1 == spawnIndex) break; // fail the spawning for this frame
+		
+		std::shared_ptr<Entity> water = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::WATER, drinkSpawnPoints.at(spawnIndex), "WaterSP");
+		drinkInstances.at(spawnIndex) = water;
+		_waterLocations.push_back(ItemLocation(drinkSpawnPoints.at(spawnIndex).p, true));
 	}
-	if (bananaSpawnIndex != -1 && fruitInstances.at(bananaSpawnIndex)->getDestroyFlag()) {
-		removeDeletedTarget(fruitSpawnPoints.at(bananaSpawnIndex).p);
-		fruitInstances.at(bananaSpawnIndex) = nullptr;
-		bananaSpawnIndex = -1;
-		bananaSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
-	}
+	while (_colaLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
+		// spawn
+		int spawnIndex = getNextDrinkSpawnIndex();
+		if (-1 == spawnIndex) break; // fail the spawning for this frame
 
-	if (carrotSpawnIndex != -1 && veggieInstances.at(carrotSpawnIndex)->getDestroyFlag()) {
-		removeDeletedTarget(veggieSpawnPoints.at(carrotSpawnIndex).p);
-		veggieInstances.at(carrotSpawnIndex) = nullptr;
-		carrotSpawnIndex = -1;
-		carrotSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
+		std::shared_ptr<Entity> cola = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::COLA, drinkSpawnPoints.at(spawnIndex), "ColaSP");
+		drinkInstances.at(spawnIndex) = cola;
+		_colaLocations.push_back(ItemLocation(drinkSpawnPoints.at(spawnIndex).p, true));
 	}
-	if (eggplantSpawnIndex != -1 && veggieInstances.at(eggplantSpawnIndex)->getDestroyFlag()) {
-		removeDeletedTarget(veggieSpawnPoints.at(eggplantSpawnIndex).p);
-		veggieInstances.at(eggplantSpawnIndex) = nullptr;
-		eggplantSpawnIndex = -1;
-		eggplantSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
-	}
-	if (broccoliSpawnIndex != -1 && veggieInstances.at(broccoliSpawnIndex)->getDestroyFlag()) {
-		removeDeletedTarget(veggieSpawnPoints.at(broccoliSpawnIndex).p);
-		veggieInstances.at(broccoliSpawnIndex) = nullptr;
-		broccoliSpawnIndex = -1;
-		broccoliSpawnTimer = GROCERY_ITEM_RESPAWN_TIME;
-	}
+	while (_appleLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
+		// spawn
+		int spawnIndex = getNextFruitSpawnIndex();
+		if (-1 == spawnIndex) break; // fail the spawning for this frame
 
+		std::shared_ptr<Entity> apple = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::APPLE, fruitSpawnPoints.at(spawnIndex), "AppleSP");
+		fruitInstances.at(spawnIndex) = apple;
+		_appleLocations.push_back(ItemLocation(fruitSpawnPoints.at(spawnIndex).p, true));
+	}
+	while (_watermelonLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
+		// spawn
+		int spawnIndex = getNextFruitSpawnIndex();
+		if (-1 == spawnIndex) break; // fail the spawning for this frame
 
-	// check each missing grocery item if they are ready to be spawned in...
-	if (milkSpawnIndex == -1) {
-		milkSpawnTimer -= variableDeltaTime;
-		if (milkSpawnTimer <= 0.0) {
-			milkSpawnIndex = getNextDrinkSpawnIndex();
-			//std::cout << "AIMANAGER.CPP | NEW MILK SPAWN" << std::endl;
-			drinkInstances.at(milkSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::MILK, drinkSpawnPoints.at(milkSpawnIndex), "MilkSP");
-		}
+		std::shared_ptr<Entity> watermelon = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::WATERMELON, fruitSpawnPoints.at(spawnIndex), "WatermelonSP");
+		fruitInstances.at(spawnIndex) = watermelon;
+		_watermelonLocations.push_back(ItemLocation(fruitSpawnPoints.at(spawnIndex).p, true));
 	}
-	if (waterSpawnIndex == -1) {
-		waterSpawnTimer -= variableDeltaTime;
-		if (waterSpawnTimer <= 0.0) {
-			waterSpawnIndex = getNextDrinkSpawnIndex();
-			//std::cout << "AIMANAGER.CPP | NEW WATER SPAWN" << std::endl;
-			drinkInstances.at(waterSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::WATER, drinkSpawnPoints.at(waterSpawnIndex), "WaterSP");
-		}
+	while (_bananaLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
+		// spawn
+		int spawnIndex = getNextFruitSpawnIndex();
+		if (-1 == spawnIndex) break; // fail the spawning for this frame
+
+		std::shared_ptr<Entity> banana = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::BANANA, fruitSpawnPoints.at(spawnIndex), "BananaSP");
+		fruitInstances.at(spawnIndex) = banana;
+		_bananaLocations.push_back(ItemLocation(fruitSpawnPoints.at(spawnIndex).p, true));
 	}
-	if (colaSpawnIndex == -1) {
-		colaSpawnTimer -= variableDeltaTime;
-		if (colaSpawnTimer <= 0.0) {
-			colaSpawnIndex = getNextDrinkSpawnIndex();
-			//std::cout << "AIMANAGER.CPP | NEW COLA SPAWN" << std::endl;
-			drinkInstances.at(colaSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::COLA, drinkSpawnPoints.at(colaSpawnIndex), "ColaSP");
-		}
+	while (_carrotLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
+		// spawn
+		int spawnIndex = getNextVeggieSpawnIndex();
+		if (-1 == spawnIndex) break; // fail the spawning for this frame
+
+		std::shared_ptr<Entity> carrot = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::CARROT, veggieSpawnPoints.at(spawnIndex), "CarrotSP");
+		veggieInstances.at(spawnIndex) = carrot;
+		_carrotLocations.push_back(ItemLocation(veggieSpawnPoints.at(spawnIndex).p, true));
+	}
+	while (_eggplantLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
+		// spawn
+		int spawnIndex = getNextVeggieSpawnIndex();
+		if (-1 == spawnIndex) break; // fail the spawning for this frame
+
+		std::shared_ptr<Entity> eggplant = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::EGGPLANT, veggieSpawnPoints.at(spawnIndex), "EggplantSP");
+		veggieInstances.at(spawnIndex) = eggplant;
+		_eggplantLocations.push_back(ItemLocation(veggieSpawnPoints.at(spawnIndex).p, true));
+	}
+	while (_broccoliLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
+		// spawn
+		int spawnIndex = getNextVeggieSpawnIndex();
+		if (-1 == spawnIndex) break; // fail the spawning for this frame
+
+		std::shared_ptr<Entity> broccoli = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::BROCCOLI, veggieSpawnPoints.at(spawnIndex), "BroccoliSP");
+		veggieInstances.at(spawnIndex) = broccoli;
+		_broccoliLocations.push_back(ItemLocation(veggieSpawnPoints.at(spawnIndex).p, true));
 	}
 
-	if (appleSpawnIndex == -1) {
-		appleSpawnTimer -= variableDeltaTime;
-		if (appleSpawnTimer <= 0.0) {
-			appleSpawnIndex = getNextFruitSpawnIndex();
-			//std::cout << "AIMANAGER.CPP | NEW APPLE SPAWN" << std::endl;
-			fruitInstances.at(appleSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::APPLE, fruitSpawnPoints.at(appleSpawnIndex), "AppleSP");
-		}
-	}
-	if (watermelonSpawnIndex == -1) {
-		watermelonSpawnTimer -= variableDeltaTime;
-		if (watermelonSpawnTimer <= 0.0) {
-			watermelonSpawnIndex = getNextFruitSpawnIndex();
-			//std::cout << "AIMANAGER.CPP | NEW WATERMELON SPAWN" << std::endl;
-			fruitInstances.at(watermelonSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::WATERMELON, fruitSpawnPoints.at(watermelonSpawnIndex), "WatermelonSP");
-		}
-	}
-	if (bananaSpawnIndex == -1) {
-		bananaSpawnTimer -= variableDeltaTime;
-		if (bananaSpawnTimer <= 0.0) {
-			bananaSpawnIndex = getNextFruitSpawnIndex();
-			//std::cout << "AIMANAGER.CPP | NEW BANANA SPAWN" << std::endl;
-			fruitInstances.at(bananaSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::BANANA, fruitSpawnPoints.at(bananaSpawnIndex), "BananaSP");
-		}
+
+	// CLEANUP SPAWN POINT INFO OF DESTROYED ITEMS (FOR NEXT FRAME)...
+
+	if (_startingCookie != nullptr && _startingCookie->getDestroyFlag()) {
+		_startingCookie = nullptr;
+		_cookieCanSpawn = false;
+		_mysteryBagCanSpawn = true; // mystery bag can now spawn after this 1st cookie has been picked up
 	}
 
-	if (carrotSpawnIndex == -1) {
-		carrotSpawnTimer -= variableDeltaTime;
-		if (carrotSpawnTimer <= 0.0) {
-			carrotSpawnIndex = getNextVeggieSpawnIndex();
-			//std::cout << "AIMANAGER.CPP | NEW CARROT SPAWN" << std::endl;
-			veggieInstances.at(carrotSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::CARROT, veggieSpawnPoints.at(carrotSpawnIndex), "CarrotSP");
-		}
+
+	if (_mysteryBag != nullptr && _mysteryBag->getDestroyFlag()) {
+		_mysteryBag = nullptr;
+		_mysteryBagSpawnTimer = ((rand() % 31) + 30); // 30-60 second range
 	}
-	if (eggplantSpawnIndex == -1) {
-		eggplantSpawnTimer -= variableDeltaTime;
-		if (eggplantSpawnTimer <= 0.0) {
-			eggplantSpawnIndex = getNextVeggieSpawnIndex();
-			//std::cout << "AIMANAGER.CPP | NEW EGGPLANT SPAWN" << std::endl;
-			veggieInstances.at(eggplantSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::EGGPLANT, veggieSpawnPoints.at(eggplantSpawnIndex), "EggplantSP");
-		}
-	}
-	if (broccoliSpawnIndex == -1) {
-		broccoliSpawnTimer -= variableDeltaTime;
-		if (broccoliSpawnTimer <= 0.0) {
-			broccoliSpawnIndex = getNextVeggieSpawnIndex();
-			//std::cout << "AIMANAGER.CPP | NEW BROCCOLI SPAWN" << std::endl;
-			veggieInstances.at(broccoliSpawnIndex) = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::BROCCOLI, veggieSpawnPoints.at(broccoliSpawnIndex), "BroccoliSP");
+
+
+	for (int i = 0; i < NB_SPARE_CHANGE_SPAWN_POINTS; i++) {
+		if (spareChangeInstances.at(i) != nullptr && spareChangeInstances.at(i)->getDestroyFlag()) {
+			spareChangeInstances.at(i) = nullptr;
+			spareChangeSpawnTimers.at(i) = SPARE_CHANGE_RESPAWN_TIME;
 		}
 	}
 
 
+	for (std::shared_ptr<Entity> &e : drinkInstances) {
+		if (nullptr != e && e->getDestroyFlag()) {
+			e = nullptr;
+		}
+	}
+
+	for (std::shared_ptr<Entity> &e : fruitInstances) {
+		if (nullptr != e && e->getDestroyFlag()) {
+			e = nullptr;
+		}
+	}
+
+	for (std::shared_ptr<Entity> &e : veggieInstances) {
+		if (nullptr != e && e->getDestroyFlag()) {
+			e = nullptr;
+		}
+	}
+
+
+	// SET A NEW TARGET LOCATION FOR EACH AI BOT TO TRAVEL TO...
 	setNewAITargets();
-
 
 
 	// update match timer...
@@ -323,53 +299,159 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 	if (_matchTimer <= 0.0) {
 		_matchTimer = 0.0; // clamp at 0 so rendering doesnt screw up
 		_broker->_isEnd = true; // FOR NOW, we pause the game when match is over
-		//std::cout << "MATCH END" << std::endl;
 	}
 }
 
 
+void AIManager::updateLocations() {
+	_cookieLocations.clear();
+	_mysteryBagLocations.clear();
+	_spareChangeLocations.clear();
+	_milkLocations.clear();
+	_waterLocations.clear();
+	_colaLocations.clear();
+	_appleLocations.clear();
+	_watermelonLocations.clear();
+	_bananaLocations.clear();
+	_carrotLocations.clear();
+	_eggplantLocations.clear();
+	_broccoliLocations.clear();
 
+	for (const std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
+		
+		if (entity->getDestroyFlag()) continue; // ignore entities that were flagged for destroy at the end og this scene
+		
+		switch (entity->getTag()) {
+			case EntityTypes::SHOPPING_CART_PLAYER:
+			{
+				std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(entity->getComponent(ComponentTypes::PLAYER_SCRIPT));
+				for (int i = 0; i < 3; i++) {
+					if (playerScript->_shoppingList_Flags.at(i)) {
+						switch (playerScript->_shoppingList_Types.at(i)) {
+							case EntityTypes::MILK:
+								_milkLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								break;
+							case EntityTypes::WATER:
+								_waterLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								break;
+							case EntityTypes::COLA:
+								_colaLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								break;
+							case EntityTypes::APPLE:
+								_appleLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								break;
+							case EntityTypes::WATERMELON:
+								_watermelonLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								break;
+							case EntityTypes::BANANA:
+								_bananaLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								break;
+							case EntityTypes::CARROT:
+								_carrotLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								break;
+							case EntityTypes::EGGPLANT:
+								_eggplantLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								break;
+							case EntityTypes::BROCCOLI:
+								_broccoliLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								break;
+						}
+					}
+				}
+
+				break;
+			}
+			case EntityTypes::COOKIE:
+				_cookieLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				break;
+			case EntityTypes::MYSTERY_BAG:
+				_mysteryBagLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				break;
+			case EntityTypes::SPARE_CHANGE:
+				_spareChangeLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				break;
+			case EntityTypes::MILK:
+				_milkLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				break;
+			case EntityTypes::WATER:
+				_waterLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				break;
+			case EntityTypes::COLA:
+				_colaLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				break;
+			case EntityTypes::APPLE:
+				_appleLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				break;
+			case EntityTypes::WATERMELON:
+				_watermelonLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				break;
+			case EntityTypes::BANANA:
+				_bananaLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				break;
+			case EntityTypes::CARROT:
+				_carrotLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				break;
+			case EntityTypes::EGGPLANT:
+				_eggplantLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				break;
+			case EntityTypes::BROCCOLI:
+				_broccoliLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				break;
+		}
+	}
+}
+
+
+// return -1 on failure
 int AIManager::getNextDrinkSpawnIndex() {
 	std::vector<int> openIndices;
 	for (int i = 0; i < NB_DRINK_SPAWN_POINTS; i++) {
 		if (drinkInstances.at(i) == nullptr) openIndices.push_back(i);
 	}
+	if (0 == openIndices.size()) return -1; // no open spots
+
 	int rng = rand() % openIndices.size();
 	return openIndices.at(rng);
 }
 
+// return -1 on failure
 int AIManager::getNextFruitSpawnIndex() {
 	std::vector<int> openIndices;
 	for (int i = 0; i < NB_FRUIT_SPAWN_POINTS; i++) {
 		if (fruitInstances.at(i) == nullptr) openIndices.push_back(i);
 	}
-	int rng = rand() % openIndices.size();
+	if (0 == openIndices.size()) return -1; // no open spots
+
+	int rng = rand() % openIndices.size(); // ~~~~~~~~~BUG: my new changes can cause this size to be 0!!!! - get divide by zero exception! - this is because i'm setting thw wrong pointer to nullptr...
 	return openIndices.at(rng);
 }
 
+// return -1 on failure
 int AIManager::getNextVeggieSpawnIndex() {
 	std::vector<int> openIndices;
 	for (int i = 0; i < NB_VEGGIE_SPAWN_POINTS; i++) {
 		if (veggieInstances.at(i) == nullptr) openIndices.push_back(i);
 	}
+	if (0 == openIndices.size()) return -1; // no open spots
+
 	int rng = rand() % openIndices.size();
 	return openIndices.at(rng);
 }
 
 
-
-
-
 void AIManager::setNewAITargets() {
-	const std::vector<std::shared_ptr<ShoppingCartPlayer>> &players = Broker::getInstance()->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
+	const std::vector<std::shared_ptr<ShoppingCartPlayer>> &players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
 	for (std::shared_ptr<ShoppingCartPlayer> player : players) {
 		std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 		if (playerScript->_playerType == PlayerScript::BOT) {
 
+			// change up the target every frame, so need to clear it first...
+			playerScript->_targets.clear();
+
+
+			// 0. IF AN AI HAS THE HOT POTATO THEY WILL SIMPLY TRY TO FIND THE NEAREST (NON BASH_PROTECTED) PLAYER TO BASH AND PASS ON THE HOT POTATO...
 			if (playerScript->_hasHotPotato) {
-				playerScript->_targets.clear();
-				
-				// find the nearest other cart in this frame (that isn't bashed protected!)...
+
 				PxVec3 playerPos = player->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
 
 				std::shared_ptr<ShoppingCartPlayer> closestCart = nullptr;
@@ -391,116 +473,122 @@ void AIManager::setNewAITargets() {
 				}
 
 				if (closestCart != nullptr) { // target found...
-					playerScript->_targets.push_back(closestCartPos);
+					playerScript->_targets.push_back(ItemLocation(closestCartPos, false));
 				}
 			}
-			else if (playerScript->_targets.size() == 0) {
+			else {
+				// 1. IF STARTING COOKIE ON FIELD, DROP WHAT YOU'RE DOING AND SEEK IT OUT...
 
-				// at start of round, all AIs will head towards center hill (starting cookie)
-				if (_startingCookie != nullptr) {
-					playerScript->_targets.push_back(_startingCookieSpawnPoint.p);
+				if (_cookieLocations.size() > 0) {
+					playerScript->_targets.push_back(_cookieLocations.at(0));
 					continue;
 				}
 
-				// if mystery bag on field, go for it...
-				if (_mysteryBag != nullptr) {
-					playerScript->_targets.push_back(_mysteryBagSpawnPoint.p);
+				// 2. IF MYSTERY BAG ON FIELD, DROP WHAT YOU'RE DOING AND SEEK IT OUT...
+
+				if (_mysteryBagLocations.size() > 0) {
+					playerScript->_targets.push_back(_mysteryBagLocations.at(0));
 					continue;
 				}
 
-				// find a new final target (pickup on your list for now)
-				PxVec3 playerPos = player->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
+				// 3. SEEK OUT LIST ITEMS THAT YOU ARE MISSING...
+				// PRIORITY:
+				// A) CLOSEST WORLD ITEM
+				// B) CLOSEST ITEM ON A PLAYER
 
-				PxVec3 closestTarget;
-				bool targetFound = false;
-				float smallestSeparation = FLT_MAX;
+				// target candidates will only contain list items that the player needs...
+				std::vector<ItemLocation> targetCandidates;
+
+				// loop over player's list...
 				for (int i = 0; i < 3; i++) {
-					if (!playerScript->_shoppingList_Flags.at(i)) { // for each pickup on list that bot doesnt have yet...
-						PxVec3 candTarget;
-
+					if (!playerScript->_shoppingList_Flags.at(i)) { // see which items the player needs to complete their list... NOTE: this will also inherently prevent an AI from trying to infinitely seek out an APPLE (distance 0 from them) while they already have an APPLE
 						switch (playerScript->_shoppingList_Types.at(i)) {
 						case EntityTypes::MILK:
-							if (milkSpawnIndex != -1) candTarget = drinkSpawnPoints.at(milkSpawnIndex).p;
-							else continue;
+							for (ItemLocation loc : _milkLocations) {
+								targetCandidates.push_back(loc);
+							}
 							break;
 						case EntityTypes::WATER:
-							if (waterSpawnIndex != -1) candTarget = drinkSpawnPoints.at(waterSpawnIndex).p;
-							else continue;
+							for (ItemLocation loc : _waterLocations) {
+								targetCandidates.push_back(loc);
+							}
 							break;
 						case EntityTypes::COLA:
-							if (colaSpawnIndex != -1) candTarget = drinkSpawnPoints.at(colaSpawnIndex).p;
-							else continue;
+							for (ItemLocation loc : _colaLocations) {
+								targetCandidates.push_back(loc);
+							}
 							break;
 						case EntityTypes::APPLE:
-							if (appleSpawnIndex != -1) candTarget = fruitSpawnPoints.at(appleSpawnIndex).p;
-							else continue;
+							for (ItemLocation loc : _appleLocations) {
+								targetCandidates.push_back(loc);
+							}
 							break;
 						case EntityTypes::WATERMELON:
-							if (watermelonSpawnIndex != -1) candTarget = fruitSpawnPoints.at(watermelonSpawnIndex).p;
-							else continue;
+							for (ItemLocation loc : _watermelonLocations) {
+								targetCandidates.push_back(loc);
+							}
 							break;
 						case EntityTypes::BANANA:
-							if (bananaSpawnIndex != -1) candTarget = fruitSpawnPoints.at(bananaSpawnIndex).p;
-							else continue;
+							for (ItemLocation loc : _bananaLocations) {
+								targetCandidates.push_back(loc);
+							}
 							break;
 						case EntityTypes::CARROT:
-							if (carrotSpawnIndex != -1) candTarget = veggieSpawnPoints.at(carrotSpawnIndex).p;
-							else continue;
+							for (ItemLocation loc : _carrotLocations) {
+								targetCandidates.push_back(loc);
+							}
 							break;
 						case EntityTypes::EGGPLANT:
-							if (eggplantSpawnIndex != -1) candTarget = veggieSpawnPoints.at(eggplantSpawnIndex).p;
-							else continue;
+							for (ItemLocation loc : _eggplantLocations) {
+								targetCandidates.push_back(loc);
+							}
 							break;
 						case EntityTypes::BROCCOLI:
-							if (broccoliSpawnIndex != -1) candTarget = veggieSpawnPoints.at(broccoliSpawnIndex).p;
-							else continue;
+							for (ItemLocation loc : _broccoliLocations) {
+								targetCandidates.push_back(loc);
+							}
 							break;
 						}
+					}
+				}
 
+
+				PxVec3 playerPos = player->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
+				ItemLocation closestTarget;
+				bool targetFound = false;
+				float smallestSeparation = FLT_MAX;
+
+				for (ItemLocation loc : targetCandidates) {
+					if (!targetFound) {
 						targetFound = true;
-
-						float separation = (candTarget - playerPos).magnitude();
-						if (separation < smallestSeparation) {
-							smallestSeparation = separation;
-							closestTarget = candTarget;
+						float separation = (loc._pos - playerPos).magnitude();
+						smallestSeparation = separation;
+						closestTarget = loc;
+					}
+					else {
+						if (closestTarget._inWorld == loc._inWorld) {
+							// tiebreak on closest...
+							float separation = (loc._pos - playerPos).magnitude();
+							if (separation < smallestSeparation) {
+								smallestSeparation = separation;
+								closestTarget = loc;
+							}
 						}
-
+						else if (!closestTarget._inWorld && loc._inWorld) {
+							float separation = (loc._pos - playerPos).magnitude();
+							smallestSeparation = separation;
+							closestTarget = loc;
+						}
 					}
 				}
 
 				if (targetFound) {
 					playerScript->_targets.push_back(closestTarget);
-					//std::cout << closestTarget.x << " " << closestTarget.y << " " << closestTarget.z << std::endl;
-				}
-
-			}
-		}
-	}
-}
-
-
-
-
-
-
-void AIManager::removeDeletedTarget(physx::PxVec3 deletedTarget) {
-	const std::vector<std::shared_ptr<ShoppingCartPlayer>> &players = Broker::getInstance()->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
-	for (std::shared_ptr<ShoppingCartPlayer> player : players) {
-		std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
-		if (playerScript->_playerType == PlayerScript::BOT) {
-			for (int i = 0; i < playerScript->_targets.size(); i++) {
-				if (isApproxEqual(playerScript->_targets.at(i), deletedTarget)) {
-					//std::cout << "target removed" << std::endl;
-					playerScript->_targets.erase(playerScript->_targets.begin() + i);
-					break;
 				}
 			}
 		}
 	}
 }
-
-
-
 
 
 std::string AIManager::getMatchTimePrettyFormat() {
