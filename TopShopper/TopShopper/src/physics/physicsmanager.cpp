@@ -431,14 +431,29 @@ void PhysicsManager::switchToScene1() {
 	// ROOF:
 	std::shared_ptr<Roof> roof = std::dynamic_pointer_cast<Roof>(instantiateEntity(EntityTypes::ROOF, PxTransform(0.0f, 0.0f, 0.0f, PxQuat(PxIdentity)), "roof"));
 
-	// OBSTACLE1.1:
-	std::shared_ptr<Obstacle1> obstacle1_1 = std::dynamic_pointer_cast<Obstacle1>(instantiateEntity(EntityTypes::OBSTACLE1, PxTransform(-115.0f, 0.0f, -4.0f, PxQuat(PxIdentity)), "obstacle1_1"));
+	// BLUE WALL BOTTOM:
+	std::shared_ptr<Obstacle1> blueWallBot = std::dynamic_pointer_cast<Obstacle1>(instantiateEntity(EntityTypes::OBSTACLE1, PxTransform(18.0f, 0.0f, 146.0f, PxQuat(PxIdentity)), "blueWallBot"));
 
-	// OBSTACLE2.1:
-	std::shared_ptr<Obstacle2> obstacle2_1 = std::dynamic_pointer_cast<Obstacle2>(instantiateEntity(EntityTypes::OBSTACLE2, PxTransform(70.0f, 0.0f, 90.0f, PxQuat(PxIdentity)), "obstacle2_1"));
+	// BLUE WALL MIDDLE:
+	std::shared_ptr<Obstacle2> blueWallMid = std::dynamic_pointer_cast<Obstacle2>(instantiateEntity(EntityTypes::OBSTACLE2, PxTransform(-101.0f, 0.0f, 168.0f, PxQuat(PxIdentity)), "blueWallMid"));
 
-	// OBSTACLE2.2:
-	std::shared_ptr<Obstacle2> obstacle2_2 = std::dynamic_pointer_cast<Obstacle2>(instantiateEntity(EntityTypes::OBSTACLE2, PxTransform(70.0f, 0.0f, -90.0f, PxQuat(PxIdentity)), "obstacle2_2"));
+	// BLUE WALL TOP:
+	std::shared_ptr<Obstacle3> blueWallTop = std::dynamic_pointer_cast<Obstacle3>(instantiateEntity(EntityTypes::OBSTACLE3, PxTransform(-141.0f, 0.0f, 61.0f, PxQuat(PxIdentity)), "blueWallTop"));
+
+	// GREEN WALL BOTTOMS:
+	std::shared_ptr<Obstacle4> greenWallBot1 = std::dynamic_pointer_cast<Obstacle4>(instantiateEntity(EntityTypes::OBSTACLE4, PxTransform(-105.0f, 0.0f, -63.0f, PxQuat(PxIdentity)), "greenWallBot1"));
+	std::shared_ptr<Obstacle4> greenWallBot2 = std::dynamic_pointer_cast<Obstacle4>(instantiateEntity(EntityTypes::OBSTACLE4, PxTransform(4.0f, 0.0f, -125.0f, PxQuat(PxIdentity)), "greenWallBot2"));
+
+	// GREEN WALL TOP: ~~~~~~~LOL THIS IS HUGE!
+	std::shared_ptr<Obstacle5> greenWallTop = std::dynamic_pointer_cast<Obstacle5>(instantiateEntity(EntityTypes::OBSTACLE5, PxTransform(-89.0f, 0.0f, -161.0f, PxQuat(PxIdentity)), "greenWallTop"));
+
+	// RED WALL BOTTOM:
+	std::shared_ptr<Obstacle6> redWallBot = std::dynamic_pointer_cast<Obstacle6>(instantiateEntity(EntityTypes::OBSTACLE6, PxTransform(159.0f, 0.0f, -75.0f, PxQuat(PxIdentity)), "redWallBot"));
+
+	// RED WALL TOP:
+	std::shared_ptr<Obstacle7> redWallTop = std::dynamic_pointer_cast<Obstacle7>(instantiateEntity(EntityTypes::OBSTACLE7, PxTransform(160.0f, 0.0f, 72.0f, PxQuat(PxIdentity)), "redWallTop"));
+
+
 
 	// VEHICLE 1:
 	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(0.0f, 5.0f, -160.0f, PxQuat(PxIdentity)), "vehicle1"));
@@ -742,6 +757,126 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 
 		// ENTITY...
 		entity = std::make_shared<Obstacle2>(actor);
+		break;
+	}
+	case EntityTypes::OBSTACLE3:
+	{
+		std::vector<PxVec3> verts = castVectorOfGLMVec4ToVectorOfPxVec3(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE3_GEO)->verts);
+		std::vector<PxU32> indices = _broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE3_GEO)->vIndex;
+		PxMaterial *material = gPhysics->createMaterial(0.5f, 0.5f, 0.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_OBSTACLE, CollisionFlags::COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eSIMULATION_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createTriMeshCollider(verts, indices, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidStatic *actor = gPhysics->createRigidStatic(transform);
+		actor->setName(name);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Obstacle3>(actor);
+		break;
+	}
+	case EntityTypes::OBSTACLE4:
+	{
+		std::vector<PxVec3> verts = castVectorOfGLMVec4ToVectorOfPxVec3(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE4_GEO)->verts);
+		std::vector<PxU32> indices = _broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE4_GEO)->vIndex;
+		PxMaterial *material = gPhysics->createMaterial(0.5f, 0.5f, 0.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_OBSTACLE, CollisionFlags::COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eSIMULATION_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createTriMeshCollider(verts, indices, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidStatic *actor = gPhysics->createRigidStatic(transform);
+		actor->setName(name);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Obstacle4>(actor);
+		break;
+	}
+	case EntityTypes::OBSTACLE5:
+	{
+		std::vector<PxVec3> verts = castVectorOfGLMVec4ToVectorOfPxVec3(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE5_GEO)->verts);
+		std::vector<PxU32> indices = _broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE5_GEO)->vIndex;
+		PxMaterial *material = gPhysics->createMaterial(0.5f, 0.5f, 0.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_OBSTACLE, CollisionFlags::COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eSIMULATION_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createTriMeshCollider(verts, indices, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidStatic *actor = gPhysics->createRigidStatic(transform);
+		actor->setName(name);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Obstacle5>(actor);
+		break;
+	}
+	case EntityTypes::OBSTACLE6:
+	{
+		std::vector<PxVec3> verts = castVectorOfGLMVec4ToVectorOfPxVec3(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE6_GEO)->verts);
+		std::vector<PxU32> indices = _broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE6_GEO)->vIndex;
+		PxMaterial *material = gPhysics->createMaterial(0.5f, 0.5f, 0.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_OBSTACLE, CollisionFlags::COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eSIMULATION_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createTriMeshCollider(verts, indices, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidStatic *actor = gPhysics->createRigidStatic(transform);
+		actor->setName(name);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Obstacle6>(actor);
+		break;
+	}
+	case EntityTypes::OBSTACLE7:
+	{
+		std::vector<PxVec3> verts = castVectorOfGLMVec4ToVectorOfPxVec3(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE7_GEO)->verts);
+		std::vector<PxU32> indices = _broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE7_GEO)->vIndex;
+		PxMaterial *material = gPhysics->createMaterial(0.5f, 0.5f, 0.0f);
+		PxFilterData simData(CollisionFlags::COLLISION_FLAG_OBSTACLE, CollisionFlags::COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+		PxFilterData qryData;
+		setupNonDrivableSurface(qryData);
+		bool isExclusive = true;
+		PxShapeFlags shapeFlags = PxShapeFlag::eSCENE_QUERY_SHAPE | PxShapeFlag::eSIMULATION_SHAPE | PxShapeFlag::eVISUALIZATION;
+
+		// SHAPE...
+		PxShape *shape = createTriMeshCollider(verts, indices, material, simData, qryData, isExclusive, shapeFlags);
+
+		// ACTOR...
+		PxRigidStatic *actor = gPhysics->createRigidStatic(transform);
+		actor->setName(name);
+
+		actor->attachShape(*shape);
+
+		// ENTITY...
+		entity = std::make_shared<Obstacle7>(actor);
 		break;
 	}
 	case EntityTypes::MILK:

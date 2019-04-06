@@ -311,12 +311,9 @@ void PlayerScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *
 
 	//Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1));
 	
-	if (otherEntity->getTag() == EntityTypes::OBSTACLE1 || otherEntity->getTag() == EntityTypes::OBSTACLE2 || otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+	if (otherEntity->getTag() == EntityTypes::OBSTACLE1 || otherEntity->getTag() == EntityTypes::OBSTACLE2 || otherEntity->getTag() == EntityTypes::OBSTACLE3 || otherEntity->getTag() == EntityTypes::OBSTACLE4 || otherEntity->getTag() == EntityTypes::OBSTACLE5 || otherEntity->getTag() == EntityTypes::OBSTACLE6 || otherEntity->getTag() == EntityTypes::OBSTACLE7 || otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER || otherEntity->getTag() == EntityTypes::ROOF) {
 		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND), distanceBetween, angle);
 		Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND));
-	}
-
-	if (otherEntity->getTag() == EntityTypes::OBSTACLE1 || otherEntity->getTag() == EntityTypes::OBSTACLE2 || otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER || otherEntity->getTag() == EntityTypes::ROOF) {
 		
 		PxVec3 impulseDir = contacts->normal;
 		// now, make sure the collision normal points towards the cart body...
@@ -634,8 +631,8 @@ void PlayerScript::navigate() {
 	bool forcedTurbo = false;
 	// ~~~NOTE: this depends on the map staying the same size! AND being symmetrically round!
 	const PxVec3 mapCenterPos = PxVec3(0.0f, 0.0f, 0.0f);
-	const float hillRadius = 50.0f; // rounding up to be safe (its alround 48.?)
-	const float wallStartRadius = 165.0f; // rounding down to be safe (its around 168.?)
+	const float hillRadius = 70.0f; // rounding up to be safe
+	const float wallStartRadius = 253.0f; // rounding down to be safe
 	if (_targets.size() > 0) {
 		PxVec3 targetPos = _targets.at(0)._pos;
 		PxVec3 diff = targetPos - pos;
@@ -736,7 +733,7 @@ void PlayerScript::navigate() {
 						}
 					}
 				}
-				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2 || entityHit->getTag() == EntityTypes::OBSTACLE3 || entityHit->getTag() == EntityTypes::OBSTACLE4 || entityHit->getTag() == EntityTypes::OBSTACLE5 || entityHit->getTag() == EntityTypes::OBSTACLE6 || entityHit->getTag() == EntityTypes::OBSTACLE7) {
 					turnDir += 1;
 					redirected = true;
 				}
@@ -779,7 +776,7 @@ void PlayerScript::navigate() {
 						}
 					}
 				}
-				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2 || entityHit->getTag() == EntityTypes::OBSTACLE3 || entityHit->getTag() == EntityTypes::OBSTACLE4 || entityHit->getTag() == EntityTypes::OBSTACLE5 || entityHit->getTag() == EntityTypes::OBSTACLE6 || entityHit->getTag() == EntityTypes::OBSTACLE7) {
 					turnDir += 2;
 					redirected = true;
 				}
@@ -822,7 +819,7 @@ void PlayerScript::navigate() {
 						}
 					}
 				}
-				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2 || entityHit->getTag() == EntityTypes::OBSTACLE3 || entityHit->getTag() == EntityTypes::OBSTACLE4 || entityHit->getTag() == EntityTypes::OBSTACLE5 || entityHit->getTag() == EntityTypes::OBSTACLE6 || entityHit->getTag() == EntityTypes::OBSTACLE7) {
 					turnDir -= 2;
 					redirected = true;
 				}
@@ -865,7 +862,7 @@ void PlayerScript::navigate() {
 						}
 					}
 				}
-				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2 || entityHit->getTag() == EntityTypes::OBSTACLE3 || entityHit->getTag() == EntityTypes::OBSTACLE4 || entityHit->getTag() == EntityTypes::OBSTACLE5 || entityHit->getTag() == EntityTypes::OBSTACLE6 || entityHit->getTag() == EntityTypes::OBSTACLE7) {
 					turnDir -= 1;
 					redirected = true;
 				}
@@ -912,7 +909,7 @@ void PlayerScript::navigate() {
 							}
 						}
 					}
-					else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2) {
+					else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2 || entityHit->getTag() == EntityTypes::OBSTACLE3 || entityHit->getTag() == EntityTypes::OBSTACLE4 || entityHit->getTag() == EntityTypes::OBSTACLE5 || entityHit->getTag() == EntityTypes::OBSTACLE6 || entityHit->getTag() == EntityTypes::OBSTACLE7) {
 						turnDir = 3;
 						redirected = true;
 					}
