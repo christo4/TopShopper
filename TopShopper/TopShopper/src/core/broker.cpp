@@ -43,7 +43,7 @@ void Broker::updateAllSeconds(double& simTime, const double& fixedDeltaTime, dou
 	_loadingManager->updateSeconds(variableDeltaTime); // useless right now, but if we want dynamic loading it could go first
 	_inputManager->updateSeconds(variableDeltaTime); // NOTE: this needs to be done before physics updates
 	
-	manageScene(accumulator);
+	manageScene(accumulator, variableDeltaTime);
 	//std::cout << std::to_string(_scene) << std::endl;
 
 	if (_scene == GAME) {
@@ -81,12 +81,13 @@ void Broker::updateAllSeconds(double& simTime, const double& fixedDeltaTime, dou
 }
 
 
-void Broker::manageScene(double& accumulator) {
+void Broker::manageScene(double& accumulator, double vartime) {
 	//ADD DELAY
-	if (delayX != 0) { // NOTE: this should probably be changed to use time, to make it framerate independant... (also a delay of 200frames in game scene is longer than a delay of 200 in main menu, due to physics/ai updates) 
-		delayX -= 1;
+	if (delayX < 0.2) { // NOTE: this should probably be changed to use time, to make it framerate independant... (also a delay of 200frames in game scene is longer than a delay of 200 in main menu, due to physics/ai updates) 
+		delayX += vartime;
 		return;
 	}
+	//std::cout << vartime << std::endl;
 
 	player1 = _inputManager->getGamePad(1);
 	bool playerControlled = true;
@@ -101,7 +102,7 @@ void Broker::manageScene(double& accumulator) {
 			else {
 				_cursorPositionStart += 1; 
 			}
-			delayX = 200;
+			delayX = 0;
 		}
 		else if (kam->sKey || (playerControlled && player1->leftStickY < -0.5)) {
 			if (_cursorPositionStart == 0) {
@@ -110,7 +111,7 @@ void Broker::manageScene(double& accumulator) {
 			else {
 				_cursorPositionStart -= 1;
 			}
-			delayX = 200;
+			delayX = 0;
 		}
 		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
 			switch (_cursorPositionStart) {
@@ -150,7 +151,7 @@ void Broker::manageScene(double& accumulator) {
 			else {
 				_cursorPositionSetup += 1;
 			}
-			delayX = 200;
+			delayX = 0;
 		}
 		else if (kam->sKey || (playerControlled && player1->leftStickY < -0.02)) {
 			if (_cursorPositionSetup == 0) {
@@ -159,7 +160,7 @@ void Broker::manageScene(double& accumulator) {
 			else {
 				_cursorPositionSetup -= 1;
 			}
-			delayX = 200;
+			delayX = 0;
 		}
 
 		if ((kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) && _cursorPositionSetup == 0) {
@@ -189,7 +190,7 @@ void Broker::manageScene(double& accumulator) {
 			else {
 				_cursorPositionPause += 1;
 			}
-			delayX = 100;
+			delayX = 0;
 		}
 		else if (kam->sKey || (playerControlled && player1->leftStickY < -0.02)) {
 			if (_cursorPositionPause == 0) {
@@ -198,7 +199,7 @@ void Broker::manageScene(double& accumulator) {
 			else {
 				_cursorPositionPause -= 1;
 			}
-			delayX = 100;
+			delayX = 0;
 		}
 		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
 			if (_cursorPositionPause == 1) {

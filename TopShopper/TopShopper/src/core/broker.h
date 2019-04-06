@@ -28,7 +28,7 @@ public:
 
 	void initAll(); // calls each subsystem's init function
 	void updateAllSeconds(double& simTime, const double& fixedDeltaTime, double& variableDeltaTime, double& accumulator); // this update function will call each subsystem's update function in an appropriate order.
-	void manageScene(double& accumulator);
+	void manageScene(double& accumulator, double vartime);
 
 	AIManager* getAIManager() { return _aiManager; }
 	AudioManager* getAudioManager() { return _audioManager; }
@@ -42,7 +42,7 @@ public:
 	unsigned int _cursorPositionSetup;
 	unsigned int _cursorPositionPause;
 	unsigned int delayY;
-	unsigned int delayX;
+	double delayX;
 
 private:
 	static Broker* _instance;
