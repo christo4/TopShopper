@@ -103,13 +103,13 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 void RenderingManager::RenderScene() {
 	//Clears the screen to a light grey background
 	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_CULL_FACE);
+
 
 	float fov = 60.0f;
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
-
-
-	std::cout << windowWidth << " " << windowHeight << std::endl;
-
 
 
 	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, 1.0f, 500.0f);
@@ -157,43 +157,6 @@ void RenderingManager::RenderScene() {
 	}
 
 	
-	/*
-	glViewport(0, 0, (GLuint)1920, (GLuint)1080);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glUseProgram(quadTestShaderProgram);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, _depthMapTex);
-	GLuint memeID = glGetUniformLocation(quadTestShaderProgram, "depthMap");
-	glUniform1i(memeID, 0);
-
-	Geometry quad;
-	quad.verts.push_back(glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f));
-	quad.verts.push_back(glm::vec4(1.0f, -1.0f, 0.0f, 1.0f));
-	quad.verts.push_back(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
-	quad.verts.push_back(glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f));
-	quad.verts.push_back(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
-	quad.verts.push_back(glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f));
-
-	quad.uvs.push_back(glm::vec2(0.0f, 0.0f));
-	quad.uvs.push_back(glm::vec2(1.0f, 0.0f));
-	quad.uvs.push_back(glm::vec2(1.0f, 1.0f));
-	quad.uvs.push_back(glm::vec2(0.0f, 0.0f));
-	quad.uvs.push_back(glm::vec2(1.0f, 1.0f));
-	quad.uvs.push_back(glm::vec2(0.0f, 1.0f));
-
-	glBindVertexArray(quad.vao);
-	assignBuffers(quad);
-	setBufferData(quad);
-	glDrawArrays(GL_TRIANGLES, 0, quad.verts.size());
-	glBindVertexArray(0);
-	deleteBufferData(quad);
-	*/
-
-
-
 
 	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -313,10 +276,6 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camer
 
 
 
-
-
-
-
 void RenderingManager::renderEndScreen() {
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
 	std::shared_ptr<ShoppingCartPlayer> player = players[0];
@@ -379,15 +338,13 @@ bool compareStruct1(Player one, Player two) {
 }
 
 
-
-
 void RenderingManager::renderPauseScreen() {
 	//960 540
 	renderText("PAUSED", windowWidth*0.37, windowHeight*0.45, 3.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
 
-//TODO: shouldn't be hardcoding the offsets for when the score display is dependent on the number of players in the game
+//TODO: *****needs to retrieve all the other players in the game to render to the side of the screen 
 void RenderingManager::renderHud(int playerID) {
 
 
@@ -397,13 +354,13 @@ void RenderingManager::renderHud(int playerID) {
 	int points = script->_points;
 	int boost = script->getNBBoosts();
 
-	//render the input players boost meter
 
+	//INPUT PLAYER STUFF BELOW
+	//render the input players boost meter
 	for (int i = 0; i < boost; i++) {
 		renderSprite(*_boostSprite, -0.95 + (i * 0.15), -0.95, -0.75 + (i * 0.15), -0.75);
 	}
 
-	renderSprite(*_borderSprite, -0.15f, -0.9f, 0.15f, -0.75f);
 	//render the input players shopping list on the bottom of the screen
 	float offset = 0.10;
 	int i = 0;
@@ -417,70 +374,56 @@ void RenderingManager::renderHud(int playerID) {
 	}
 	i = 0;
 
+	renderSprite(*getPlayerBorderSprite(playerID), -0.15f, -0.92f, 0.16f, -0.73f);
 	std::string pointDisplay = std::to_string(points);
-	renderText("Your Score: " + pointDisplay, windowWidth*0.795, windowHeight*0.93, 1.0f, glm::vec3(0.8f, 0.0f, 0.0f));
+	renderText("Your Score: " + pointDisplay, windowWidth*0.795, windowHeight*0.93, 1.0f, getPlayerColor(playerID));
 	
 
-
-
-
-	//render player 2's shopping list
-	renderSprite(*_borderSprite, 0.69f, 0.55f, 0.90f, 0.70f);
-	player = players[1];
-	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
-	points = script->_points;
-
-	offset = 0.07f;
-	for (EntityTypes eType : script->_shoppingList_Types) {
-
-		if (script->_shoppingList_Flags[i]) {
-
-			renderSprite(*getSpriteTexture(EntityTypes::CHECK_MARK), 0.69f + (offset*i), 0.55f, 0.76f + (offset*i), 0.70f);
+	//OTHER PLAYER STUFF BELOW
+	//Render the other player's lists and points to the side of the input player's screen
+	std::vector<int> otherPlayerIDs;
+	for (int i = 0; i < players.size(); i ++) {
+		if (i != playerID) {
+			otherPlayerIDs.push_back(i);
 		}
-
-		renderSprite(*getSpriteTexture(eType), 0.69f + (offset*i), 0.55f, 0.76f + (offset*i), 0.70f);
-		i++;
 	}
-	i = 0;
 
 
+	float shoppingListOffSetAccum = 0.0f;
+	float scoreOffsetAccum = 0.0f;
+	float shoppingListYOffset = -0.25f;
+	float scoreYOffset = -0.14f;
 
-	
-	pointDisplay = std::to_string(points);
-	//renderText("Opp1 Score: " + pointDisplay, 1580, 950, 0.8f, glm::vec3(0.0f, 0.0f, 0.8f));
-	renderText("Opp1 Score: " + pointDisplay, windowWidth*0.82, windowHeight*0.88, 0.8f, glm::vec3(0.0f, 0.0f, 0.8f));
+	for (int otherPlayerID : otherPlayerIDs) {
+
+		player = players[otherPlayerID];
+		script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+		points = script->_points;
 
 
-	//render player 3's shopping list
-	renderSprite(*_borderSprite, 0.69f, 0.30f, 0.90f, 0.45f);
-	player = players[2];
-	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
-	points = script->_points;
+		int i = 0;
+		offset = 0.07f;
+		for (EntityTypes eType : script->_shoppingList_Types) {
 
-	offset = 0.07f;
-	for (EntityTypes eType : script->_shoppingList_Types) {
+			if (script->_shoppingList_Flags[i]) {
 
-		if (script->_shoppingList_Flags[i]) {
-			renderSprite(*getSpriteTexture(EntityTypes::CHECK_MARK), 0.69f + (offset*i), 0.30f, 0.76f + (offset*i), 0.45f);
+				renderSprite(*getSpriteTexture(EntityTypes::CHECK_MARK), 0.69f + (offset*i), 0.55f + shoppingListOffSetAccum, 0.76f + (offset*i), 0.70f + shoppingListOffSetAccum);
+			}
+
+			renderSprite(*getSpriteTexture(eType), 0.69f + (offset*i), 0.55f + shoppingListOffSetAccum, 0.76f + (offset*i), 0.70f + shoppingListOffSetAccum);
+			i++;
 		}
-		renderSprite(*getSpriteTexture(eType), 0.69f + (offset*i), 0.30f, 0.76f + (offset*i), 0.45f);
-		i++;
+		renderSprite(*getPlayerBorderSprite(otherPlayerID), 0.69f, 0.55f + shoppingListOffSetAccum, 0.90f, 0.70f + shoppingListOffSetAccum);
+
+		pointDisplay = std::to_string(points);
+		renderText("Score: " + pointDisplay, windowWidth*0.82, windowHeight*(0.88 + scoreOffsetAccum), 0.8f, getPlayerColor(otherPlayerID));
+
+
+		shoppingListOffSetAccum += shoppingListYOffset;
+		scoreOffsetAccum += scoreYOffset;
 	}
-	i = 0;
-
-	pointDisplay = std::to_string(points);
-	//renderText("Opp2 Score: " + pointDisplay, 1580, 800, 0.8f, glm::vec3(0.0f, 0.8f, 0.0f));
-	renderText("Opp2 Score: " + pointDisplay, windowWidth*0.82, windowHeight*0.74, 0.8f, glm::vec3(0.0f, 0.8f, 0.0f));
-	
-
-	std::string timeString = _broker->getAIManager()->getMatchTimePrettyFormat();
-	//renderText(timeString, 870, 1010, 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
-	renderText(timeString, windowWidth*0.45, windowHeight*0.94, 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
-
-	//renderText("Boost:", 100, 100, 1.5f, glm::vec3(0.0f, 0.0f, 0.0f));
-	renderText("Boost:", windowWidth*0.04, windowHeight*0.101, 1.5f, glm::vec3(0.0f, 0.0f, 0.0f));
-	
 }
+
 
 
 
@@ -599,8 +542,8 @@ void RenderingManager::renderText(std::string text, GLfloat x, GLfloat y, GLfloa
 
 	glUseProgram(0);
 
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_BLEND);
+	//glDisable(GL_CULL_FACE);
+	//glDisable(GL_BLEND);
 }
 
 
@@ -814,7 +757,12 @@ void RenderingManager::initFrameBuffers() {
 
 void RenderingManager::initSpriteTextures() {
 
-	InitializeTexture(_borderSprite, "../TopShopper/resources/Sprites/Border.png", GL_TEXTURE_2D);
+	InitializeTexture(_borderSpriteBlue, "../TopShopper/resources/Sprites/BlueBorder.png", GL_TEXTURE_2D);
+	InitializeTexture(_borderSpriteBlack, "../TopShopper/resources/Sprites/BlackBorder.png", GL_TEXTURE_2D);
+	InitializeTexture(_borderSpritePurple, "../TopShopper/resources/Sprites/PurpleBorder.png", GL_TEXTURE_2D);
+	InitializeTexture(_borderSpriteRed, "../TopShopper/resources/Sprites/RedBorder.png", GL_TEXTURE_2D);
+	InitializeTexture(_borderSpriteOrange, "../TopShopper/resources/Sprites/OrangeBorder.png", GL_TEXTURE_2D);
+	InitializeTexture(_borderSpriteGreen, "../TopShopper/resources/Sprites/GreenBorder.png", GL_TEXTURE_2D);
 	InitializeTexture(_appleSprite, "../TopShopper/resources/Sprites/Apple.png", GL_TEXTURE_2D);
 	InitializeTexture(_bananaSprite, "../TopShopper/resources/Sprites/Banana.png", GL_TEXTURE_2D);
 	InitializeTexture(_broccoliSprite, "../TopShopper/resources/Sprites/Broccoli.png", GL_TEXTURE_2D);
@@ -896,6 +844,46 @@ void RenderingManager::init3DTextures() {
 
 
 }
+
+
+MyTexture * RenderingManager::getPlayerBorderSprite(int playerID) {
+	switch (playerID) {
+	case 0:
+		return _borderSpriteRed;
+	case 1:
+		return _borderSpriteBlue;
+	case 2:
+		return _borderSpriteGreen;
+	case 3:
+		return _borderSpritePurple;
+	case 4:
+		return _borderSpriteOrange;
+	case 5:
+		return _borderSpriteBlack;
+	default:
+		return nullptr;
+	}
+}
+
+glm::vec3 RenderingManager::getPlayerColor(int playerID) {
+	switch (playerID) {
+	case 0:
+		return glm::vec3(0.8f, 0.0f, 0.0f);
+	case 1:
+		return glm::vec3(0.0f, 0.0f, 0.8f);
+	case 2:
+		return glm::vec3(0.0f, 0.8f, 0.0f);
+	case 3:
+		return glm::vec3(0.8f, 0.0f, 0.8f);
+	case 4:
+		return glm::vec3(1.0f, 0.5f, 0.0f);
+	case 5:
+		return glm::vec3(0.0f, 0.0f, 0.0f);
+	default:
+		return glm::vec3(0.0f, 0.0f, 0.0f);
+	}
+}
+
 
 
 

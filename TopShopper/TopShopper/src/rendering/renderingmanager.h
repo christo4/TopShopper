@@ -30,7 +30,12 @@ struct Player {
 };
 
 enum SpriteTexture {
-	BORDER_SPRITE,
+	BORDER_SPRITE_BLACK,
+	BORDER_SPRITE_BLUE,
+	BORDER_SPRITE_RED,
+	BORDER_SPRITE_PURPLE,
+	BORDER_SPRITE_ORANGE,
+	BORDER_SPRITE_GREEN,
 	APPLE_SPRITE,
 	BANANA_SPRITE,
 	BROCCOLI_SPRITE,
@@ -69,6 +74,8 @@ public:
 	void init3DTextures();
 	void initFrameBuffers();
 	MyTexture * getSpriteTexture(EntityTypes type);
+	MyTexture * getPlayerBorderSprite(int playerID);
+	glm::vec3 getPlayerColor(int playerID);
 
 
 	//Create vao and vbos for objects
@@ -96,8 +103,6 @@ public:
 
 	glm::mat4 Camera(float theta, float radius, float phi);
 	void push3DObjects();
-	//void textBuffers();
-
 	std::map<GLchar, Character> Characters;
 
 	int windowHeight;
@@ -118,7 +123,12 @@ private:
 
 	void openWindow();
 
-	MyTexture *_borderSprite = new MyTexture();
+	MyTexture *_borderSpriteBlack = new MyTexture();
+	MyTexture *_borderSpriteBlue = new MyTexture();
+	MyTexture *_borderSpriteRed = new MyTexture();
+	MyTexture *_borderSpritePurple = new MyTexture();
+	MyTexture *_borderSpriteOrange = new MyTexture();
+	MyTexture *_borderSpriteGreen = new MyTexture();
 	MyTexture *_appleSprite = new MyTexture();
 	MyTexture *_bananaSprite = new MyTexture();
 	MyTexture *_broccoliSprite = new MyTexture();
