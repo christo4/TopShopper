@@ -41,8 +41,7 @@ public:
 	unsigned int _cursorPositionStart;
 	unsigned int _cursorPositionSetup;
 	unsigned int _cursorPositionPause;
-	unsigned int delayY;
-	double delayX;
+	double delayX = -1.0; // safety (don't start with a delay)
 
 private:
 	static Broker* _instance;
