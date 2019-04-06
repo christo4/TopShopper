@@ -14,7 +14,7 @@ Cookie::Cookie(PxRigidDynamic *actor)
 	addComponent(ComponentTypes::PICKUP_SCRIPT);
 	std::shared_ptr<PickupScript> pickupScript = std::static_pointer_cast<PickupScript>(getComponent(ComponentTypes::PICKUP_SCRIPT));
 	pickupScript->_points = 75;
-	pickupScript->_rotationSpeed = 180.0; // degrees/s ??? -- TODO: figure this out
+	//pickupScript->_rotationSpeed = 180.0; // degrees/s ??? -- TODO: figure this out
 }
 
 

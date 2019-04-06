@@ -4,8 +4,7 @@
 #include <array>
 #include <vector>
 #include <glm/glm.hpp>
-#include <foundation/PxVec3.h>
-
+#include "utility/utility.h"
 
 
 class Entity;
@@ -20,18 +19,6 @@ namespace physx {
 // ORDERED ALPHABETICALLY FROM 0 (corresponding to index in entity::_components)
 // NOTE: I'm enforcing that an entity can have at most 1 BehaviourScript component and it will be last index
 enum ComponentTypes {
-	// AUDIO...
-	//AUDIO_LISTENER=0,
-	//AUDIO_SOURCE,
-
-	// RENDERING...
-	//CAMERA,
-	//MESH,
-
-	// AI...
-	//NAV_MESH_AGENT,
-
-
 	BEHAVIOUR_SCRIPT,
 	NUMBER_OF_COMPONENT_TYPES,
 
@@ -49,31 +36,6 @@ struct Component {
 	Entity *_entity = nullptr;
 	ComponentTypes _tag;
 };
-
-//struct AudioListener : Component {
-	// simple, just flags we want audio to be relative to this point
-//};
-
-//struct AudioSource : Component {
-	// audioclip(s), isMute ? , playOnAwake ? , Loop ? , Priority, volume)
-//};
-
-//struct Camera : Component {
-	// FOV, clipping planes(near and far), etc.
-//};
-
-//struct Mesh : Component {
-	//std::vector<glm::vec4> verts;
-	//std::vector<glm::vec3> normals;
-	//std::vector<glm::vec2> uvs;
-	//std::vector<unsigned int> indices;
-	// TODO: material properties 
-//};
-
-//struct NavMeshAgent : Component {
-	//movement properties, target, path finding weights, etc.
-//};
-
 
 
 // SCRIPTS ...
@@ -141,7 +103,7 @@ struct PickupScript : BehaviourScript {
 	// SPECIFICS...
 
 	int _points = 0; // value of this pickup
-	double _rotationSpeed = 0.0;
+	//double _rotationSpeed = 0.0;
 
 };
 
@@ -151,7 +113,6 @@ struct PlayerScript : BehaviourScript {
 	enum PlayerTypes {
 		HUMAN,
 		BOT
-		//OBSTACLE
 	};
 
 	PlayerScript(Entity *entity);
@@ -196,14 +157,8 @@ struct PlayerScript : BehaviourScript {
 
 
 	// AI STUFF...
-	std::vector<physx::PxVec3> _targets; // starts empty
-
-	//std::vector<physx::PxVec3> _targets = { physx::PxVec3(0.0f, 2.0f, -80.0f), physx::PxVec3(80.0f, 2.0f, 0.0f), physx::PxVec3(0.0f, 2.0f, 80.0f), physx::PxVec3(-80.0f, 2.0f, 0.0f) }; // hardcoded test point
-	//std::vector<physx::PxVec3> _targets = { physx::PxVec3(0.0f, 2.0f, 160.0f) }; // hardcoded test point
-
-
+	std::vector<ItemLocation> _targets; // starts empty
 	void navigate();
-
 
 
 
@@ -212,8 +167,7 @@ struct PlayerScript : BehaviourScript {
 	void giveHotPotato(double remainingDuration);
 	void tickHotPotatoTimer(double fixedDeltaTime);
 	void explodeHotPotato();
-
-
+	
 	int getNBBoosts();
 };
 

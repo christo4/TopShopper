@@ -5,7 +5,6 @@
 #include "core/broker.h"
 #include <iostream>
 #include <cstdlib>
-#include "utility/utility.h"
 
 
 
@@ -23,12 +22,18 @@ BehaviourScript::BehaviourScript(Entity *entity, ComponentTypes tag) : Component
 ////////////////////////////
 MysteryBagScript::MysteryBagScript(Entity *entity) : BehaviourScript(entity, ComponentTypes::MYSTERY_BAG_SCRIPT) {}
 
-void MysteryBagScript::onSpawn() {}
+void MysteryBagScript::onSpawn() {
+	_entity->_actor->is<PxRigidDynamic>()->setAngularDamping(0.0f);
+	_entity->_actor->is<PxRigidDynamic>()->setAngularVelocity(PxVec3(1, 5, 1));
+}
+
 void MysteryBagScript::fixedUpdate(double fixedDeltaTime) {}
 void MysteryBagScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
 void MysteryBagScript::onCollisionExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
 
 void MysteryBagScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity) {
+	if (_entity->getDestroyFlag()) return; // PREVENTS MULTIPLE CARTS PICKING THIS UP IN SAME FRAME
+	
 	if (otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
 		ShoppingCartPlayer *player = static_cast<ShoppingCartPlayer*>(otherEntity);
 		std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
@@ -61,7 +66,11 @@ void MysteryBagScript::onDestroy() {}
 ////////////////////////////
 PickupScript::PickupScript(Entity *entity) : BehaviourScript(entity, ComponentTypes::PICKUP_SCRIPT) {}
 
-void PickupScript::onSpawn() {}
+void PickupScript::onSpawn() {
+	_entity->_actor->is<PxRigidDynamic>()->setAngularDamping(0.0f);
+	_entity->_actor->is<PxRigidDynamic>()->setAngularVelocity(PxVec3(1, 5, 1));
+}
+
 void PickupScript::fixedUpdate(double fixedDeltaTime) {}
 
 void PickupScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {
@@ -85,7 +94,11 @@ void PickupScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *
 
 		dyn->setLinearVelocity(PxVec3(0.0f));
 		// ~~~~NOTE: this might conflict with future spinning pickups
-		dyn->setAngularVelocity(PxVec3(0.0f));
+		//dyn->setAngularVelocity(PxVec3(0.0f));
+
+		// reset rotation info to be same as on spawn...
+		dyn->setAngularDamping(0.0f);
+		dyn->setAngularVelocity(PxVec3(1, 5, 1));
 
 	}
 
@@ -94,17 +107,14 @@ void PickupScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *
 void PickupScript::onCollisionExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {}
 
 void PickupScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity) {
+	if (_entity->getDestroyFlag()) return; // PREVENTS MULTIPLE CARTS PICKING THIS UP IN SAME FRAME
+	
 	if (otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
 		ShoppingCartPlayer *player = static_cast<ShoppingCartPlayer*>(otherEntity);
 		std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 		playerScript->addPoints(_points); // increase player points by this pickup's value
 		playerScript->pickedUpItem(_entity->getTag()); // tell player that this type of pickup was picked up
-		//std::cout << "COMPONENT.CPP | PICKUP WAS PICKED UP!" << std::endl;
-		//std::cout << "PLAYER POINTS = " << playerScript->_points << std::endl;
 		_entity->destroy(); // destroy this pickup
-
-
-		//Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND));
 	}
 }
 
@@ -627,7 +637,7 @@ void PlayerScript::navigate() {
 	const float hillRadius = 50.0f; // rounding up to be safe (its alround 48.?)
 	const float wallStartRadius = 165.0f; // rounding down to be safe (its around 168.?)
 	if (_targets.size() > 0) {
-		PxVec3 targetPos = _targets.at(0);
+		PxVec3 targetPos = _targets.at(0)._pos;
 		PxVec3 diff = targetPos - pos;
 		diffNoY = PxVec3(diff.x, 0.0f, diff.z);
 		diffNormalized = diff.getNormalized();
@@ -715,7 +725,7 @@ void PlayerScript::navigate() {
 					}
 					else {
 						if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
-							if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+							if (!isApproxEqual(_targets.at(0)._pos, hitPlayerScript->_targets.at(0)._pos)) {
 								turnDir += 1;
 								redirected = true;
 							}
@@ -758,7 +768,7 @@ void PlayerScript::navigate() {
 					}
 					else {
 						if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
-							if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+							if (!isApproxEqual(_targets.at(0)._pos, hitPlayerScript->_targets.at(0)._pos)) {
 								turnDir += 2;
 								redirected = true;
 							}
@@ -801,7 +811,7 @@ void PlayerScript::navigate() {
 					}
 					else {
 						if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
-							if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+							if (!isApproxEqual(_targets.at(0)._pos, hitPlayerScript->_targets.at(0)._pos)) {
 								turnDir -= 2;
 								redirected = true;
 							}
@@ -844,7 +854,7 @@ void PlayerScript::navigate() {
 					}
 					else {
 						if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
-							if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+							if (!isApproxEqual(_targets.at(0)._pos, hitPlayerScript->_targets.at(0)._pos)) {
 								turnDir -= 1;
 								redirected = true;
 							}
@@ -891,7 +901,7 @@ void PlayerScript::navigate() {
 						}
 						else {
 							if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
-								if (!isApproxEqual(_targets.at(0), hitPlayerScript->_targets.at(0))) {
+								if (!isApproxEqual(_targets.at(0)._pos, hitPlayerScript->_targets.at(0)._pos)) {
 									turnDir = 3;
 									redirected = true;
 								}
@@ -990,14 +1000,14 @@ void PlayerScript::navigate() {
 
 
 	// now check if we have arrived at (close) to our destination...
-
+/*
 	if (_targets.size() > 0) {
 		float diffNoYMag = diffNoY.magnitude();
 		if (diffNoYMag < 5.0f) {
 			_targets.erase(_targets.begin() + 0); // erase first target (element 0)
 		}
 	}
-	
+*/	
 }
 
 
