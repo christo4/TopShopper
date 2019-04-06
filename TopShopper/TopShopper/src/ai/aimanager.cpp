@@ -64,26 +64,26 @@ AIManager::AIManager(Broker *broker)
 
 
 
-	drinkSpawnPoints.at(0) = PxTransform(-48.0f, 2.0f, -94.0f);
-	drinkSpawnPoints.at(1) = PxTransform(-132.0f, 2.0f, -94.0f);
-	drinkSpawnPoints.at(2) = PxTransform(-13.0f, 2.0f, -161.0f);
-	drinkSpawnPoints.at(3) = PxTransform(-109.0f, 2.0f, -200.0f);
-	drinkSpawnPoints.at(4) = PxTransform(-220.0f, 2.0f, -82.0f);
-	drinkSpawnPoints.at(5) = PxTransform(43.0f, 2.0f, -237.0f);
+	drinkSpawnPoints.at(0) = PxTransform(-48.0f, 2.0f, 94.0f);
+	drinkSpawnPoints.at(1) = PxTransform(-132.0f, 2.0f, 94.0f);
+	drinkSpawnPoints.at(2) = PxTransform(-13.0f, 2.0f, 161.0f);
+	drinkSpawnPoints.at(3) = PxTransform(-109.0f, 2.0f, 200.0f);
+	drinkSpawnPoints.at(4) = PxTransform(-220.0f, 2.0f, 82.0f);
+	drinkSpawnPoints.at(5) = PxTransform(43.0f, 2.0f, 237.0f);
 
-	fruitSpawnPoints.at(0) = PxTransform(-45.0f, 2.0f, 94.0f);
-	fruitSpawnPoints.at(1) = PxTransform(-86.0f, 2.0f, 148.0f);
-	fruitSpawnPoints.at(2) = PxTransform(-155.0f, 2.0f, 123.0f);
-	fruitSpawnPoints.at(3) = PxTransform(-220.0f, 2.0f, 57.0f);
-	fruitSpawnPoints.at(4) = PxTransform(-35.0f, 2.0f, 194.0f);
-	fruitSpawnPoints.at(5) = PxTransform(55.0f, 2.0f, 217.0f);
+	fruitSpawnPoints.at(0) = PxTransform(-45.0f, 2.0f, -94.0f);
+	fruitSpawnPoints.at(1) = PxTransform(-86.0f, 2.0f, -148.0f);
+	fruitSpawnPoints.at(2) = PxTransform(-155.0f, 2.0f, -123.0f);
+	fruitSpawnPoints.at(3) = PxTransform(-220.0f, 2.0f, -57.0f);
+	fruitSpawnPoints.at(4) = PxTransform(-35.0f, 2.0f, -194.0f);
+	fruitSpawnPoints.at(5) = PxTransform(55.0f, 2.0f, -217.0f);
 
 	veggieSpawnPoints.at(0) = PxTransform(91.0f, 2.0f, 0.0f);
-	veggieSpawnPoints.at(1) = PxTransform(161.0f, 2.0f, 40.0f);
-	veggieSpawnPoints.at(2) = PxTransform(161.0f, 2.0f, -40.0f);
+	veggieSpawnPoints.at(1) = PxTransform(161.0f, 2.0f, -40.0f);
+	veggieSpawnPoints.at(2) = PxTransform(161.0f, 2.0f, 40.0f);
 	veggieSpawnPoints.at(3) = PxTransform(238.0f, 2.0f, 0.0f);
-	veggieSpawnPoints.at(4) = PxTransform(158.0f, 2.0f, -161.0f);
-	veggieSpawnPoints.at(5) = PxTransform(158.0f, 2.0f, 161.0f);
+	veggieSpawnPoints.at(4) = PxTransform(158.0f, 2.0f, 161.0f);
+	veggieSpawnPoints.at(5) = PxTransform(158.0f, 2.0f, -161.0f);
 
 	
 	for (int i = 0; i < NB_DRINK_SPAWN_POINTS; i++) {
