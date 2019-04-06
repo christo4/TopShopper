@@ -28,7 +28,7 @@ public:
 
 	void initAll(); // calls each subsystem's init function
 	void updateAllSeconds(double& simTime, const double& fixedDeltaTime, double& variableDeltaTime, double& accumulator); // this update function will call each subsystem's update function in an appropriate order.
-	void manageScene(double& accumlator);
+	void manageScene(double& accumulator);
 
 	AIManager* getAIManager() { return _aiManager; }
 	AudioManager* getAudioManager() { return _audioManager; }
@@ -54,7 +54,7 @@ private:
 	LoadingManager * _loadingManager = nullptr;
 	PhysicsManager *_physicsManager = nullptr;
 	RenderingManager *_renderingManager = nullptr;
-	Gamepad* player1;
+	Gamepad* player1 = nullptr;
 };
 
 

@@ -24,7 +24,6 @@ Broker::Broker() {
 
 
 void Broker::initAll() {
-	
 	_loadingManager->init(); // loads in all assets
 	_renderingManager->init(); // inits GLFW
 	_inputManager->init(); // sets up gamepads w/ IDS
@@ -52,16 +51,14 @@ void Broker::updateAllSeconds(double& simTime, const double& fixedDeltaTime, dou
 			_physicsManager->updateSeconds(fixedDeltaTime);
 			accumulator -= fixedDeltaTime;
 			simTime += fixedDeltaTime;
-			
 		}
 		
 		_aiManager->updateSeconds(variableDeltaTime);
-		
 	}
 	
 
 	_renderingManager->updateSeconds(variableDeltaTime);
-	_audioManager->updateSeconds(variableDeltaTime);
+	_audioManager->updateSeconds(variableDeltaTime); // NOTE: probably need to guard this to either only play in GAME scene or stop audio once left GAME scene??
 	
 
 	// CLEANUP ENTITIES FLAGGED TO BE DESTROYED...
@@ -84,9 +81,9 @@ void Broker::updateAllSeconds(double& simTime, const double& fixedDeltaTime, dou
 }
 
 
-void Broker::manageScene(double& accumlator) {
+void Broker::manageScene(double& accumulator) {
 	//ADD DELAY
-	if (delayX != 0) {
+	if (delayX != 0) { // NOTE: this should probably be changed to use time, to make it framerate independant... (also a delay of 200frames in game scene is longer than a delay of 200 in main menu, due to physics/ai updates) 
 		delayX -= 1;
 		return;
 	}
@@ -97,7 +94,6 @@ void Broker::manageScene(double& accumlator) {
 	KeyboardAndMouse *kam = getInputManager()->getKeyboardAndMouse();	
 	switch (_scene) {
 	case (MAIN_MENU):
-
 		if (kam->wKey || (playerControlled && player1->leftStickY > 0.5)) {
 			if (_cursorPositionStart == 3) {
 				_cursorPositionStart = 0;
@@ -105,7 +101,7 @@ void Broker::manageScene(double& accumlator) {
 			else {
 				_cursorPositionStart += 1; 
 			}
-			delayX = 40;
+			delayX = 200;
 		}
 		else if (kam->sKey || (playerControlled && player1->leftStickY < -0.5)) {
 			if (_cursorPositionStart == 0) {
@@ -114,9 +110,9 @@ void Broker::manageScene(double& accumlator) {
 			else {
 				_cursorPositionStart -= 1;
 			}
-			delayX = 40;
+			delayX = 200;
 		}
-		if (kam->spaceKey || (playerControlled && player1->aButton)) {
+		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
 			switch (_cursorPositionStart) {
 			case 0:
 				std::exit(0);
@@ -131,19 +127,19 @@ void Broker::manageScene(double& accumlator) {
 				_cursorPositionStart = 3;
 				break;
 			}
-			delayX = 40;
+			delayX = 0;
 		}
 		break;
 	case(CREDITS):
-		if (kam->spaceKey || (playerControlled && player1->bButton)) {
+		if (kam->spaceKeyJustPressed || (playerControlled && player1->bButtonJustPressed)) {
 			_scene = MAIN_MENU;
-			delayX = 40;
+			delayX = 0;
 		}
 		break;
 	case(CONTROLS):
-		if (kam->spaceKey || (playerControlled && player1->bButton)) {
+		if (kam->spaceKeyJustPressed || (playerControlled && player1->bButtonJustPressed)) {
 			_scene = MAIN_MENU;
-			delayX = 40;
+			delayX = 0;
 		}
 		break;
 	case(SETUP):
@@ -154,7 +150,7 @@ void Broker::manageScene(double& accumlator) {
 			else {
 				_cursorPositionSetup += 1;
 			}
-			delayX = 40;
+			delayX = 200;
 		}
 		else if (kam->sKey || (playerControlled && player1->leftStickY < -0.02)) {
 			if (_cursorPositionSetup == 0) {
@@ -163,24 +159,26 @@ void Broker::manageScene(double& accumlator) {
 			else {
 				_cursorPositionSetup -= 1;
 			}
-			delayX = 40;
+			delayX = 200;
 		}
-		if ((kam->spaceKey || (playerControlled && player1->aButton)) && _cursorPositionSetup == 0) {
+
+		if ((kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) && _cursorPositionSetup == 0) {
+			// NOTE: this is where we need to reset the PhysX and AI (should probably display the loading screen image first before calling reset functions)
 			_scene = LOADING;
 			_cursorPositionSetup = 2;
-			delayX = 40;
+			delayX = 0;
 		}
-		if ((kam->dKey || (playerControlled && player1->bButton))) {
+		if ((kam->spaceKeyJustPressed || (playerControlled && player1->bButtonJustPressed))) {
 			_scene = MAIN_MENU;
 			_cursorPositionSetup = 2;
-			delayX = 40;
+			delayX = 0;
 		}
 		break;
 	case(LOADING):
-		if (kam->spaceKey || (playerControlled && player1->aButton)) {
+		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
 			_scene = GAME;
-			accumlator = 0;
-			delayX = 20;
+			accumulator = 0.0; // NOTE: maybe move this above?
+			delayX = 0;
 		}
 		break;
 	case(PAUSED):
@@ -191,7 +189,7 @@ void Broker::manageScene(double& accumlator) {
 			else {
 				_cursorPositionPause += 1;
 			}
-			delayX = 40;
+			delayX = 100;
 		}
 		else if (kam->sKey || (playerControlled && player1->leftStickY < -0.02)) {
 			if (_cursorPositionPause == 0) {
@@ -200,36 +198,33 @@ void Broker::manageScene(double& accumlator) {
 			else {
 				_cursorPositionPause -= 1;
 			}
-			delayX = 40;
+			delayX = 100;
 		}
-		if (kam->spaceKey || (playerControlled && player1->aButton)) {
+		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
 			if (_cursorPositionPause == 1) {
 				_scene = GAME;
-				accumlator = 0;
+				//accumulator = 0.0; // I don't think the accumulator needs to be reset here since it isnt incrementing while game is paused and we would lose out on some left over time from frame before pause
 				_cursorPositionPause = 1;
 			}
 			else {
 				_scene = MAIN_MENU;
 				_cursorPositionPause = 1;
-				//Have to reset physics stuff somehow
+				//Have to reset physics stuff somehow NOTE: physics won't be reset here, only during loading scene!
 			}
-			delayX = 40;
+			delayX = 0;
 		}
 		break;
 	case (GAME):
-		// if the pause button/key was pressed in last frame...
-		// right now, only player 1 (keyboard or gamepad1 can pause the game)
-		//Gamepad *pad1 = broker->getInputManager()->getGamePad(1);
-		if (kam->pKey || (playerControlled && player1->startButton)) {
+		if (kam->pKeyJustPressed || (playerControlled && player1->startButtonJustPressed)) {
 			_scene = PAUSED;
 		}
-		delayX = 20;
+		delayX = 0;
 		break;
 	case (END_SCREEN):
-		if (kam->spaceKey || (playerControlled && player1->aButton)) {
+		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
 			_scene = MAIN_MENU;
 		}
-		delayX = 40;
+		delayX = 0;
 		break;
 	}
 }

@@ -43,8 +43,14 @@ void InputManager::updateSeconds(double variableDeltaTime) {
 		_gamePads[i]->rightTrigger = axesArray[5];
 		
 		//update the state of the current gamepad's buttons
-		_gamePads[i]->aButton = (bool) buttonArray[0];
-		_gamePads[i]->bButton = (bool) buttonArray[1];
+		bool newAButtonState = (bool) buttonArray[0];
+		_gamePads[i]->aButtonJustPressed = (!_gamePads[i]->aButton && newAButtonState);
+		_gamePads[i]->aButton = newAButtonState;
+
+		bool newBButtonState = (bool) buttonArray[1];
+		_gamePads[i]->bButtonJustPressed = (!_gamePads[i]->bButton && newBButtonState);
+		_gamePads[i]->bButton = newBButtonState;
+
 		_gamePads[i]->xButton = (bool) buttonArray[2];
 		_gamePads[i]->yButton = (bool) buttonArray[3];
 		_gamePads[i]->leftBump = (bool) buttonArray[4];
@@ -70,12 +76,18 @@ void InputManager::updateSeconds(double variableDeltaTime) {
 	_keyboardAndMouse->sKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S);
 	_keyboardAndMouse->dKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D);
 	_keyboardAndMouse->leftShiftKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT_SHIFT);
-	_keyboardAndMouse->spaceKey = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE);
+
+	bool newSpaceKeyState = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE);
+	_keyboardAndMouse->spaceKeyJustPressed = (!_keyboardAndMouse->spaceKey && newSpaceKeyState);
+	_keyboardAndMouse->spaceKey = newSpaceKeyState;
 
 	bool newPKeyState = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_P);
 	_keyboardAndMouse->pKeyJustPressed = (!_keyboardAndMouse->pKey && newPKeyState);
 	_keyboardAndMouse->pKey = newPKeyState;
 
+	bool newEnterKeyState = GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ENTER);
+	_keyboardAndMouse->enterKeyJustPressed = (!_keyboardAndMouse->enterKey && newEnterKeyState);
+	_keyboardAndMouse->enterKey = newEnterKeyState;
 }
 
 //returns a pointer to the structure representing the gamepad number given as a parameter (1,2,3,4)
