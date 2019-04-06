@@ -108,7 +108,7 @@ void RenderingManager::RenderScene() {
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
 
 
-	std::cout << windowWidth << " " << windowHeight << std::endl;
+	//std::cout << windowWidth << " " << windowHeight << std::endl;
 
 
 
@@ -293,7 +293,7 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camer
 
 	float radius = 30.0f; // FIXED (for now)
 	float camX = -1 * radius * vehicleRotationVecSum.x;
-	float camY = 20.0f;
+	float camY = 12.5f;
 	float camZ = -1 * radius * vehicleRotationVecSum.z;
 	
 
@@ -308,7 +308,7 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camer
 
 	camera = camPos;
 
-	 return View;
+	return View;
 }
 
 

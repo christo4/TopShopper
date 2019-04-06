@@ -63,6 +63,7 @@ AIManager::AIManager(Broker *broker)
 	}
 
 
+	// WARNING: don't reduce the number of spawn points, otherwise you get a nullptr exception on instantiteEntity
 
 	drinkSpawnPoints.at(0) = PxTransform(-48.0f, 2.0f, 94.0f);
 	drinkSpawnPoints.at(1) = PxTransform(-132.0f, 2.0f, 94.0f);
@@ -72,8 +73,8 @@ AIManager::AIManager(Broker *broker)
 	drinkSpawnPoints.at(5) = PxTransform(43.0f, 2.0f, 237.0f);
 
 	fruitSpawnPoints.at(0) = PxTransform(-45.0f, 2.0f, -94.0f);
-	fruitSpawnPoints.at(1) = PxTransform(-86.0f, 2.0f, -148.0f);
-	fruitSpawnPoints.at(2) = PxTransform(-155.0f, 2.0f, -123.0f);
+	fruitSpawnPoints.at(1) = PxTransform(-130.0f, 2.0f, -190.0f);
+	fruitSpawnPoints.at(2) = PxTransform(-155.0f, 2.0f, -112.0f);
 	fruitSpawnPoints.at(3) = PxTransform(-220.0f, 2.0f, -57.0f);
 	fruitSpawnPoints.at(4) = PxTransform(-35.0f, 2.0f, -194.0f);
 	fruitSpawnPoints.at(5) = PxTransform(55.0f, 2.0f, -217.0f);
