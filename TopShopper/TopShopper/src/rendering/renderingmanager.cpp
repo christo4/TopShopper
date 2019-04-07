@@ -836,12 +836,25 @@ void RenderingManager::push3DObjects() {
 						otherPos = otherPlayers->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
 					}
 				}
-				PxVec3 forward = rot.getBasisVector2();
+				//PxMat44 meme = PxMat44(rot);
 
-				PxVec3 cartForward = forward - pos;
+				PxVec3 forward = rot.getBasisVector2();
+				PxVec3 cartForward = forward;
 				PxVec3 cartToCart = otherPos - pos;
-				float angle = acos((cartForward.dot(cartToCart))/(cartForward.magnitude()*cartToCart.magnitude()));
-				std::cout << angle << std::endl;
+				cartForward.y = 0;
+				cartToCart.y = 0;
+				//cartForward.getNormalized();
+				//cartToCart.getNormalized();
+				float dot = cartForward.dot(cartToCart);
+				float magnitudes = cartForward.magnitude()*cartToCart.magnitude();
+				//float check = dot / magnitudes;
+				float angle = acos(dot/magnitudes);
+
+				//PxVec3 cross = cartForward.cross(cartToCart);
+				if ((cartForward.cross(cartToCart)).y <= 0) {
+					angle += pi;
+				}
+				//std::cout << cross.y << std::endl;
 				
 				PxQuat localRot(angle, PxVec3(0.0f, 1.0f, 0.0f));
 				PxQuat netRotation = rot * localRot;

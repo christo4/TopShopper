@@ -113,6 +113,7 @@ public:
 	int windowHeight;
 	int windowWidth;
 
+	float pi = 3.14159265;
 
 private:
 
