@@ -24,6 +24,9 @@ public:
 	void init();
 	void updateSeconds(double variableDeltaTime);
 
+	void loadScene1();
+	void cleanupScene1();
+
 	std::string getMatchTimePrettyFormat();
 
 private:

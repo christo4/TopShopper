@@ -109,6 +109,53 @@ void AIManager::init() {
 
 }
 
+void AIManager::loadScene1() {
+	// nothing here for now
+}
+
+void AIManager::cleanupScene1() {
+	_cookieLocations.clear();
+	_mysteryBagLocations.clear();
+	_spareChangeLocations.clear();
+	_milkLocations.clear();
+	_waterLocations.clear();
+	_colaLocations.clear();
+	_appleLocations.clear();
+	_watermelonLocations.clear();
+	_bananaLocations.clear();
+	_carrotLocations.clear();
+	_eggplantLocations.clear();
+	_broccoliLocations.clear();
+
+	_cookieCanSpawn = true;
+	_startingCookie = nullptr;
+
+	_mysteryBagCanSpawn = false;
+	_mysteryBag = nullptr;
+	_mysteryBagSpawnTimer = 30.0;
+
+	for (int i = 0; i < NB_SPARE_CHANGE_SPAWN_POINTS; i++) {
+		spareChangeInstances.at(i) = nullptr;
+		spareChangeSpawnTimers.at(i) = -1.0;
+	}
+
+	for (int i = 0; i < NB_DRINK_SPAWN_POINTS; i++) {
+		drinkInstances.at(i) = nullptr;
+	}
+
+	for (int i = 0; i < NB_FRUIT_SPAWN_POINTS; i++) {
+		fruitInstances.at(i) = nullptr;
+	}
+
+	for (int i = 0; i < NB_VEGGIE_SPAWN_POINTS; i++) {
+		veggieInstances.at(i) = nullptr;
+	}
+
+	_matchTimer = 300;
+
+}
+
+
 void AIManager::updateSeconds(double variableDeltaTime) {
 	// call UPDATE() for all behaviour scripts...
 	std::vector<std::shared_ptr<Entity>> entitiesCopy = _broker->getPhysicsManager()->getActiveScene()->_entities;
