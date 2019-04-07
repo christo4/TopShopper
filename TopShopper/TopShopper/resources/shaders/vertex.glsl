@@ -12,7 +12,7 @@ uniform mat4 Projection;
 uniform mat4 LightView;
 uniform mat4 LightProjection;
 uniform vec3 CameraPos;
-
+uniform float Flash;
 
 // output to be interpolated between vertices and passed to the fragment stage
 out vec3 Normal;
@@ -20,6 +20,7 @@ out vec3 FragPos;
 out vec4 FragPosLightSpace;
 out vec3 look;
 out vec2 uv;
+out float flash;
 
 
 void main()
@@ -33,4 +34,5 @@ void main()
 	FragPosLightSpace = LightProjection * LightView * vec4(FragPos, 1.0);
 	look = CameraPos;
 	uv = VertexUV;
+	flash = Flash;
 }

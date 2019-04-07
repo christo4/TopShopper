@@ -283,6 +283,7 @@ void RenderingManager::RenderGameScene() {
 	GLuint cameraID;
 	GLuint LightViewID;
 	GLuint LightProjectionID;
+	GLuint Flash;
 
 	glm::mat4 lightProjection = glm::ortho(-200.0f, 200.0f, -200.0f, 200.0f, 1.0f, 500.0f);
 	glm::mat4 lightView = glm::lookAt(glm::vec3(70.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -329,6 +330,7 @@ void RenderingManager::RenderGameScene() {
 	cameraID = glGetUniformLocation(shaderProgram, "CameraPos");
 	LightViewID = glGetUniformLocation(shaderProgram, "LightView");
 	LightProjectionID = glGetUniformLocation(shaderProgram, "LightProjection");
+	Flash = glGetUniformLocation(shaderProgram, "Flash");
 
 
 	for (Geometry& g : _objects) {
@@ -352,6 +354,12 @@ void RenderingManager::RenderGameScene() {
 		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &Projection[0][0]);
 		glUniformMatrix4fv(LightViewID, 1, GL_FALSE, &lightView[0][0]);
 		glUniformMatrix4fv(LightProjectionID, 1, GL_FALSE, &lightProjection[0][0]);
+		if (g.color == glm::vec3(3.0f, 4.0f, 3.0f) && flash) {
+			glUniform1f(Flash, GLfloat(1));
+		}
+		else {
+			glUniform1f(Flash, GLfloat(0));
+		}
 
 		glBindVertexArray(g.vao);
 		//assignBuffers(g);		//already done in the first rendering pass
@@ -800,8 +808,14 @@ void RenderingManager::push3DObjects() {
 			std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 			if (playerScript->_hasHotPotato) {
 				Geometry geoPotato = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::HOT_POTATO_GEO_NO_INDEX));
-				geoPotato.color = glm::vec3(0.0f, 0.0f, 0.0f);
+				geoPotato.color = glm::vec3(3.0f, 4.0f, 3.0f);
 
+				if ((playerScript->_hotPotatoTimer > 1 && playerScript->_hotPotatoTimer < 1.5 ) || (playerScript->_hotPotatoTimer > 3 && playerScript->_hotPotatoTimer < 4) ||( playerScript->_hotPotatoTimer > 5 && playerScript->_hotPotatoTimer < 7) || (playerScript->_hotPotatoTimer > 9.5 && playerScript->_hotPotatoTimer < 11) || ( playerScript->_hotPotatoTimer > 12 && playerScript->_hotPotatoTimer < 14)) {
+					flash = true;
+				}
+				else {
+					flash = false;
+				}
 				glm::mat4 model;
 				PxMat44 rotation = PxMat44(rot);
 				PxVec3 potatoOffset(0.0f, 5.0f, 0.0f);

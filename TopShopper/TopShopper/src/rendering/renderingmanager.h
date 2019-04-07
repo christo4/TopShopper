@@ -115,6 +115,8 @@ public:
 
 	float pi = 3.14159265;
 
+	bool flash;
+
 private:
 
 	Broker *_broker = nullptr;

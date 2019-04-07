@@ -8,6 +8,7 @@ in vec3 FragPos;
 in vec3 look;
 in vec2 uv;
 in vec4 FragPosLightSpace;
+in float flash;
 
 // first output is mapped to the framebuffer's colour index by default
 out vec4 FragmentColour;
@@ -47,8 +48,14 @@ void main()
 	//vec3 lightPos = vec3(0.0f, 30.0f, 0.0f);
 	vec3 lightPos = vec3(70.0f, 200.0f, 0.0f);
 
+	vec3 color;
 
-    vec3 color = texture(imageTexture, uv).rgb;
+	if (flash == 1){
+    color = (texture(imageTexture, uv).rgb) + vec3(0.7f, 0, 0);
+	}
+	else {
+	color = texture(imageTexture, uv).rgb;
+	}
     vec3 normal = normalize(Normal);
     vec3 lightColor = vec3(1.0);
 
@@ -73,6 +80,6 @@ void main()
     // calculate shadow
     float shadow = ShadowCalculation(FragPosLightSpace, bias);       
     vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;    
-    
-    FragmentColour = vec4(lighting, 1.0);
+	FragmentColour = vec4(lighting, 1.0);
+	
 }
