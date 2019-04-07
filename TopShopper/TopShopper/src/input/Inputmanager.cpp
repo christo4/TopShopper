@@ -35,10 +35,30 @@ void InputManager::updateSeconds(double variableDeltaTime) {
 
 		//update the state of the current gamepad's axes
 
-		_gamePads[i]->leftStickX = axesArray[0];
-		_gamePads[i]->leftStickY = axesArray[1];
-		_gamePads[i]->rightStickX = axesArray[2];
-		_gamePads[i]->rightStickY = axesArray[3];
+		if (axesArray[0] > 0.5f || axesArray[0] < -0.5f) {
+			_gamePads[i]->leftStickX = axesArray[0];
+		}
+		else {
+			_gamePads[i]->leftStickX = 0;
+		}
+		if (axesArray[1] > 0.5f || axesArray[1] < -0.5f) {
+			_gamePads[i]->leftStickY = axesArray[1];
+		}
+		else {
+			_gamePads[i]->leftStickY = 0;
+		}
+		if (axesArray[2] > 0.5f || axesArray[2] < -0.5f) {
+			_gamePads[i]->rightStickX = axesArray[2];
+		}
+		else {
+			_gamePads[i]->rightStickX = 0;
+		}
+		if (axesArray[3] > 0.5f || axesArray[3] < -0.5f) {
+			_gamePads[i]->rightStickY = axesArray[3];
+		}
+		else {
+			_gamePads[i]->rightStickY = 0;
+		}
 		_gamePads[i]->leftTrigger = axesArray[4];
 		_gamePads[i]->rightTrigger = axesArray[5];
 		
