@@ -33,6 +33,7 @@ Geometry* Obstacle7Geo = new Geometry();
 Geometry* CookieGeo = new Geometry();
 Geometry* MysteryBagGeo = new Geometry();
 Geometry* HotPotatoGeo = new Geometry();
+Geometry* PointerGeo = new Geometry();
 
 Geometry* VehicleChassisGeoNoIndex = new Geometry();
 Geometry* VehicleWheelGeoNoIndex = new Geometry();
@@ -58,6 +59,7 @@ Geometry* Obstacle7GeoNoIndex = new Geometry();
 Geometry* CookieGeoNoIndex = new Geometry();
 Geometry* MysteryBagGeoNoIndex = new Geometry();
 Geometry* HotPotatoGeoNoIndex = new Geometry();
+Geometry* PointerGeoNoIndex = new Geometry();
 
 LoadingManager::LoadingManager(Broker *broker) 
 	: _broker(broker)
@@ -885,6 +887,38 @@ void LoadingManager::init() {
 	normalIndex.clear();
 	
 
+	//Pointer
+	loadObject("../TopShopper/resources/Objects/Pointer.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+
+	PointerGeo->verts = returnVertices;
+	PointerGeo->uvs = returnUV;
+	PointerGeo->normals = returnNormal;
+	PointerGeo->vIndex = vIndex;
+	PointerGeo->uvIndex = uvIndex;
+	PointerGeo->normalIndex = normalIndex;
+
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		PointerGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		PointerGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		PointerGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
 }
 
 void LoadingManager::updateSeconds(double variableDeltaTime) {
@@ -1031,6 +1065,8 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return Obstacle6Geo;
 	case GeometryTypes::OBSTACLE7_GEO:
 		return Obstacle7Geo;
+	case GeometryTypes::POINTER_GEO:
+		return PointerGeo;
 	case GeometryTypes::VEHICLE_CHASSIS_GEO_NO_INDEX:
 		return VehicleChassisGeoNoIndex;
 	case GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX:
@@ -1079,6 +1115,8 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return Obstacle6GeoNoIndex;
 	case GeometryTypes::OBSTACLE7_GEO_NO_INDEX:
 		return Obstacle7GeoNoIndex;
+	case GeometryTypes::POINTER_GEO_NO_INDEX:
+		return PointerGeoNoIndex;
 	default:
 		return nullptr;
 	}

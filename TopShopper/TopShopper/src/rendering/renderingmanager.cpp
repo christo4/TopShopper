@@ -818,6 +818,57 @@ void RenderingManager::push3DObjects() {
 				_objects.push_back(geoPotato);
 
 			}
+			if (playerInputID == 1) {
+				Geometry geoPointer = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::POINTER_GEO_NO_INDEX));
+				geoPointer.color = glm::vec3(0, 0, 0);
+				glm::mat4 model; 
+				PxVec3 otherPos;
+
+				const std::vector<std::shared_ptr<ShoppingCartPlayer>> &players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
+				float yOffset = 0;
+
+				for (std::shared_ptr<ShoppingCartPlayer> otherPlayers : players) {
+					std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(otherPlayers->getComponent(ComponentTypes::PLAYER_SCRIPT));					
+					if (playerScript->_inputID != 1) { //Not current player, Also need to add that players texture
+						if (playerScript->_inputID == -1) {
+							geoPointer.texture = *_shoppingCartBlue;
+						}
+						if (playerScript->_inputID == -2) {
+							geoPointer.texture = *_shoppingCartGreen;
+						}
+
+						otherPos = otherPlayers->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
+						PxVec3 forward = rot.getBasisVector2();
+						PxVec3 cartForward = forward;
+						PxVec3 cartToCart = otherPos - pos;
+						cartForward.y = 0;
+						cartToCart.y = 0;
+
+						float dot = cartForward.dot(cartToCart);
+						float magnitudes = cartForward.magnitude()*cartToCart.magnitude();
+						float angle = acos(dot / magnitudes);
+
+						if ((cartForward.cross(cartToCart)).y <= 0)	angle = -angle;
+						PxQuat localRot(angle, PxVec3(0.0f, 1.0f, 0.0f));
+						PxQuat netRotation = rot * localRot;
+						PxMat44 rotation = PxMat44(netRotation);
+
+						PxVec3 pointerOffset(0.0f, yOffset, 5.0f);
+						PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos + rotation.rotate(pointerOffset));
+						PxMat44	pxModel = translation * rotation;
+						model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+							glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+							glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+							glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+						geoPointer.model = model;
+
+						geoPointer.drawMode = GL_TRIANGLES;
+						_objects.push_back(geoPointer);
+						yOffset += 0.5f;
+					}
+				}
+			}
 			break;
 		}
 		case EntityTypes::GROUND:
@@ -1069,6 +1120,9 @@ void RenderingManager::init3DTextures() {
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(HOT_POTATO_GEO_NO_INDEX)->texture = texture;
+
+	//InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
+	//_broker->getLoadingManager()->getGeometry(POINTER_GEO_NO_INDEX)->texture = texture;
 
 	InitializeTexture(_shoppingCartBlue, "../TopShopper/resources/Textures/CartBlue.jpg", GL_TEXTURE_2D);
 	InitializeTexture(_shoppingCartGreen, "../TopShopper/resources/Textures/CartGreen.jpg", GL_TEXTURE_2D);
