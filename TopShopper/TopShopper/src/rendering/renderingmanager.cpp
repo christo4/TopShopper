@@ -822,10 +822,35 @@ void RenderingManager::push3DObjects() {
 				Geometry geoPointer = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::POINTER_GEO_NO_INDEX));
 				geoPointer.color = glm::vec3(0, 0, 0);
 
-				glm::mat4 model;
-				PxMat44 rotation = PxMat44(rot);
-				PxVec3 pointerOffset(5.0f, 0.0f, 5.0f);
-				PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos + pointerOffset);
+				glm::mat4 model; 
+
+				//PxQuat netRotation = rot * wheelShape->getLocalPose().q; // MUST BE IN THIS ORDER
+				//PxMat44 rotation = PxMat44(netRotation); // compound rot (parent.rotate() and then local.rotate())
+				//PxVec3 wheelOffset = wheelShape->getLocalPose().p;
+				//wheelOffset = rot.rotate(wheelOffset);
+				PxVec3 otherPos;
+				const std::vector<std::shared_ptr<ShoppingCartPlayer>> &players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
+				for (std::shared_ptr<ShoppingCartPlayer> otherPlayers : players) {
+					std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(otherPlayers->getComponent(ComponentTypes::PLAYER_SCRIPT));
+					if (playerScript->_inputID == -1) {
+						otherPos = otherPlayers->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
+					}
+				}
+				PxVec3 forward = rot.getBasisVector2();
+
+				PxVec3 cartForward = forward - pos;
+				PxVec3 cartToCart = otherPos - pos;
+				float angle = acos((cartForward.dot(cartToCart))/(cartForward.magnitude()*cartToCart.magnitude()));
+				std::cout << angle << std::endl;
+				
+				PxQuat localRot(angle, PxVec3(0.0f, 1.0f, 0.0f));
+				PxQuat netRotation = rot * localRot;
+				PxMat44 rotation = PxMat44(netRotation);
+
+
+				PxVec3 pointerOffset(0.0f, 0.0f, 5.0f);
+				//PxMat44 rotation = PxMat44(rot);
+				PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos + rotation.rotate(pointerOffset));
 				PxMat44	pxModel = translation * rotation;
 				model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
 					glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
