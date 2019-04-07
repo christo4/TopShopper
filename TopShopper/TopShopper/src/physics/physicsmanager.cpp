@@ -378,14 +378,137 @@ void PhysicsManager::init() {
 	PxVehicleSetBasisVectors(PxVec3(0.0f, 1.0f, 0.0f), PxVec3(0.0f, 0.0f, 1.0f)); // up = y, forward = z
 	PxVehicleSetUpdateMode(PxVehicleUpdateMode::eVELOCITY_CHANGE);
 
-
-
-	switchToScene1();
-
 }
 
 
 
+void PhysicsManager::loadScene1() {
+	// init vehicle stuff, create entities / add their actors into PxScene, position them at starting transforms, etc.....
+	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
+	sceneDesc.gravity = PxVec3(0.0f, -98.1f, 0.0f);
+
+	PxU32 numWorkers = 1; // 1 thread off the main thread (~~~~~~~~MAYBE CHANGE TO 0, to run on main thread?)
+	gDispatcher = PxDefaultCpuDispatcherCreate(numWorkers);
+	sceneDesc.cpuDispatcher = gDispatcher;
+	sceneDesc.filterShader = CustomFilterShader; // TODO: change this later to use a finished CustomFilterShader
+	sceneDesc.simulationEventCallback = &gSimEventCallback;
+
+	PxScene *physxScene = gPhysics->createScene(sceneDesc);
+
+	#ifdef PVD_ENABLED
+	PxPvdSceneClient *pvdClient = physxScene->getScenePvdClient();
+	if (pvdClient)
+	{
+		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+	}
+	#endif // PVD_ENABLED
+
+	//Create the batched scene queries for the suspension raycasts.
+	PxU32 maxNumVehicles = 6; // 6 players
+	PxU32 maxNumWheelsPerVehicle = 4;
+	gVehicleSceneQueryData = VehicleSceneQueryData::allocate(maxNumVehicles, maxNumWheelsPerVehicle, 1, maxNumVehicles, WheelSceneQueryPreFilterBlocking, NULL, gAllocator); // setup for 1 batch (batch ID=0 ???)
+	gBatchQuery = VehicleSceneQueryData::setUpBatchedSceneQuery(0, *gVehicleSceneQueryData, physxScene);
+
+	//Create the friction table for each combination of tire and surface type.
+	initFrictionPairs();
+
+
+	// ENTITY INIT...
+
+	_activeScene = std::make_shared<GameScene>(physxScene);
+
+
+	// GROUND:
+	std::shared_ptr<Ground> ground = std::dynamic_pointer_cast<Ground>(instantiateEntity(EntityTypes::GROUND, PxTransform(0.0f, 0.0f, 0.0f, PxQuat(PxIdentity)), "ground"));
+
+	// ROOF:
+	std::shared_ptr<Roof> roof = std::dynamic_pointer_cast<Roof>(instantiateEntity(EntityTypes::ROOF, PxTransform(0.0f, 0.0f, 0.0f, PxQuat(PxIdentity)), "roof"));
+
+	// BLUE WALL BOTTOM:
+	std::shared_ptr<Obstacle1> blueWallBot = std::dynamic_pointer_cast<Obstacle1>(instantiateEntity(EntityTypes::OBSTACLE1, PxTransform(18.0f, 0.0f, -146.0f, PxQuat(PxIdentity)), "blueWallBot"));
+
+	// BLUE WALL MIDDLE:
+	std::shared_ptr<Obstacle2> blueWallMid = std::dynamic_pointer_cast<Obstacle2>(instantiateEntity(EntityTypes::OBSTACLE2, PxTransform(-101.0f, 0.0f, -168.0f, PxQuat(PxIdentity)), "blueWallMid"));
+
+	// BLUE WALL TOP:
+	std::shared_ptr<Obstacle3> blueWallTop = std::dynamic_pointer_cast<Obstacle3>(instantiateEntity(EntityTypes::OBSTACLE3, PxTransform(-141.0f, 0.0f, -61.0f, PxQuat(PxIdentity)), "blueWallTop"));
+
+	// GREEN WALL BOTTOMS:
+	std::shared_ptr<Obstacle4> greenWallBot1 = std::dynamic_pointer_cast<Obstacle4>(instantiateEntity(EntityTypes::OBSTACLE4, PxTransform(-105.0f, 0.0f, 63.0f, PxQuat(PxIdentity)), "greenWallBot1"));
+	std::shared_ptr<Obstacle4> greenWallBot2 = std::dynamic_pointer_cast<Obstacle4>(instantiateEntity(EntityTypes::OBSTACLE4, PxTransform(4.0f, 0.0f, 125.0f, PxQuat(PxIdentity)), "greenWallBot2"));
+
+	// GREEN WALL TOP:
+	std::shared_ptr<Obstacle5> greenWallTop = std::dynamic_pointer_cast<Obstacle5>(instantiateEntity(EntityTypes::OBSTACLE5, PxTransform(-89.0f, 0.0f, 161.0f, PxQuat(PxIdentity)), "greenWallTop"));
+
+	// RED WALL BOTTOM:
+	std::shared_ptr<Obstacle6> redWallBot = std::dynamic_pointer_cast<Obstacle6>(instantiateEntity(EntityTypes::OBSTACLE6, PxTransform(159.0f, 0.0f, 75.0f, PxQuat(PxIdentity)), "redWallBot"));
+
+	// RED WALL TOP:
+	std::shared_ptr<Obstacle7> redWallTop = std::dynamic_pointer_cast<Obstacle7>(instantiateEntity(EntityTypes::OBSTACLE7, PxTransform(160.0f, 0.0f, -72.0f, PxQuat(PxIdentity)), "redWallTop"));
+
+
+
+	// VEHICLE 1:
+	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-200.0f, 5.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
+	std::shared_ptr<PlayerScript> player1Script = std::static_pointer_cast<PlayerScript>(vehicle1->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	player1Script->_playerType = PlayerScript::PlayerTypes::HUMAN;
+	player1Script->_inputID = 1;
+
+	// VEHICLE 2: (COMMENT OUT WHEN 2 CONTROLLERS ARE NOT PLUGGED IN - NVM this doesnt seem to matter)
+	// FOR TEST PURPOSES - BASHING
+	//std::shared_ptr<ShoppingCartPlayer> vehicle2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(20.0f, 5.0f, 70.0f, PxQuat(PxIdentity)), "vehicle2"));
+	//std::shared_ptr<PlayerScript> player2Script = std::static_pointer_cast<PlayerScript>(vehicle2->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	//player2Script->_inputID = 2;
+
+	// BOT 1:
+	std::shared_ptr<ShoppingCartPlayer> bot1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-190.0f, 5.0f, 0.0f, PxQuat(PxIdentity)), "bot1"));
+	std::shared_ptr<PlayerScript> bot1Script = std::static_pointer_cast<PlayerScript>(bot1->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	bot1Script->_playerType = PlayerScript::PlayerTypes::BOT;
+	bot1Script->_inputID = -1;
+
+	// BOT 2:
+	std::shared_ptr<ShoppingCartPlayer> bot2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-180.0f, 5.0f, 0.0f, PxQuat(PxIdentity)), "bot2"));
+	std::shared_ptr<PlayerScript> bot2Script = std::static_pointer_cast<PlayerScript>(bot2->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	bot2Script->_playerType = PlayerScript::PlayerTypes::BOT;
+	bot2Script->_inputID = -2;
+
+	// BOT 3:
+
+	//std::shared_ptr<ShoppingCartPlayer> bot3 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-80.0f, 5.0f, -80.0f, PxQuat(PxIdentity)), "bot3"));
+	//std::shared_ptr<PlayerScript> bot3Script = std::static_pointer_cast<PlayerScript>(bot3->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	//bot3Script->_playerType = PlayerScript::PlayerTypes::BOT;
+	//bot3Script->_inputID = -3;
+}
+
+
+void PhysicsManager::cleanupScene1() {
+
+	std::vector<std::shared_ptr<Entity>> entitiesCopy = _activeScene->_entities;
+	for (std::shared_ptr<Entity> &entity : entitiesCopy) {
+		_activeScene->removeEntity(entity);
+	}
+
+	//std::cout << _activeScene->_entities.size() << std::endl;
+
+	gBatchQuery->release();
+	gBatchQuery = NULL;
+	gVehicleSceneQueryData->free(gAllocator);
+	gVehicleSceneQueryData = NULL;
+	gFrictionPairs->release();
+	gFrictionPairs = NULL;
+
+	_activeScene->_physxScene->release();
+	_activeScene->_physxScene = nullptr;
+	_activeScene = nullptr;
+
+	gDispatcher->release();
+	gDispatcher = NULL;
+}
+
+
+/*
 void PhysicsManager::switchToScene1() {
 	// TODO: cleanup scene we just transitioned from...
 
@@ -487,6 +610,7 @@ void PhysicsManager::switchToScene1() {
 	//bot3Script->_inputID = -3;
 
 }
+*/
 
 
 

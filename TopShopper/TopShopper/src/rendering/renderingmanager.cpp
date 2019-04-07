@@ -75,13 +75,15 @@ void RenderingManager::init() {
 //handles the deletion of objects after completing the rendering of each frame as well as the updating of model positions
 //calls render scene after pushing back the 3d objects in order to render the scene again. 
 void RenderingManager::updateSeconds(double variableDeltaTime) {
-	// call LATEUPDATE() for all behaviour scripts...
-	std::vector<std::shared_ptr<Entity>> entitiesCopy = _broker->getPhysicsManager()->getActiveScene()->_entities;
-	for (std::shared_ptr<Entity> &entity : entitiesCopy) {
-		std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
-		if (comp != nullptr) {
-			std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
-			script->lateUpdate(variableDeltaTime);
+	if (_broker->_scene == GAME) {
+		// call LATEUPDATE() for all behaviour scripts...
+		std::vector<std::shared_ptr<Entity>> entitiesCopy = _broker->getPhysicsManager()->getActiveScene()->_entities;
+		for (std::shared_ptr<Entity> &entity : entitiesCopy) {
+			std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
+			if (comp != nullptr) {
+				std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
+				script->lateUpdate(variableDeltaTime);
+			}
 		}
 	}
 
@@ -285,7 +287,7 @@ void RenderingManager::RenderGameScene() {
 	GLuint LightProjectionID;
 	GLuint Flash;
 
-	glm::mat4 lightProjection = glm::ortho(-200.0f, 200.0f, -200.0f, 200.0f, 1.0f, 500.0f);
+	glm::mat4 lightProjection = glm::ortho(-270.0f, 270.0f, -270.0f, 270.0f, 1.0f, 500.0f);
 	glm::mat4 lightView = glm::lookAt(glm::vec3(70.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	glViewport(0, 0, (GLuint)_shadowWidth, (GLuint)_shadowHeight);

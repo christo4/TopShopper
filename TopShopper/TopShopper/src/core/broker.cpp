@@ -61,21 +61,23 @@ void Broker::updateAllSeconds(double& simTime, const double& fixedDeltaTime, dou
 	_audioManager->updateSeconds(variableDeltaTime); // NOTE: probably need to guard this to either only play in GAME scene or stop audio once left GAME scene??
 	
 
-	// CLEANUP ENTITIES FLAGGED TO BE DESTROYED...
-	std::vector<std::shared_ptr<Entity>> destroyedEntities;
-	for (std::shared_ptr<Entity> &entity : _physicsManager->getActiveScene()->_entities) {
-		if (entity->getDestroyFlag()) {
-			destroyedEntities.push_back(entity);
+	if (_scene == GAME || _scene == PAUSED || _scene == END_SCREEN) {
+		// CLEANUP ENTITIES FLAGGED TO BE DESTROYED...
+		std::vector<std::shared_ptr<Entity>> destroyedEntities;
+		for (std::shared_ptr<Entity> &entity : _physicsManager->getActiveScene()->_entities) {
+			if (entity->getDestroyFlag()) {
+				destroyedEntities.push_back(entity);
+			}
 		}
-	}
 
-	for (std::shared_ptr<Entity> &entity : destroyedEntities) {
-		std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
-		if (comp != nullptr) {
-			std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
-			script->onDestroy();
+		for (std::shared_ptr<Entity> &entity : destroyedEntities) {
+			std::shared_ptr<Component> comp = entity->getComponent(ComponentTypes::BEHAVIOUR_SCRIPT);
+			if (comp != nullptr) {
+				std::shared_ptr<BehaviourScript> script = std::static_pointer_cast<BehaviourScript>(comp);
+				script->onDestroy();
+			}
+			_physicsManager->getActiveScene()->removeEntity(entity);
 		}
-		_physicsManager->getActiveScene()->removeEntity(entity);
 	}
 
 }
@@ -163,10 +165,14 @@ void Broker::manageScene(double& accumulator, double vartime) {
 		}
 
 		if ((kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) && _cursorPositionSetup == 0) {
-			// NOTE: this is where we need to reset the PhysX and AI (should probably display the loading screen image first before calling reset functions)
 			_scene = LOADING;
 			_cursorPositionSetup = 2;
 			delayX = 0.0;
+
+			// NOTE: this is where we need to reset the PhysX and AI (should probably display the loading screen image first before calling reset functions)
+			// NOTE: keep it in this order...
+			_physicsManager->loadScene1();
+			_aiManager->loadScene1();
 		}
 		if ((kam->spaceKeyJustPressed || (playerControlled && player1->bButtonJustPressed))) {
 			_scene = MAIN_MENU;
@@ -203,13 +209,15 @@ void Broker::manageScene(double& accumulator, double vartime) {
 		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
 			if (_cursorPositionPause == 1) {
 				_scene = GAME;
-				//accumulator = 0.0; // I don't think the accumulator needs to be reset here since it isnt incrementing while game is paused and we would lose out on some left over time from frame before pause
 				_cursorPositionPause = 1;
 			}
 			else {
 				_scene = MAIN_MENU;
 				_cursorPositionPause = 1;
-				//Have to reset physics stuff somehow NOTE: physics won't be reset here, only during loading scene!
+
+				// NOTE: keep in this order...
+				_physicsManager->cleanupScene1();
+				_aiManager->cleanupScene1();
 			}
 			delayX = 0.0;
 		}
@@ -217,14 +225,18 @@ void Broker::manageScene(double& accumulator, double vartime) {
 	case (GAME):
 		if (kam->pKeyJustPressed || (playerControlled && player1->startButtonJustPressed)) {
 			_scene = PAUSED;
+			delayX = 0.0;
 		}
-		delayX = 0.0;
 		break;
 	case (END_SCREEN):
 		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
 			_scene = MAIN_MENU;
+			delayX = 0.0;
+
+			// NOTE: keep in this order...
+			_physicsManager->cleanupScene1();
+			_aiManager->cleanupScene1();
 		}
-		delayX = 0.0;
 		break;
 	}
 }
