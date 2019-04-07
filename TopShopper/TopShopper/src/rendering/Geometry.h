@@ -13,7 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-//**Must include glad and GLFW in this order or it breaks**
+ //**Must include glad and GLFW in this order or it breaks**
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <string>
@@ -28,6 +28,8 @@ public:
 	glm::mat4 model;
 	glm::vec3 color;
 	MyTexture texture;
+	bool gradientShader;
+	bool cullBackFace;
 
 	//Data structures for storing vertices, normals colors and uvs
 	std::vector<glm::vec4> verts;

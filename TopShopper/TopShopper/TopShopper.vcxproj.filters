@@ -298,5 +298,11 @@
     <None Include="resources\shaders\quadTestVertex.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="resources\shaders\gradientFragment.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\shaders\gradientVertex.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

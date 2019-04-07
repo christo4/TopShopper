@@ -3,6 +3,8 @@
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
+#define SHADOW_MAP_WIDTH 6144
+#define SHADOW_MAP_HEIGHT 6144
 
 
 //**Must include glad and GLFW in this order or it breaks**
@@ -101,6 +103,7 @@ public:
 	GLuint shaderProgramNoTex;
 	GLuint depthBufferShaderProgram;
 	GLuint quadTestShaderProgram;
+	GLuint gradientShaderProgram;
 
 	GLFWwindow* getWindow();
 
@@ -126,6 +129,7 @@ private:
 	unsigned int _shadowWidth = 6144;
 	unsigned int _shadowHeight = 6144;
 	unsigned int _depthMapTex;
+	float _gradientDegree;
 
 
 

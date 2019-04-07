@@ -179,6 +179,8 @@
     <None Include="resources\shaders\fragment.glsl" />
     <None Include="resources\shaders\fragmentSprite.glsl" />
     <None Include="resources\shaders\fragmentText.glsl" />
+    <None Include="resources\shaders\gradientFragment.glsl" />
+    <None Include="resources\shaders\gradientVertex.glsl" />
     <None Include="resources\shaders\quadTestFragment.glsl" />
     <None Include="resources\shaders\quadTestVertex.glsl" />
     <None Include="resources\shaders\vertex.glsl" />

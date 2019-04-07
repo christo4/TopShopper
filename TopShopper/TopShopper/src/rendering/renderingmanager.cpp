@@ -62,6 +62,12 @@ void RenderingManager::init() {
 		return;
 	}
 
+	gradientShaderProgram = ShaderTools::InitializeShaders(std::string("gradientVertex"), std::string("gradientFragment"));
+	if (gradientShaderProgram == 0) {
+		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
+		return;
+	}
+
 	glUseProgram(shaderProgram);
 
 	/*TODO: Should do this in loading manager or a texture manager class*/
@@ -269,43 +275,29 @@ void RenderingManager::RenderGameScene() {
 	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_CULL_FACE);
-
+	//glEnable(GL_CULL_FACE);
 
 	float fov = 60.0f;
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
-
 	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, 1.0f, 800.0f);
 	glm::vec3 cameraPos;
 	glm::mat4 View = computeCameraPosition(0, cameraPos);	//compute the cameraPosition and view matrix for player 0
-
-	GLuint ModelID;
-	GLuint ViewID;
-	GLuint ProjectionID;
-	GLuint cameraID;
-	GLuint LightViewID;
-	GLuint LightProjectionID;
-	GLuint Flash;
-
 	glm::mat4 lightProjection = glm::ortho(-270.0f, 270.0f, -270.0f, 270.0f, 1.0f, 500.0f);
 	glm::mat4 lightView = glm::lookAt(glm::vec3(70.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-	glViewport(0, 0, (GLuint)_shadowWidth, (GLuint)_shadowHeight);
+
+	glViewport(0, 0, (GLuint)SHADOW_MAP_WIDTH, (GLuint)SHADOW_MAP_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	ModelID = glGetUniformLocation(depthBufferShaderProgram, "Model");
-	ViewID = glGetUniformLocation(depthBufferShaderProgram, "View");
-	ProjectionID = glGetUniformLocation(depthBufferShaderProgram, "Projection");
-
-	//render the scene from the light and fill the depth buffer
-	for (Geometry& g : _objects) {	
+	//render the scene from the light and fill the depth buffer for shadows
+	for (Geometry& g : _objects) {
 
 		glUseProgram(depthBufferShaderProgram);
 
-		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
-		glUniformMatrix4fv(ViewID, 1, GL_FALSE, &lightView[0][0]);
-		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &lightProjection[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "View"), 1, GL_FALSE, &lightView[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Projection"), 1, GL_FALSE, &lightProjection[0][0]);
 
 		glBindVertexArray(g.vao);
 		assignBuffers(g);
@@ -316,71 +308,86 @@ void RenderingManager::RenderGameScene() {
 		if (g.verts.size() != geo.verts.size()) {
 			glDrawArrays(GL_TRIANGLES, 0, g.verts.size());	//ignore the roof in the shadow map
 		}
-
 		glBindVertexArray(0);
 	}
-
-	
 
 	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	ModelID = glGetUniformLocation(shaderProgram, "Model");				//TODO: Probably dont need to do this everytime
-	ViewID = glGetUniformLocation(shaderProgram, "View");
-	ProjectionID = glGetUniformLocation(shaderProgram, "Projection");
-	cameraID = glGetUniformLocation(shaderProgram, "CameraPos");
-	LightViewID = glGetUniformLocation(shaderProgram, "LightView");
-	LightProjectionID = glGetUniformLocation(shaderProgram, "LightProjection");
-	Flash = glGetUniformLocation(shaderProgram, "Flash");
+
 
 
 	for (Geometry& g : _objects) {
 
-		glUseProgram(shaderProgram);					//use the default shader program
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(g.texture.target, g.texture.textureID);
-		GLuint imageTexUniLocation = glGetUniformLocation(shaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
-		glUniform1i(imageTexUniLocation, 0);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, (GLuint) _depthMapTex);
-		GLuint shadowTexUniLocation = glGetUniformLocation(shaderProgram, "shadowMap");		//pass the shadow map into the fragment shader
-		glUniform1i(shadowTexUniLocation, 1);
-
-
-		glUniform3f(cameraID, cameraPos.x, cameraPos.y, cameraPos.z);
-		glUniformMatrix4fv(ModelID, 1, GL_FALSE, &g.model[0][0]);
-		glUniformMatrix4fv(ViewID, 1, GL_FALSE, &View[0][0]);
-		glUniformMatrix4fv(ProjectionID, 1, GL_FALSE, &Projection[0][0]);
-		glUniformMatrix4fv(LightViewID, 1, GL_FALSE, &lightView[0][0]);
-		glUniformMatrix4fv(LightProjectionID, 1, GL_FALSE, &lightProjection[0][0]);
-		if (g.color == glm::vec3(3.0f, 4.0f, 3.0f) && flash) {
-			glUniform1f(Flash, GLfloat(1));
+		if (g.cullBackFace) {
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
 		}
 		else {
-			glUniform1f(Flash, GLfloat(0));
+			glDisable(GL_CULL_FACE);
+		}
+
+
+
+
+
+
+		if (g.gradientShader) {
+
+			glUseProgram(gradientShaderProgram);
+
+			glUniform3f(glGetUniformLocation(gradientShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
+			glUniform1f(glGetUniformLocation(gradientShaderProgram, "gradientDegree"), _gradientDegree);
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(g.texture.target, g.texture.textureID);
+			GLuint imageTexUniLocation = glGetUniformLocation(gradientShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
+			glUniform1i(imageTexUniLocation, 0);
+
+		}
+
+		else {
+			glUseProgram(shaderProgram);					//use the default shader program
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(g.texture.target, g.texture.textureID);
+			GLuint imageTexUniLocation = glGetUniformLocation(shaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
+			glUniform1i(imageTexUniLocation, 0);
+
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, (GLuint)_depthMapTex);
+			GLuint shadowTexUniLocation = glGetUniformLocation(shaderProgram, "shadowMap");		//pass the shadow map into the fragment shader
+			glUniform1i(shadowTexUniLocation, 1);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "LightView"), 1, GL_FALSE, &lightView[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "LightProjection"), 1, GL_FALSE, &lightProjection[0][0]);
+
+			glUniform3f(glGetUniformLocation(shaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
 		}
 
 		glBindVertexArray(g.vao);
-		//assignBuffers(g);		//already done in the first rendering pass
-		//setBufferData(g);
 		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
+		glUseProgram(0);
 		glBindVertexArray(0);
 	}
 
-	
 	if (_broker->_scene == GAME) {
 		renderHud(0);
 	}
-	else if (_broker->_scene == END_SCREEN){
+	else if (_broker->_scene == END_SCREEN) {
 		renderEndScreen();
 	}
-	else if(_broker->_scene == PAUSED){
+	else if (_broker->_scene == PAUSED) {
 		renderPauseScreen();
 	}
-	
+
 	CheckGLErrors();
 }
 
@@ -814,13 +821,9 @@ void RenderingManager::push3DObjects() {
 			if (playerScript->_hasHotPotato) {
 				Geometry geoPotato = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::HOT_POTATO_GEO_NO_INDEX));
 				geoPotato.color = glm::vec3(3.0f, 4.0f, 3.0f);
+				
+				_gradientDegree = playerScript->_hotPotatoTimer;
 
-				if ((playerScript->_hotPotatoTimer > 1 && playerScript->_hotPotatoTimer < 1.5 ) || (playerScript->_hotPotatoTimer > 3 && playerScript->_hotPotatoTimer < 4) ||( playerScript->_hotPotatoTimer > 5 && playerScript->_hotPotatoTimer < 6.5) || (playerScript->_hotPotatoTimer > 9.5 && playerScript->_hotPotatoTimer < 11) || ( playerScript->_hotPotatoTimer > 12 && playerScript->_hotPotatoTimer < 14)) {
-					flash = true;
-				}
-				else {
-					flash = false;
-				}
 				glm::mat4 model;
 				PxMat44 rotation = PxMat44(rot);
 				PxVec3 potatoOffset(0.0f, 5.0f, 0.0f);
@@ -832,6 +835,7 @@ void RenderingManager::push3DObjects() {
 					glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
 
 				geoPotato.model = model;
+				geoPotato.gradientShader = true;
 
 				geoPotato.drawMode = GL_TRIANGLES;
 				_objects.push_back(geoPotato);
@@ -893,6 +897,7 @@ void RenderingManager::push3DObjects() {
 		case EntityTypes::GROUND:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
 			break;
 		}
 		case EntityTypes::ROOF:
@@ -967,36 +972,43 @@ void RenderingManager::push3DObjects() {
 		case EntityTypes::OBSTACLE1:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE1_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
 			break;
 		}
 		case EntityTypes::OBSTACLE2:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE2_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
 			break;
 		}
 		case EntityTypes::OBSTACLE3:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE3_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
 			break;
 		}
 		case EntityTypes::OBSTACLE4:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE4_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
 			break;
 		}
 		case EntityTypes::OBSTACLE5:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE5_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
 			break;
 		}
 		case EntityTypes::OBSTACLE6:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE6_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
 			break;
 		}
 		case EntityTypes::OBSTACLE7:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE7_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
 			break;
 		}
 		default:
