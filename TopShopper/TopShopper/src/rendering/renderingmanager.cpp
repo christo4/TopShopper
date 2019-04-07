@@ -812,7 +812,7 @@ void RenderingManager::push3DObjects() {
 				Geometry geoPotato = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::HOT_POTATO_GEO_NO_INDEX));
 				geoPotato.color = glm::vec3(3.0f, 4.0f, 3.0f);
 
-				if ((playerScript->_hotPotatoTimer > 1 && playerScript->_hotPotatoTimer < 1.5 ) || (playerScript->_hotPotatoTimer > 3 && playerScript->_hotPotatoTimer < 4) ||( playerScript->_hotPotatoTimer > 5 && playerScript->_hotPotatoTimer < 7) || (playerScript->_hotPotatoTimer > 9.5 && playerScript->_hotPotatoTimer < 11) || ( playerScript->_hotPotatoTimer > 12 && playerScript->_hotPotatoTimer < 14)) {
+				if ((playerScript->_hotPotatoTimer > 1 && playerScript->_hotPotatoTimer < 1.5 ) || (playerScript->_hotPotatoTimer > 3 && playerScript->_hotPotatoTimer < 4) ||( playerScript->_hotPotatoTimer > 5 && playerScript->_hotPotatoTimer < 6.5) || (playerScript->_hotPotatoTimer > 9.5 && playerScript->_hotPotatoTimer < 11) || ( playerScript->_hotPotatoTimer > 12 && playerScript->_hotPotatoTimer < 14)) {
 					flash = true;
 				}
 				else {
