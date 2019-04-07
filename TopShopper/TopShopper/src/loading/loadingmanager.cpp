@@ -60,6 +60,12 @@ Geometry* CookieGeoNoIndex = new Geometry();
 Geometry* MysteryBagGeoNoIndex = new Geometry();
 Geometry* HotPotatoGeoNoIndex = new Geometry();
 Geometry* PointerGeoNoIndex = new Geometry();
+Geometry* CartBlackGeoNoIndex = new Geometry();
+//Geometry* CartRedGeoNoIndex = new Geometry();
+Geometry* CartGreenGeoNoIndex = new Geometry();
+Geometry* CartBlueGeoNoIndex = new Geometry();
+Geometry* CartOrangeGeoNoIndex = new Geometry();
+Geometry* CartPurpleGeoNoIndex = new Geometry();
 
 LoadingManager::LoadingManager(Broker *broker) 
 	: _broker(broker)
@@ -919,6 +925,120 @@ void LoadingManager::init() {
 	uvIndex.clear();
 	normalIndex.clear();
 
+	//CartBlack
+	loadObject("../TopShopper/resources/Objects/CartBlack.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		CartBlackGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		CartBlackGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		CartBlackGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+	//CartBlue
+	loadObject("../TopShopper/resources/Objects/CartBlue.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		CartBlueGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		CartBlueGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		CartBlueGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+	//CartGreen
+	loadObject("../TopShopper/resources/Objects/CartGreen.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		CartGreenGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		CartGreenGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		CartGreenGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+	//CartOrange
+	loadObject("../TopShopper/resources/Objects/CartOrange.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		CartOrangeGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		CartOrangeGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		CartOrangeGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
+
+	//CartPurple
+	loadObject("../TopShopper/resources/Objects/CartPurple.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		CartPurpleGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		CartPurpleGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		CartPurpleGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
 }
 
 void LoadingManager::updateSeconds(double variableDeltaTime) {
@@ -1069,6 +1189,18 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return PointerGeo;
 	case GeometryTypes::VEHICLE_CHASSIS_GEO_NO_INDEX:
 		return VehicleChassisGeoNoIndex;
+	case GeometryTypes::CART_BLACK_GEO_NO_INDEX:
+		return CartBlackGeoNoIndex;
+	case GeometryTypes::CART_RED_GEO_NO_INDEX:
+		return VehicleChassisGeoNoIndex;
+	case GeometryTypes::CART_BLUE_GEO_NO_INDEX:
+		return CartBlueGeoNoIndex;
+	case GeometryTypes::CART_GREEN_GEO_NO_INDEX:
+		return CartGreenGeoNoIndex;
+	case GeometryTypes::CART_ORANGE_GEO_NO_INDEX:
+		return CartOrangeGeoNoIndex;
+	case GeometryTypes::CART_PURPLE_GEO_NO_INDEX:
+		return CartPurpleGeoNoIndex;
 	case GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX:
 		return VehicleWheelGeoNoIndex;
 	case GeometryTypes::GROUND_GEO_NO_INDEX:
