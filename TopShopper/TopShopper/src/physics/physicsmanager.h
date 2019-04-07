@@ -155,8 +155,11 @@ public:
 	void updateSeconds(double fixedDeltaTime);
 	void cleanup();
 
+	void loadScene1();
+	void cleanupScene1();
+
 	std::shared_ptr<Entity> instantiateEntity(EntityTypes type, physx::PxTransform transform, const char *name);
-	void switchToScene1();
+	//void switchToScene1();
 	std::shared_ptr<GameScene> getActiveScene() { return _activeScene; }
 
 

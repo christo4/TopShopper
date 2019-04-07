@@ -2,8 +2,9 @@
 #include "PxScene.h"
 #include "objects/shoppingcartplayer.h"
 #include "objects/sparechange.h"
-
 #include <iostream>
+#include "PxRigidActor.h"
+#include "vehicle/VehicleShoppingCart.h"
 
 using namespace physx;
 
@@ -29,6 +30,11 @@ void GameScene::removeEntity(std::shared_ptr<Entity> entity) {
 	for (int i = 0; i < _entities.size(); i++) {
 		if (_entities.at(i) == entity) { // if both pointers point to same address...
 			_physxScene->removeActor(*(entity->_actor));
+			entity->_actor->is<PxRigidActor>()->release();
+			entity->_actor = nullptr;
+			if (entity->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+				std::dynamic_pointer_cast<ShoppingCartPlayer>(entity)->_shoppingCartBase->_vehicle4W->free();
+			}
 			_entities.erase(_entities.begin() + i);
 			break;
 		}
