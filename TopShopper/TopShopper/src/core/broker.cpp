@@ -30,7 +30,7 @@ void Broker::initAll() {
 	_physicsManager->init(); // inits PhysX/Vehicle SDKs + starting scene
 	_audioManager->init(); // inits SDL
 	_aiManager->init(); // could init menus
-	_scene = GAME;
+	_scene = MAIN_MENU;
 	_cursorPositionStart = 3;
 	_cursorPositionSetup = 2;
 	_cursorPositionPause = 1;
