@@ -118,6 +118,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	_objects.clear();
 
 	if (_broker->_scene == GAME || _broker->_scene == PAUSED || _broker->_scene == END_SCREEN) {
+		//clearObjects
 		push3DObjects();
 		RenderGameScene();
 	}
@@ -331,8 +332,6 @@ void RenderingManager::RenderGameScene() {
 		glUseProgram(0);
 		glBindVertexArray(0);
 	}
-	renderHud(1);
-
 
 	if (_broker->_scene == GAME) {
 		renderHud(1);
