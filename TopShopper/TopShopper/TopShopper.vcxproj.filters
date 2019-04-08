@@ -304,5 +304,11 @@
     <None Include="resources\shaders\gradientVertex.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="resources\shaders\transparencyShaderFragment.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\shaders\transparencyShaderVertex.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

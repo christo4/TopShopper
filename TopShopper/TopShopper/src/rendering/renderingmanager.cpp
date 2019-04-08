@@ -68,6 +68,12 @@ void RenderingManager::init() {
 		return;
 	}
 
+	transparencyShaderProgram = ShaderTools::InitializeShaders(std::string("transparencyShaderVertex"), std::string("transparencyShaderFragment"));
+	if (transparencyShaderProgram == 0) {
+		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
+		return;
+	}
+
 	glUseProgram(shaderProgram);
 
 	/*TODO: Should do this in loading manager or a texture manager class*/
@@ -315,9 +321,6 @@ void RenderingManager::RenderGameScene() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-
-
 	for (Geometry& g : _objects) {
 
 
@@ -329,15 +332,9 @@ void RenderingManager::RenderGameScene() {
 			glDisable(GL_CULL_FACE);
 		}
 
-
-
-
-
-
 		if (g.gradientShader) {
 
 			glUseProgram(gradientShaderProgram);
-
 			glUniform3f(glGetUniformLocation(gradientShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
 			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
 			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
@@ -348,21 +345,31 @@ void RenderingManager::RenderGameScene() {
 			glBindTexture(g.texture.target, g.texture.textureID);
 			GLuint imageTexUniLocation = glGetUniformLocation(gradientShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
 			glUniform1i(imageTexUniLocation, 0);
-
 		}
 
-		else {
+		else if (g.isTransparent) {
+			glUseProgram(transparencyShaderProgram);
+			glUniform3f(glGetUniformLocation(transparencyShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
+			
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(g.texture.target, g.texture.textureID);
+			GLuint imageTexUniLocation = glGetUniformLocation(transparencyShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
+			glUniform1i(imageTexUniLocation, 0);
+		}
+				
+		else{
 			glUseProgram(shaderProgram);					//use the default shader program
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(g.texture.target, g.texture.textureID);
-			GLuint imageTexUniLocation = glGetUniformLocation(shaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
-			glUniform1i(imageTexUniLocation, 0);
+			glBindTexture(g.texture.target, g.texture.textureID);					//pass the geometry texture into the fragment shader
+			glUniform1i(glGetUniformLocation(shaderProgram, "imageTexture"), 0);
 
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, (GLuint)_depthMapTex);
-			GLuint shadowTexUniLocation = glGetUniformLocation(shaderProgram, "shadowMap");		//pass the shadow map into the fragment shader
-			glUniform1i(shadowTexUniLocation, 1);
+			glBindTexture(GL_TEXTURE_2D, (GLuint)_depthMapTex);						//pass the shadow map into the fragment shader
+			glUniform1i(glGetUniformLocation(shaderProgram, "shadowMap"), 1);
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "LightView"), 1, GL_FALSE, &lightView[0][0]);
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "LightProjection"), 1, GL_FALSE, &lightProjection[0][0]);
 
@@ -377,6 +384,10 @@ void RenderingManager::RenderGameScene() {
 		glUseProgram(0);
 		glBindVertexArray(0);
 	}
+
+
+
+
 
 	if (_broker->_scene == GAME) {
 		renderHud(0);
@@ -991,12 +1002,14 @@ void RenderingManager::push3DObjects() {
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE4_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			geo.cullBackFace = true;
+			geo.isTransparent = true;
 			break;
 		}
 		case EntityTypes::OBSTACLE5:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE5_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			geo.cullBackFace = true;
+			geo.isTransparent = true;
 			break;
 		}
 		case EntityTypes::OBSTACLE6:

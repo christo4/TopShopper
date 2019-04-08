@@ -183,6 +183,8 @@
     <None Include="resources\shaders\gradientVertex.glsl" />
     <None Include="resources\shaders\quadTestFragment.glsl" />
     <None Include="resources\shaders\quadTestVertex.glsl" />
+    <None Include="resources\shaders\transparencyShaderFragment.glsl" />
+    <None Include="resources\shaders\transparencyShaderVertex.glsl" />
     <None Include="resources\shaders\vertex.glsl" />
     <None Include="resources\shaders\vertexSprite.glsl" />
     <None Include="resources\shaders\vertexText.glsl" />

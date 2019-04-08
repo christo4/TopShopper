@@ -30,6 +30,7 @@ public:
 	MyTexture texture;
 	bool gradientShader;
 	bool cullBackFace;
+	bool isTransparent;
 
 	//Data structures for storing vertices, normals colors and uvs
 	std::vector<glm::vec4> verts;

@@ -104,6 +104,7 @@ public:
 	GLuint depthBufferShaderProgram;
 	GLuint quadTestShaderProgram;
 	GLuint gradientShaderProgram;
+	GLuint transparencyShaderProgram;
 
 	GLFWwindow* getWindow();
 
