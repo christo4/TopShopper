@@ -31,6 +31,7 @@ public:
 	bool gradientShader;
 	bool cullBackFace;
 	bool isTransparent;
+	bool hasShadow;
 
 	//Data structures for storing vertices, normals colors and uvs
 	std::vector<glm::vec4> verts;

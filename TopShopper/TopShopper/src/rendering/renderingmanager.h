@@ -61,6 +61,7 @@ public:
 
 	void init();
 	void updateSeconds(double variableDeltaTime);
+	void updateVehicleThetas();
 	void cleanup();
 
 	//Renders each object

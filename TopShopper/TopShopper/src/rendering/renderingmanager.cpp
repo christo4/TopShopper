@@ -3,6 +3,7 @@
 #include "loading/loadingmanager.h"
 #include <iostream>
 #include <string>
+#include <map>
 #include "ShaderTools.h"
 #include "PxRigidDynamic.h"
 #include <ft2build.h>
@@ -10,12 +11,11 @@
 #include "vehicle/VehicleShoppingCart.h"
 #include <deque>
 
-
-
 using namespace physx;
 
+std::map<int, std::deque<float>> gVehicleThetasMap;
 
-std::deque<float> gVehicleThetas = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; // I WILL ENFORCE THIS TO BE A FIXED SIZE OF 10 (for now, holds the last 10 frames worth of VEHICLE ROTATIONS)
+//std::deque<float> gVehicleThetas = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }; // I WILL ENFORCE THIS TO BE A FIXED SIZE OF 10 (for now, holds the last 10 frames worth of VEHICLE ROTATIONS)
 std::deque<float> gRightStickXValues = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; // always maintain a fixed size (here I use 10) 
 
 RenderingManager::RenderingManager(Broker *broker)
@@ -34,6 +34,13 @@ RenderingManager::~RenderingManager() {
 void RenderingManager::init() {
 	openWindow();
 	initTextRender();
+	
+	gVehicleThetasMap[0] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gVehicleThetasMap[1] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gVehicleThetasMap[2] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gVehicleThetasMap[3] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gVehicleThetasMap[4] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gVehicleThetasMap[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 
 	glEnable(GL_DEPTH_TEST);
 	shaderProgram = ShaderTools::InitializeShaders(std::string("vertex"), std::string("fragment"));
@@ -75,14 +82,18 @@ void RenderingManager::init() {
 		return;
 	}
 
+	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
+
+
 	glUseProgram(shaderProgram);
 
 	/*TODO: Should do this in loading manager or a texture manager class*/
 	init3DTextures();
 	initSpriteTextures();
 	initFrameBuffers();
-
 }
+
+
 
 //UpdateSeconds called every frame from the main loop
 //handles the deletion of objects after completing the rendering of each frame as well as the updating of model positions
@@ -128,6 +139,358 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	
 	glfwSwapBuffers(_window);
 }
+
+
+
+
+//RenderScene utilizes the current array of objects in the rendering manager, setting and assigning the buffers for each geometry,
+//then sending the vertex info down the openGL pipeline, while utilizing the approprite shaders tied to the geometry.
+//performs multiple rendering passes in order to create shadowsm, while calculating the camera information each time it is called.
+void RenderingManager::RenderGameScene() {
+	//Clears the screen to a light grey background
+	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_CULL_FACE);
+
+	float fov = 60.0f;
+	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
+	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, 1.0f, 800.0f);
+
+	glm::vec3 cameraPos;
+	glm::mat4 View = computeCameraPosition(0, cameraPos);	//compute the cameraPosition and view matrix for player 0
+	glm::mat4 lightProjection = glm::ortho(-270.0f, 270.0f, -270.0f, 270.0f, 1.0f, 500.0f);
+	glm::mat4 lightView = glm::lookAt(glm::vec3(70.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+
+	glViewport(0, 0, (GLuint)SHADOW_MAP_WIDTH, (GLuint)SHADOW_MAP_HEIGHT);
+	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	//render the scene from the light and fill the depth buffer for shadows
+	for (Geometry& g : _objects) {
+
+		glUseProgram(depthBufferShaderProgram);
+
+		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "View"), 1, GL_FALSE, &lightView[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Projection"), 1, GL_FALSE, &lightProjection[0][0]);
+
+		glBindVertexArray(g.vao);
+		assignBuffers(g);
+		setBufferData(g);
+
+		Geometry geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::ROOF_GEO_NO_INDEX));
+
+	
+		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());	//ignore the roof in the shadow map
+		
+		glBindVertexArray(0);
+	}
+
+	glViewport(0, (GLuint)windowHeight / 2, (GLuint)windowWidth/2, (GLuint)windowHeight/2);	//reset the viewport to the full window to render from the camera pov
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	for (Geometry& g : _objects) {
+
+
+		if (g.cullBackFace) {
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+		}
+		else {
+			glDisable(GL_CULL_FACE);
+		}
+
+		if (g.gradientShader) {
+			glUseProgram(gradientShaderProgram);
+			glUniform3f(glGetUniformLocation(gradientShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
+			glUniform1f(glGetUniformLocation(gradientShaderProgram, "gradientDegree"), _gradientDegree);
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(g.texture.target, g.texture.textureID);
+			GLuint imageTexUniLocation = glGetUniformLocation(gradientShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
+			glUniform1i(imageTexUniLocation, 0);
+		}
+
+		else if (g.isTransparent) {
+			glUseProgram(transparencyShaderProgram);
+			glUniform3f(glGetUniformLocation(transparencyShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
+			
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(g.texture.target, g.texture.textureID);
+			GLuint imageTexUniLocation = glGetUniformLocation(transparencyShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
+			glUniform1i(imageTexUniLocation, 0);
+		}
+				
+		else{
+			glUseProgram(shaderProgram);					//use the default shader program
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(g.texture.target, g.texture.textureID);					//pass the geometry texture into the fragment shader
+			glUniform1i(glGetUniformLocation(shaderProgram, "imageTexture"), 0);
+
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, (GLuint)_depthMapTex);						//pass the shadow map into the fragment shader
+			glUniform1i(glGetUniformLocation(shaderProgram, "shadowMap"), 1);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "LightView"), 1, GL_FALSE, &lightView[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "LightProjection"), 1, GL_FALSE, &lightProjection[0][0]);
+
+			glUniform3f(glGetUniformLocation(shaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
+		}
+		glBindVertexArray(g.vao);
+		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
+		glUseProgram(0);
+		glBindVertexArray(0);
+	}
+	
+	if (_broker->_scene == GAME) {
+		renderHud(0);
+	}
+	else if (_broker->_scene == END_SCREEN) {
+		renderEndScreen();
+	}
+	else if (_broker->_scene == PAUSED) {
+		renderPauseScreen();
+	}
+
+
+	View = computeCameraPosition(1, cameraPos);
+
+	
+	glViewport((GLuint)windowWidth / 2, (GLuint)windowHeight / 2, (GLuint)windowWidth/2, (GLuint)windowHeight/2);	//reset the viewport to the full window to render from the camera pov
+
+	for (Geometry& g : _objects) {
+
+		if (g.cullBackFace) {
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+		}
+		else {
+			glDisable(GL_CULL_FACE);
+		}
+
+		if (g.gradientShader) {
+
+			glUseProgram(gradientShaderProgram);
+			glUniform3f(glGetUniformLocation(gradientShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
+			glUniform1f(glGetUniformLocation(gradientShaderProgram, "gradientDegree"), _gradientDegree);
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(g.texture.target, g.texture.textureID);
+			GLuint imageTexUniLocation = glGetUniformLocation(gradientShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
+			glUniform1i(imageTexUniLocation, 0);
+		}
+
+		else if (g.isTransparent) {
+			glUseProgram(transparencyShaderProgram);
+			glUniform3f(glGetUniformLocation(transparencyShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(g.texture.target, g.texture.textureID);
+			GLuint imageTexUniLocation = glGetUniformLocation(transparencyShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
+			glUniform1i(imageTexUniLocation, 0);
+		}
+
+		else {
+			glUseProgram(shaderProgram);					//use the default shader program
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(g.texture.target, g.texture.textureID);					//pass the geometry texture into the fragment shader
+			glUniform1i(glGetUniformLocation(shaderProgram, "imageTexture"), 0);
+
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, (GLuint)_depthMapTex);						//pass the shadow map into the fragment shader
+			glUniform1i(glGetUniformLocation(shaderProgram, "shadowMap"), 1);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "LightView"), 1, GL_FALSE, &lightView[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "LightProjection"), 1, GL_FALSE, &lightProjection[0][0]);
+
+			glUniform3f(glGetUniformLocation(shaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
+		}
+		glBindVertexArray(g.vao);
+		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
+		glUseProgram(0);
+		glBindVertexArray(0);
+	}
+	renderHud(1);
+
+
+	if (_broker->_scene == GAME) {
+		renderHud(1);
+	}
+	else if (_broker->_scene == END_SCREEN) {
+		renderEndScreen();
+	}
+	else if (_broker->_scene == PAUSED) {
+		renderPauseScreen();
+	}
+	CheckGLErrors();
+}
+
+
+
+//Computes the cameraPosition of an  particular player in the game (represented by their player id) using an averaging technique to smooth the camera
+//returns a mat4 representing the lookat matrix of the camera for the input player to be used to represent where the scene will be rendered from
+// NOTE: I'm assuming that this function only gets called for human players (which will be upto [0], [1], [2], [3] in the vector and thus their inputID = playerID+1)
+glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camera) {
+
+	std::shared_ptr<ShoppingCartPlayer> player = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers().at(playerID);
+	PxRigidDynamic* playerDyn = player->_actor->is<PxRigidDynamic>();
+	PxTransform playerTransform = playerDyn->getGlobalPose();
+	PxVec3 playerPos = playerTransform.p;
+	PxQuat playerRot = playerTransform.q;
+
+	PxVec3 forward(0.0f, 0.0f, 1.0f);
+	forward = playerRot.rotate(forward);
+	PxVec3 forwardNoYNorm = PxVec3(forward.x, 0.0f, forward.z).getNormalized();
+	float theta = acos(forwardNoYNorm.dot(PxVec3(0.0f, 0.0f, 1.0f))); // theta in [0, pi]
+
+	// now use cross product to figure out which side (sign of theta)...
+	// +ve theta if CCW, -ve theta if CW
+
+	PxVec3 crossprod = forwardNoYNorm.cross(PxVec3(0.0f, 0.0f, 1.0f));
+	bool isCCW = crossprod.y <= 0.0f;
+	if (!isCCW) theta *= -1;
+
+	// now theta in [-pi, 0] or [0, pi]
+	
+	gVehicleThetasMap[playerID].pop_front(); // pop the oldest frame
+	gVehicleThetasMap[playerID].push_back(theta); // push current vehicle rotation (around +y-axis)
+
+	// get the average vehicle rotation in last 10 frames (incl. this one) 
+	// have to use vectors since thetas have edge case problems (e.g. going from pi to -pi)
+	PxVec3 vehicleRotationVecSum(0.0f, 0.0f, 0.0f);
+	std::deque<float> gVehicleThetas = gVehicleThetasMap[playerID];
+
+
+	for (float t : gVehicleThetas) {
+		// assume a radius of 1 for this calculation (scale later by our intended radius)
+		// also assume a y of 0.0f (can set y later)
+		vehicleRotationVecSum += PxVec3(sin(t), 0.0f, cos(t));
+	}
+	vehicleRotationVecSum /= gVehicleThetas.size();
+
+	// NOTE: I could change this to perform the glm::mix(t=0.5f) over all vectors, but the current solution seems to work
+	
+	// RIGHT STICK PANNING (NOTE: there is no keyboard equivalent for now, would probably need to use mouse, or just leave it out)...
+	PxVec3 finalCamVec;
+	int inputID = playerID + 1;
+	if (_broker->getInputManager()->getGamePad(inputID) != nullptr) {
+		float newRightStickXValue = _broker->getInputManager()->getGamePad(inputID)->rightStickX;
+		gRightStickXValues.pop_front();
+		gRightStickXValues.push_back(newRightStickXValue);
+		float avgRightStickXValue = 0.0f;
+		for (float f : gRightStickXValues) {
+			avgRightStickXValue += f;
+		}
+		avgRightStickXValue /= gRightStickXValues.size();
+
+		float rightStickTheta = avgRightStickXValue *-1 * 1.0472f; // 60deg (1.0472 rads) max
+		PxMat33 rightStickMat = PxMat33(PxVec3(cos(rightStickTheta), 0, -sin(rightStickTheta)), PxVec3(0, 1, 0), PxVec3(sin(rightStickTheta), 0, cos(rightStickTheta))); // rotation matrix around y-axis
+		finalCamVec = rightStickMat * vehicleRotationVecSum;
+	}
+	else {
+		finalCamVec = vehicleRotationVecSum;
+	}
+
+	float radius = 30.0f; // FIXED (for now)
+	float camX = -1 * radius * finalCamVec.x;
+	float camY = 12.5f;
+	float camZ = -1 * radius * finalCamVec.z;
+	
+
+	glm::vec3 camPos(playerPos.x + camX, playerPos.y + camY, playerPos.z + camZ);
+
+	glm::mat4 View = glm::lookAt(
+		camPos, // camera position
+		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at 
+		glm::vec3(0.0f, 1.0f, 0.0f)  // up vector
+	);
+
+	camera = camPos;
+	return View;
+}
+
+
+
+void RenderingManager::renderEndScreen() {
+	std::vector<std::shared_ptr<ShoppingCartPlayer>> players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
+	std::shared_ptr<ShoppingCartPlayer> player = players[0];
+	std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+
+	Player scores[3];
+
+	scores[0].score = script->_points;
+	scores[0].player = "Player1 ";
+
+	player = players[1];
+	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	scores[1].score = script->_points;
+	scores[1].player = "Opp2 "; // Check if its a human or cpu
+
+	
+	player = players[2];
+	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	scores[2].score = script->_points;
+	scores[2].player = "Opp3 "; // Check if its a human or cpu
+	/*
+	player = players[3];
+	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	scores[3].score = script->_points;
+	scores[3].player = "Opp4 "; // Check if its a human or cpu
+
+	player = players[4];
+	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	scores[4].score = script->_points;
+	scores[4].player = "Opp5 ";
+
+	player = players[5];
+	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	scores[5].score = script->_points;
+	scores[5].player = "Opp6 ";
+	*/
+
+	std::sort(scores, scores+3, compareStruct1);
+	
+	
+	//renderText("Shopper Ranks", windowWidth*0.35, windowHeight*0.63, 1.7f, glm::vec3(0.0f, 0.0f, 0.0f));
+
+	renderText("1st: " + scores[0].player + std::to_string(scores[0].score), windowWidth*0.35, windowHeight*0.55, 1.5f, glm::vec3(0.93f, 0.84f, 0.03f));
+
+	renderText("2nd: " + scores[1].player + std::to_string(scores[1].score), windowWidth*0.35, windowHeight*0.46, 1.5f, glm::vec3(0.65f, 0.65f, 0.65f));
+
+	renderText("3rd: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.38, 1.5f, glm::vec3(0.70f, 0.36f, 0.0f));
+
+	renderText("4th: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.33, 1.0f, glm::vec3(0, 0, 0));
+
+	renderText("5th: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.29, 1.0f, glm::vec3(0, 0, 0));
+
+	renderText("6th: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.25, 1.0f, glm::vec3(0, 0, 0));
+
+	renderText("Menu", GLfloat(windowWidth*0.466), GLfloat(windowHeight*0.106), 1.0f, glm::vec3(0, 0, 0));
+	renderSprite(*_buttonHighlightSprite, -0.15, -0.85, 0.15, -0.65);
+	renderSprite(*_resultsScreenSprite, -0.5, -0.77, 0.5, 1);
+}
+
 
 
 void RenderingManager::RenderMainMenu() {
@@ -271,279 +634,6 @@ void RenderingManager::RenderControls() {
 	renderSprite(*_backgroundSprite, -1, -1, 1, 1);
 
 	CheckGLErrors();
-}
-
-
-//RenderScene utilizes the current array of objects in the rendering manager, setting and assigning the buffers for each geometry,
-//then sending the vertex info down the openGL pipeline, while utilizing the approprite shaders tied to the geometry.
-//performs multiple rendering passes in order to create shadowsm, while calculating the camera information each time it is called.
-void RenderingManager::RenderGameScene() {
-	//Clears the screen to a light grey background
-	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glEnable(GL_CULL_FACE);
-
-	float fov = 60.0f;
-	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
-	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, 1.0f, 800.0f);
-	glm::vec3 cameraPos;
-	glm::mat4 View = computeCameraPosition(0, cameraPos);	//compute the cameraPosition and view matrix for player 0
-	glm::mat4 lightProjection = glm::ortho(-270.0f, 270.0f, -270.0f, 270.0f, 1.0f, 500.0f);
-	glm::mat4 lightView = glm::lookAt(glm::vec3(70.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-
-	glViewport(0, 0, (GLuint)SHADOW_MAP_WIDTH, (GLuint)SHADOW_MAP_HEIGHT);
-	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);
-	glClear(GL_DEPTH_BUFFER_BIT);
-
-	//render the scene from the light and fill the depth buffer for shadows
-	for (Geometry& g : _objects) {
-
-		glUseProgram(depthBufferShaderProgram);
-
-		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "View"), 1, GL_FALSE, &lightView[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Projection"), 1, GL_FALSE, &lightProjection[0][0]);
-
-		glBindVertexArray(g.vao);
-		assignBuffers(g);
-		setBufferData(g);
-
-		Geometry geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::ROOF_GEO_NO_INDEX));
-
-		if (g.verts.size() != geo.verts.size()) {
-			glDrawArrays(GL_TRIANGLES, 0, g.verts.size());	//ignore the roof in the shadow map
-		}
-		glBindVertexArray(0);
-	}
-
-	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	for (Geometry& g : _objects) {
-
-
-		if (g.cullBackFace) {
-			glEnable(GL_CULL_FACE);
-			glCullFace(GL_BACK);
-		}
-		else {
-			glDisable(GL_CULL_FACE);
-		}
-
-		if (g.gradientShader) {
-
-			glUseProgram(gradientShaderProgram);
-			glUniform3f(glGetUniformLocation(gradientShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
-			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
-			glUniform1f(glGetUniformLocation(gradientShaderProgram, "gradientDegree"), _gradientDegree);
-
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(g.texture.target, g.texture.textureID);
-			GLuint imageTexUniLocation = glGetUniformLocation(gradientShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
-			glUniform1i(imageTexUniLocation, 0);
-		}
-
-		else if (g.isTransparent) {
-			glUseProgram(transparencyShaderProgram);
-			glUniform3f(glGetUniformLocation(transparencyShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
-			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
-			
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(g.texture.target, g.texture.textureID);
-			GLuint imageTexUniLocation = glGetUniformLocation(transparencyShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
-			glUniform1i(imageTexUniLocation, 0);
-		}
-				
-		else{
-			glUseProgram(shaderProgram);					//use the default shader program
-
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(g.texture.target, g.texture.textureID);					//pass the geometry texture into the fragment shader
-			glUniform1i(glGetUniformLocation(shaderProgram, "imageTexture"), 0);
-
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, (GLuint)_depthMapTex);						//pass the shadow map into the fragment shader
-			glUniform1i(glGetUniformLocation(shaderProgram, "shadowMap"), 1);
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "LightView"), 1, GL_FALSE, &lightView[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "LightProjection"), 1, GL_FALSE, &lightProjection[0][0]);
-
-			glUniform3f(glGetUniformLocation(shaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
-		}
-
-		glBindVertexArray(g.vao);
-		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
-		glUseProgram(0);
-		glBindVertexArray(0);
-	}
-
-
-
-
-
-	if (_broker->_scene == GAME) {
-		renderHud(0);
-	}
-	else if (_broker->_scene == END_SCREEN) {
-		renderEndScreen();
-	}
-	else if (_broker->_scene == PAUSED) {
-		renderPauseScreen();
-	}
-
-	CheckGLErrors();
-}
-
-
-
-//Computes the cameraPosition of an  particular player in the game (represented by their player id) using an averaging technique to smooth the camera
-//returns a mat4 representing the lookat matrix of the camera for the input player to be used to represent where the scene will be rendered from
-// NOTE: I'm assuming that this function only gets called for human players (which will be upto [0], [1], [2], [3] in the vector and thus their inputID = playerID+1)
-glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camera) {
-	std::shared_ptr<ShoppingCartPlayer> player = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers().at(playerID);
-	PxRigidDynamic* playerDyn = player->_actor->is<PxRigidDynamic>();
-	PxTransform playerTransform = playerDyn->getGlobalPose();
-	PxVec3 playerPos = playerTransform.p;
-	PxQuat playerRot = playerTransform.q;
-
-	PxVec3 forward(0.0f, 0.0f, 1.0f);
-	forward = playerRot.rotate(forward);
-	PxVec3 forwardNoYNorm = PxVec3(forward.x, 0.0f, forward.z).getNormalized();
-	float theta = acos(forwardNoYNorm.dot(PxVec3(0.0f, 0.0f, 1.0f))); // theta in [0, pi]
-
-	// now use cross product to figure out which side (sign of theta)...
-	// +ve theta if CCW, -ve theta if CW
-
-	PxVec3 crossprod = forwardNoYNorm.cross(PxVec3(0.0f, 0.0f, 1.0f));
-	bool isCCW = crossprod.y <= 0.0f;
-	if (!isCCW) theta *= -1;
-
-	// now theta in [-pi, 0] or [0, pi]
-
-	gVehicleThetas.pop_front(); // pop the oldest frame
-	gVehicleThetas.push_back(theta); // push current vehicle rotation (around +y-axis)
-
-	// get the average vehicle rotation in last 10 frames (incl. this one) 
-	// have to use vectors since thetas have edge case problems (e.g. going from pi to -pi)
-	PxVec3 vehicleRotationVecSum(0.0f, 0.0f, 0.0f);
-	for (float t : gVehicleThetas) {
-		// assume a radius of 1 for this calculation (scale later by our intended radius)
-		// also assume a y of 0.0f (can set y later)
-		vehicleRotationVecSum += PxVec3(sin(t), 0.0f, cos(t));
-	}
-	vehicleRotationVecSum /= gVehicleThetas.size();
-
-	// NOTE: I could change this to perform the glm::mix(t=0.5f) over all vectors, but the current solution seems to work
-	
-	// RIGHT STICK PANNING (NOTE: there is no keyboard equivalent for now, would probably need to use mouse, or just leave it out)...
-	PxVec3 finalCamVec;
-	int inputID = playerID + 1;
-	if (_broker->getInputManager()->getGamePad(inputID) != nullptr) {
-		float newRightStickXValue = _broker->getInputManager()->getGamePad(inputID)->rightStickX;
-		gRightStickXValues.pop_front();
-		gRightStickXValues.push_back(newRightStickXValue);
-		float avgRightStickXValue = 0.0f;
-		for (float f : gRightStickXValues) {
-			avgRightStickXValue += f;
-		}
-		avgRightStickXValue /= gRightStickXValues.size();
-
-		float rightStickTheta = avgRightStickXValue *-1 * 1.0472f; // 60deg (1.0472 rads) max
-		PxMat33 rightStickMat = PxMat33(PxVec3(cos(rightStickTheta), 0, -sin(rightStickTheta)), PxVec3(0, 1, 0), PxVec3(sin(rightStickTheta), 0, cos(rightStickTheta))); // rotation matrix around y-axis
-		finalCamVec = rightStickMat * vehicleRotationVecSum;
-	}
-	else {
-		finalCamVec = vehicleRotationVecSum;
-	}
-
-	float radius = 30.0f; // FIXED (for now)
-	float camX = -1 * radius * finalCamVec.x;
-	float camY = 12.5f;
-	float camZ = -1 * radius * finalCamVec.z;
-	
-
-	glm::vec3 camPos(playerPos.x + camX, playerPos.y + camY, playerPos.z + camZ);
-
-	glm::mat4 View = glm::lookAt(
-		camPos, // camera position
-		glm::vec3(playerPos.x, playerPos.y, playerPos.z), // looks at 
-		glm::vec3(0.0f, 1.0f, 0.0f)  // up vector
-	);
-
-
-	camera = camPos;
-
-	return View;
-}
-
-
-
-void RenderingManager::renderEndScreen() {
-	std::vector<std::shared_ptr<ShoppingCartPlayer>> players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
-	std::shared_ptr<ShoppingCartPlayer> player = players[0];
-	std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
-
-	Player scores[3];
-
-	scores[0].score = script->_points;
-	scores[0].player = "Player1 ";
-
-	player = players[1];
-	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
-	scores[1].score = script->_points;
-	scores[1].player = "Opp2 "; // Check if its a human or cpu
-
-	
-	player = players[2];
-	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
-	scores[2].score = script->_points;
-	scores[2].player = "Opp3 "; // Check if its a human or cpu
-	/*
-	player = players[3];
-	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
-	scores[3].score = script->_points;
-	scores[3].player = "Opp4 "; // Check if its a human or cpu
-
-	player = players[4];
-	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
-	scores[4].score = script->_points;
-	scores[4].player = "Opp5 ";
-
-	player = players[5];
-	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
-	scores[5].score = script->_points;
-	scores[5].player = "Opp6 ";
-	*/
-
-	std::sort(scores, scores+3, compareStruct1);
-	
-	
-	//renderText("Shopper Ranks", windowWidth*0.35, windowHeight*0.63, 1.7f, glm::vec3(0.0f, 0.0f, 0.0f));
-
-	renderText("1st: " + scores[0].player + std::to_string(scores[0].score), windowWidth*0.35, windowHeight*0.55, 1.5f, glm::vec3(0.93f, 0.84f, 0.03f));
-
-	renderText("2nd: " + scores[1].player + std::to_string(scores[1].score), windowWidth*0.35, windowHeight*0.46, 1.5f, glm::vec3(0.65f, 0.65f, 0.65f));
-
-	renderText("3rd: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.38, 1.5f, glm::vec3(0.70f, 0.36f, 0.0f));
-
-	renderText("4th: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.33, 1.0f, glm::vec3(0, 0, 0));
-
-	renderText("5th: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.29, 1.0f, glm::vec3(0, 0, 0));
-
-	renderText("6th: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.25, 1.0f, glm::vec3(0, 0, 0));
-
-	renderText("Menu", GLfloat(windowWidth*0.466), GLfloat(windowHeight*0.106), 1.0f, glm::vec3(0, 0, 0));
-	renderSprite(*_buttonHighlightSprite, -0.15, -0.85, 0.15, -0.65);
-	renderSprite(*_resultsScreenSprite, -0.5, -0.77, 0.5, 1);
 }
 
 
@@ -1024,14 +1114,12 @@ void RenderingManager::push3DObjects() {
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE4_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			geo.cullBackFace = true;
-			geo.isTransparent = true;
 			break;
 		}
 		case EntityTypes::OBSTACLE5:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE5_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			geo.cullBackFace = true;
-			geo.isTransparent = true;
 			break;
 		}
 		case EntityTypes::OBSTACLE6:
