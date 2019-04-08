@@ -365,13 +365,13 @@ void RenderingManager::renderEndScreen() {
 	player = players[1];
 	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
 	scores[1].score = script->_points;
-	scores[1].player = "Opp2 "; // Check if its a human or cpu
+	scores[1].player = "Player2 "; // Check if its a human or cpu
 
 	
 	player = players[2];
 	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
 	scores[2].score = script->_points;
-	scores[2].player = "Opp3 "; // Check if its a human or cpu
+	scores[2].player = "Player3 "; // Check if its a human or cpu
 	/*
 	player = players[3];
 	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
