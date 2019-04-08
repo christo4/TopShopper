@@ -34,6 +34,8 @@ RenderingManager::~RenderingManager() {
 void RenderingManager::init() {
 	openWindow();
 	initTextRender();
+
+	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
 	
 	gVehicleThetasMap[0] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 	gVehicleThetasMap[1] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
@@ -99,6 +101,7 @@ void RenderingManager::init() {
 //handles the deletion of objects after completing the rendering of each frame as well as the updating of model positions
 //calls render scene after pushing back the 3d objects in order to render the scene again. 
 void RenderingManager::updateSeconds(double variableDeltaTime) {
+	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
 	if (_broker->_scene == GAME) {
 		// call LATEUPDATE() for all behaviour scripts...
 		std::vector<std::shared_ptr<Entity>> entitiesCopy = _broker->getPhysicsManager()->getActiveScene()->_entities;
@@ -114,13 +117,22 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	for (Geometry& geoDel : _objects) {
 		deleteBufferData(geoDel);
 	}
-
 	_objects.clear();
 
+
 	if (_broker->_scene == GAME || _broker->_scene == PAUSED || _broker->_scene == END_SCREEN) {
-		//clearObjects
 		push3DObjects();
-		RenderGameScene();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		if (SPLIT_SCREEN) {
+			RenderGameScene(0, 0, windowHeight / 2, windowWidth / 2, windowHeight / 2);						//split screen rendering
+			RenderGameScene(1, windowWidth / 2, windowHeight / 2, windowWidth / 2, windowHeight / 2);
+			RenderGameScene(2, 0, 0, windowWidth / 2, windowHeight / 2);
+		}
+		else {
+			RenderGameScene(0, 0, 0, windowWidth, windowHeight);
+		}
+
 	}
 	else if (_broker->_scene == MAIN_MENU) {
 		RenderMainMenu();
@@ -142,27 +154,24 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 }
 
 
-
-
 //RenderScene utilizes the current array of objects in the rendering manager, setting and assigning the buffers for each geometry,
 //then sending the vertex info down the openGL pipeline, while utilizing the approprite shaders tied to the geometry.
 //performs multiple rendering passes in order to create shadowsm, while calculating the camera information each time it is called.
-void RenderingManager::RenderGameScene() {
+void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int viewBottomLeftY, int viewTopRightX, int viewTopRightY){  
 	//Clears the screen to a light grey background
 	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glEnable(GL_CULL_FACE);
 
-	float fov = 60.0f;
+	float fov = 65.0f;
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
 	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, 1.0f, 800.0f);
 
 	glm::vec3 cameraPos;
-	glm::mat4 View = computeCameraPosition(0, cameraPos);	//compute the cameraPosition and view matrix for player 0
+	glm::mat4 View = computeCameraPosition(playerID, cameraPos);	//compute the cameraPosition and view matrix for player 0
 	glm::mat4 lightProjection = glm::ortho(-270.0f, 270.0f, -270.0f, 270.0f, 1.0f, 500.0f);
 	glm::mat4 lightView = glm::lookAt(glm::vec3(70.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
 
 	glViewport(0, 0, (GLuint)SHADOW_MAP_WIDTH, (GLuint)SHADOW_MAP_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);
@@ -178,23 +187,15 @@ void RenderingManager::RenderGameScene() {
 		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Projection"), 1, GL_FALSE, &lightProjection[0][0]);
 
 		glBindVertexArray(g.vao);
-		assignBuffers(g);
-		setBufferData(g);
-
-		Geometry geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::ROOF_GEO_NO_INDEX));
-
-	
 		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());	//ignore the roof in the shadow map
-		
 		glBindVertexArray(0);
 	}
 
-	glViewport(0, (GLuint)windowHeight / 2, (GLuint)windowWidth/2, (GLuint)windowHeight/2);	//reset the viewport to the full window to render from the camera pov
+	glViewport((GLuint)viewBottomLeftx, (GLuint)viewBottomLeftY, (GLuint)viewTopRightX, (GLuint)viewTopRightY);	//reset the viewport to the full window to render from the camera pov
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for (Geometry& g : _objects) {
-
 
 		if (g.cullBackFace) {
 			glEnable(GL_CULL_FACE);
@@ -203,7 +204,6 @@ void RenderingManager::RenderGameScene() {
 		else {
 			glDisable(GL_CULL_FACE);
 		}
-
 		if (g.gradientShader) {
 			glUseProgram(gradientShaderProgram);
 			glUniform3f(glGetUniformLocation(gradientShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
@@ -254,87 +254,8 @@ void RenderingManager::RenderGameScene() {
 		glUseProgram(0);
 		glBindVertexArray(0);
 	}
-	
 	if (_broker->_scene == GAME) {
-		renderHud(0);
-	}
-	else if (_broker->_scene == END_SCREEN) {
-		renderEndScreen();
-	}
-	else if (_broker->_scene == PAUSED) {
-		renderPauseScreen();
-	}
-
-
-	View = computeCameraPosition(1, cameraPos);
-
-	
-	glViewport((GLuint)windowWidth / 2, (GLuint)windowHeight / 2, (GLuint)windowWidth/2, (GLuint)windowHeight/2);	//reset the viewport to the full window to render from the camera pov
-
-	for (Geometry& g : _objects) {
-
-		if (g.cullBackFace) {
-			glEnable(GL_CULL_FACE);
-			glCullFace(GL_BACK);
-		}
-		else {
-			glDisable(GL_CULL_FACE);
-		}
-
-		if (g.gradientShader) {
-
-			glUseProgram(gradientShaderProgram);
-			glUniform3f(glGetUniformLocation(gradientShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
-			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(gradientShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
-			glUniform1f(glGetUniformLocation(gradientShaderProgram, "gradientDegree"), _gradientDegree);
-
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(g.texture.target, g.texture.textureID);
-			GLuint imageTexUniLocation = glGetUniformLocation(gradientShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
-			glUniform1i(imageTexUniLocation, 0);
-		}
-
-		else if (g.isTransparent) {
-			glUseProgram(transparencyShaderProgram);
-			glUniform3f(glGetUniformLocation(transparencyShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
-			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
-
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(g.texture.target, g.texture.textureID);
-			GLuint imageTexUniLocation = glGetUniformLocation(transparencyShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
-			glUniform1i(imageTexUniLocation, 0);
-		}
-
-		else {
-			glUseProgram(shaderProgram);					//use the default shader program
-
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(g.texture.target, g.texture.textureID);					//pass the geometry texture into the fragment shader
-			glUniform1i(glGetUniformLocation(shaderProgram, "imageTexture"), 0);
-
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, (GLuint)_depthMapTex);						//pass the shadow map into the fragment shader
-			glUniform1i(glGetUniformLocation(shaderProgram, "shadowMap"), 1);
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "LightView"), 1, GL_FALSE, &lightView[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "LightProjection"), 1, GL_FALSE, &lightProjection[0][0]);
-
-			glUniform3f(glGetUniformLocation(shaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
-		}
-		glBindVertexArray(g.vao);
-		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
-		glUseProgram(0);
-		glBindVertexArray(0);
-	}
-
-	if (_broker->_scene == GAME) {
-		renderHud(1);
+		renderHud(playerID);
 	}
 	else if (_broker->_scene == END_SCREEN) {
 		renderEndScreen();
@@ -663,7 +584,6 @@ void RenderingManager::renderPauseScreen() {
 //TODO: *****needs to retrieve all the other players in the game to render to the side of the screen 
 void RenderingManager::renderHud(int playerID) {
 
-
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
 	std::shared_ptr<ShoppingCartPlayer> player = players[playerID];
 	std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
@@ -930,8 +850,9 @@ void RenderingManager::push3DObjects() {
 					glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
 
 				geoWheel.model = model;
-
 				geoWheel.drawMode = GL_TRIANGLES;
+				assignBuffers(geoWheel);
+				setBufferData(geoWheel);
 				_objects.push_back(geoWheel);
 			}
 
@@ -960,6 +881,8 @@ void RenderingManager::push3DObjects() {
 				geoPotato.gradientShader = true;
 
 				geoPotato.drawMode = GL_TRIANGLES;
+				assignBuffers(geoPotato);
+				setBufferData(geoPotato);
 				_objects.push_back(geoPotato);
 
 			}
@@ -1007,8 +930,10 @@ void RenderingManager::push3DObjects() {
 							glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
 
 						geoPointer.model = model;
-
 						geoPointer.drawMode = GL_TRIANGLES;
+
+						assignBuffers(geoPointer);
+						setBufferData(geoPointer);
 						_objects.push_back(geoPointer);
 						yOffset += 0.5f;
 					}
@@ -1148,6 +1073,9 @@ void RenderingManager::push3DObjects() {
 
 		geo.model = model;
 		geo.drawMode = GL_TRIANGLES;
+
+		assignBuffers(geo);
+		setBufferData(geo);
 		_objects.push_back(geo);
 	}
 }
@@ -1156,7 +1084,7 @@ void RenderingManager::initFrameBuffers() {
 	glGenFramebuffers(1, &_lightDepthFBO);
 	glGenTextures(1, &_depthMapTex);								//init the texture for the depth map information
 	glBindTexture(GL_TEXTURE_2D, _depthMapTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _shadowWidth, _shadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

@@ -6,6 +6,8 @@
 #define SHADOW_MAP_WIDTH 6144
 #define SHADOW_MAP_HEIGHT 6144
 
+#define SPLIT_SCREEN true
+
 
 //**Must include glad and GLFW in this order or it breaks**
 #include <glad/glad.h>
@@ -58,28 +60,31 @@ public:
 	RenderingManager(Broker *broker);
 	virtual ~RenderingManager();
 
-
 	void init();
 	void updateSeconds(double variableDeltaTime);
 	void cleanup();
 
 	//Renders each object
-	void RenderGameScene();
+	void RenderGameScene(int playerID, int viewBottomLeftx, int viewBottomLeftY, int viewTopRightX, int viewTopRightY);
 	void RenderMainMenu();
 	void RenderLoading();
 	void RenderSetup();
 	void RenderCredits();
 	void RenderControls();
+
 	glm::mat4 computeCameraPosition(int playerID, glm::vec3 &camera);
+
 	void renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
 	void renderSprite(MyTexture spriteTex, float bottomLeftX, float bottomLeftY, float topRightX, float topRightY);
 	void renderHud(int playerID);
 	void renderEndScreen();
 	void renderPauseScreen();
+
 	void initTextRender();
 	void initSpriteTextures();
 	void init3DTextures();
 	void initFrameBuffers();
+
 	MyTexture * getSpriteTexture(EntityTypes type);
 	MyTexture * getPlayerBorderSprite(int playerID);
 	glm::vec3 getPlayerColor(int playerID);
@@ -107,10 +112,7 @@ public:
 	GLuint transparencyShaderProgram;
 
 	GLFWwindow* getWindow();
-
 	void QueryGLVersion();
-
-	glm::mat4 Camera(float theta, float radius, float phi);
 	void push3DObjects();
 	std::map<GLchar, Character> Characters;
 
@@ -119,21 +121,14 @@ public:
 
 	float pi = 3.14159265;
 
-	bool flash;
-
 private:
 
 	Broker *_broker = nullptr;
 	GLFWwindow *_window = nullptr;
 	std::vector<Geometry> _objects;
 	unsigned int _lightDepthFBO;
-	unsigned int _shadowWidth = 6144;
-	unsigned int _shadowHeight = 6144;
 	unsigned int _depthMapTex;
 	float _gradientDegree;
-
-
-
 	void openWindow();
 
 	MyTexture *_borderSpriteBlack = new MyTexture();
