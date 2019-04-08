@@ -47,12 +47,12 @@ void InputManager::updateSeconds(double variableDeltaTime) {
 		else {
 			_gamePads[i]->leftStickY = 0;
 		}
-		if (axesArray[2] > 0.5f || axesArray[2] < -0.5f) {
-			_gamePads[i]->rightStickX = axesArray[2];
-		}
-		else {
-			_gamePads[i]->rightStickX = 0;
-		}
+		//if (axesArray[2] > 0.5f || axesArray[2] < -0.5f) {
+		_gamePads[i]->rightStickX = axesArray[2];
+		//}
+		//else {
+		//	_gamePads[i]->rightStickX = 0;
+		//}
 		if (axesArray[3] > 0.5f || axesArray[3] < -0.5f) {
 			_gamePads[i]->rightStickY = axesArray[3];
 		}

@@ -16,6 +16,7 @@ using namespace physx;
 
 
 std::deque<float> gVehicleThetas = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; // I WILL ENFORCE THIS TO BE A FIXED SIZE OF 10 (for now, holds the last 10 frames worth of VEHICLE ROTATIONS)
+std::deque<float> gRightStickXValues = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; // always maintain a fixed size (here I use 10) 
 
 RenderingManager::RenderingManager(Broker *broker)
 	: _broker(broker)
@@ -406,8 +407,8 @@ void RenderingManager::RenderGameScene() {
 
 //Computes the cameraPosition of an  particular player in the game (represented by their player id) using an averaging technique to smooth the camera
 //returns a mat4 representing the lookat matrix of the camera for the input player to be used to represent where the scene will be rendered from
+// NOTE: I'm assuming that this function only gets called for human players (which will be upto [0], [1], [2], [3] in the vector and thus their inputID = playerID+1)
 glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camera) {
-	// NOTE: later on... for right thumbstick, the cmaera position will curl around the circle proportional to -1.0 to 1.0 (post-process over the theta)
 	std::shared_ptr<ShoppingCartPlayer> player = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers().at(playerID);
 	PxRigidDynamic* playerDyn = player->_actor->is<PxRigidDynamic>();
 	PxTransform playerTransform = playerDyn->getGlobalPose();
@@ -442,11 +443,32 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camer
 	vehicleRotationVecSum /= gVehicleThetas.size();
 
 	// NOTE: I could change this to perform the glm::mix(t=0.5f) over all vectors, but the current solution seems to work
+	
+	// RIGHT STICK PANNING (NOTE: there is no keyboard equivalent for now, would probably need to use mouse, or just leave it out)...
+	PxVec3 finalCamVec;
+	int inputID = playerID + 1;
+	if (_broker->getInputManager()->getGamePad(inputID) != nullptr) {
+		float newRightStickXValue = _broker->getInputManager()->getGamePad(inputID)->rightStickX;
+		gRightStickXValues.pop_front();
+		gRightStickXValues.push_back(newRightStickXValue);
+		float avgRightStickXValue = 0.0f;
+		for (float f : gRightStickXValues) {
+			avgRightStickXValue += f;
+		}
+		avgRightStickXValue /= gRightStickXValues.size();
+
+		float rightStickTheta = avgRightStickXValue *-1 * 1.0472f; // 60deg (1.0472 rads) max
+		PxMat33 rightStickMat = PxMat33(PxVec3(cos(rightStickTheta), 0, -sin(rightStickTheta)), PxVec3(0, 1, 0), PxVec3(sin(rightStickTheta), 0, cos(rightStickTheta))); // rotation matrix around y-axis
+		finalCamVec = rightStickMat * vehicleRotationVecSum;
+	}
+	else {
+		finalCamVec = vehicleRotationVecSum;
+	}
 
 	float radius = 30.0f; // FIXED (for now)
-	float camX = -1 * radius * vehicleRotationVecSum.x;
+	float camX = -1 * radius * finalCamVec.x;
 	float camY = 12.5f;
-	float camZ = -1 * radius * vehicleRotationVecSum.z;
+	float camZ = -1 * radius * finalCamVec.z;
 	
 
 	glm::vec3 camPos(playerPos.x + camX, playerPos.y + camY, playerPos.z + camZ);
