@@ -227,7 +227,6 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			_cursorPositionPause = 1;
 		}
 		break;
-		break;
 	case (GAME):
 		if (kam->pKeyJustPressed || (playerControlled && player1->startButtonJustPressed)) {
 			_scene = PAUSED;

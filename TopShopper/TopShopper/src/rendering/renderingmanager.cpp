@@ -15,10 +15,11 @@ using namespace physx;
 
 // TODO: reset this map on game load...
 std::map<int, std::deque<float>> gVehicleThetasMap;
+std::map<int, std::deque<float>> gRightStickXValuesMap;
 
 //std::deque<float> gVehicleThetas = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }; // I WILL ENFORCE THIS TO BE A FIXED SIZE OF 10 (for now, holds the last 10 frames worth of VEHICLE ROTATIONS)
 // TODO: change this to a map and reset similiar to gVehicleThetasMap
-std::deque<float> gRightStickXValues = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; // always maintain a fixed size (here I use 10) 
+//std::deque<float> gRightStickXValues = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; // always maintain a fixed size (here I use 10) 
 
 RenderingManager::RenderingManager(Broker *broker)
 	: _broker(broker)
@@ -140,6 +141,13 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		gVehicleThetasMap[3] = { -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f };
 		gVehicleThetasMap[4] = { -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f };
 		gVehicleThetasMap[5] = { -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f };
+
+		gRightStickXValuesMap[0] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+		gRightStickXValuesMap[1] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+		gRightStickXValuesMap[2] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+		gRightStickXValuesMap[3] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+		gRightStickXValuesMap[4] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+		gRightStickXValuesMap[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 		RenderLoading();
 	}
 	else if (_broker->_scene == SETUP) {
@@ -302,6 +310,7 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camer
 	// have to use vectors since thetas have edge case problems (e.g. going from pi to -pi)
 	PxVec3 vehicleRotationVecSum(0.0f, 0.0f, 0.0f);
 	std::deque<float> gVehicleThetas = gVehicleThetasMap[playerID];
+	std::deque<float> gRightStickXValues = gRightStickXValuesMap[playerID];
 
 
 	for (float t : gVehicleThetas) {
@@ -318,8 +327,8 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camer
 	int inputID = playerID + 1;
 	if (_broker->getInputManager()->getGamePad(inputID) != nullptr && _broker->_scene == GAME) {
 		float newRightStickXValue = _broker->getInputManager()->getGamePad(inputID)->rightStickX;
-		gRightStickXValues.pop_front();
-		gRightStickXValues.push_back(newRightStickXValue);
+		gRightStickXValuesMap[playerID].pop_front();
+		gRightStickXValuesMap[playerID].push_back(newRightStickXValue);
 		float avgRightStickXValue = 0.0f;
 		for (float f : gRightStickXValues) {
 			avgRightStickXValue += f;
