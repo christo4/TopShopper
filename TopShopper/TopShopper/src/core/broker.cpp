@@ -221,6 +221,12 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			}
 			delayX = 0.0;
 		}
+		if (kam->pKeyJustPressed || (playerControlled && player1->startButtonJustPressed)) {
+			_scene = GAME;
+			delayX = 0.0;
+			_cursorPositionPause = 1;
+		}
+		break;
 		break;
 	case (GAME):
 		if (kam->pKeyJustPressed || (playerControlled && player1->startButtonJustPressed)) {

@@ -38,14 +38,6 @@ void RenderingManager::init() {
 	initTextRender();
 
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
-	
-	// NOTE: these starting values are in [-pi, pi], based on the starting rotation of each cart...
-	gVehicleThetasMap[0] = { 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f };
-	gVehicleThetasMap[1] = { 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f };
-	gVehicleThetasMap[2] = { -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f };
-	gVehicleThetasMap[3] = { -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f };
-	gVehicleThetasMap[4] = { -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f };
-	gVehicleThetasMap[5] = { -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f };
 
 	glEnable(GL_DEPTH_TEST);
 	shaderProgram = ShaderTools::InitializeShaders(std::string("vertex"), std::string("fragment"));
@@ -141,6 +133,13 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		RenderMainMenu();
 	}
 	else if (_broker->_scene == LOADING) {
+		// NOTE: these starting values are in [-pi, pi], based on the starting rotation of each cart...
+		gVehicleThetasMap[0] = { 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f };
+		gVehicleThetasMap[1] = { 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f };
+		gVehicleThetasMap[2] = { -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f };
+		gVehicleThetasMap[3] = { -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f };
+		gVehicleThetasMap[4] = { -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f };
+		gVehicleThetasMap[5] = { -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f };
 		RenderLoading();
 	}
 	else if (_broker->_scene == SETUP) {
@@ -317,7 +316,7 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camer
 	// RIGHT STICK PANNING (NOTE: there is no keyboard equivalent for now, would probably need to use mouse, or just leave it out)...
 	PxVec3 finalCamVec;
 	int inputID = playerID + 1;
-	if (_broker->getInputManager()->getGamePad(inputID) != nullptr) {
+	if (_broker->getInputManager()->getGamePad(inputID) != nullptr && _broker->_scene == GAME) {
 		float newRightStickXValue = _broker->getInputManager()->getGamePad(inputID)->rightStickX;
 		gRightStickXValues.pop_front();
 		gRightStickXValues.push_back(newRightStickXValue);
