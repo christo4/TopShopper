@@ -189,6 +189,9 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 
 	//render the scene from the light and fill the depth buffer for shadows
 	for (Geometry& g : _objects) {
+		if (g.player != playerID && g.pointer) {
+			continue;
+		}
 
 		glUseProgram(depthBufferShaderProgram);
 
@@ -206,6 +209,9 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for (Geometry& g : _objects) {
+		if (g.player != playerID && g.pointer) {
+			continue;
+		}
 
 		if (g.cullBackFace) {
 			glEnable(GL_CULL_FACE);
@@ -923,6 +929,8 @@ void RenderingManager::push3DObjects() {
 			// POINTER RENDERING...
 			Geometry geoPointer = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::POINTER_GEO_NO_INDEX));
 			geoPointer.color = glm::vec3(0, 0, 0);
+			geoPointer.pointer = true;
+			geoPointer.player = vehicleID;
 			glm::mat4 model; 
 			PxVec3 otherPos;
 
