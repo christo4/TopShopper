@@ -315,7 +315,9 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camer
 	// get the average vehicle rotation in last 10 frames (incl. this one) 
 	// have to use vectors since thetas have edge case problems (e.g. going from pi to -pi)
 	PxVec3 vehicleRotationVecSum(0.0f, 0.0f, 0.0f);
-	const std::deque<float> &gVehicleThetas = gVehicleThetasMap[playerID];
+	std::deque<float> gVehicleThetas = gVehicleThetasMap[playerID];
+	std::deque<float> gRightStickXValues = gRightStickXValuesMap[playerID];
+
 
 	for (float t : gVehicleThetas) {
 		// assume a radius of 1 for this calculation (scale later by our intended radius)
@@ -334,8 +336,6 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camer
 		gRightStickXValuesMap[playerID].pop_front();
 		gRightStickXValuesMap[playerID].push_back(newRightStickXValue);
 		float avgRightStickXValue = 0.0f;
-		const std::deque<float> &gRightStickXValues = gRightStickXValuesMap[playerID];
-
 		for (float f : gRightStickXValues) {
 			avgRightStickXValue += f;
 		}
@@ -642,9 +642,9 @@ void RenderingManager::renderHud(int playerID) {
 
 
 	float shoppingListOffSetAccum = 0.0f;
-	float scoreOffsetAccum = 0.0f;
+	float scoreOffsetAccum = -0.02f;
 	float shoppingListYOffset = -0.25f;
-	float scoreYOffset = -0.14f;
+	float scoreYOffset = -0.125f;
 
 	for (int otherPlayerID : otherPlayerIDs) {
 
