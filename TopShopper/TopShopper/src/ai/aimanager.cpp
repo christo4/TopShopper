@@ -176,8 +176,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 	if (_cookieCanSpawn && _startingCookie == nullptr) {
 		std::shared_ptr<Cookie> cookie = std::dynamic_pointer_cast<Cookie>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::COOKIE, _startingCookieSpawnPoint, "startingCookie"));
 		_startingCookie = cookie;
-		_cookieLocations.push_back(ItemLocation(_startingCookieSpawnPoint.p, true));
-
+		_cookieLocations.push_back(ItemLocation(_startingCookieSpawnPoint.p, true, ItemLocation::TargetTypes::COOKIE));
 	}
 
 	if (_mysteryBagCanSpawn && _mysteryBag == nullptr) {
@@ -185,7 +184,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		if (_mysteryBagSpawnTimer <= 0.0) {
 			std::shared_ptr<MysteryBag> mysteryBag = std::dynamic_pointer_cast<MysteryBag>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::MYSTERY_BAG, _mysteryBagSpawnPoint, "mysteryBag"));
 			_mysteryBag = mysteryBag;
-			_mysteryBagLocations.push_back(ItemLocation(_mysteryBagSpawnPoint.p, true));
+			_mysteryBagLocations.push_back(ItemLocation(_mysteryBagSpawnPoint.p, true, ItemLocation::TargetTypes::MYSTERY_BAG));
 		}
 	}
 
@@ -197,7 +196,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 			if (spareChangeSpawnTimers.at(i) <= 0.0) {
 				std::shared_ptr<SpareChange> spareChange = std::dynamic_pointer_cast<SpareChange>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::SPARE_CHANGE, spareChangeSpawnPoints.at(i), "SpareChangeSP" + i));
 				spareChangeInstances.at(i) = spareChange;
-				_spareChangeLocations.push_back(ItemLocation(spareChangeSpawnPoints.at(i).p, true));
+				_spareChangeLocations.push_back(ItemLocation(spareChangeSpawnPoints.at(i).p, true, ItemLocation::TargetTypes::OTHER));
 			}
 		}
 	}
@@ -211,7 +210,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 
 		std::shared_ptr<Entity> milk = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::MILK, drinkSpawnPoints.at(spawnIndex), "MilkSP"); 
 		drinkInstances.at(spawnIndex) = milk;
-		_milkLocations.push_back(ItemLocation(drinkSpawnPoints.at(spawnIndex).p, true));
+		_milkLocations.push_back(ItemLocation(drinkSpawnPoints.at(spawnIndex).p, true, ItemLocation::TargetTypes::OTHER));
 
 	}
 	while (_waterLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
@@ -221,7 +220,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		
 		std::shared_ptr<Entity> water = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::WATER, drinkSpawnPoints.at(spawnIndex), "WaterSP");
 		drinkInstances.at(spawnIndex) = water;
-		_waterLocations.push_back(ItemLocation(drinkSpawnPoints.at(spawnIndex).p, true));
+		_waterLocations.push_back(ItemLocation(drinkSpawnPoints.at(spawnIndex).p, true, ItemLocation::TargetTypes::OTHER));
 	}
 	while (_colaLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
 		// spawn
@@ -230,7 +229,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 
 		std::shared_ptr<Entity> cola = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::COLA, drinkSpawnPoints.at(spawnIndex), "ColaSP");
 		drinkInstances.at(spawnIndex) = cola;
-		_colaLocations.push_back(ItemLocation(drinkSpawnPoints.at(spawnIndex).p, true));
+		_colaLocations.push_back(ItemLocation(drinkSpawnPoints.at(spawnIndex).p, true, ItemLocation::TargetTypes::OTHER));
 	}
 	while (_appleLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
 		// spawn
@@ -239,7 +238,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 
 		std::shared_ptr<Entity> apple = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::APPLE, fruitSpawnPoints.at(spawnIndex), "AppleSP");
 		fruitInstances.at(spawnIndex) = apple;
-		_appleLocations.push_back(ItemLocation(fruitSpawnPoints.at(spawnIndex).p, true));
+		_appleLocations.push_back(ItemLocation(fruitSpawnPoints.at(spawnIndex).p, true, ItemLocation::TargetTypes::OTHER));
 	}
 	while (_watermelonLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
 		// spawn
@@ -248,7 +247,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 
 		std::shared_ptr<Entity> watermelon = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::WATERMELON, fruitSpawnPoints.at(spawnIndex), "WatermelonSP");
 		fruitInstances.at(spawnIndex) = watermelon;
-		_watermelonLocations.push_back(ItemLocation(fruitSpawnPoints.at(spawnIndex).p, true));
+		_watermelonLocations.push_back(ItemLocation(fruitSpawnPoints.at(spawnIndex).p, true, ItemLocation::TargetTypes::OTHER));
 	}
 	while (_bananaLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
 		// spawn
@@ -257,7 +256,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 
 		std::shared_ptr<Entity> banana = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::BANANA, fruitSpawnPoints.at(spawnIndex), "BananaSP");
 		fruitInstances.at(spawnIndex) = banana;
-		_bananaLocations.push_back(ItemLocation(fruitSpawnPoints.at(spawnIndex).p, true));
+		_bananaLocations.push_back(ItemLocation(fruitSpawnPoints.at(spawnIndex).p, true, ItemLocation::TargetTypes::OTHER));
 	}
 	while (_carrotLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
 		// spawn
@@ -266,7 +265,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 
 		std::shared_ptr<Entity> carrot = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::CARROT, veggieSpawnPoints.at(spawnIndex), "CarrotSP");
 		veggieInstances.at(spawnIndex) = carrot;
-		_carrotLocations.push_back(ItemLocation(veggieSpawnPoints.at(spawnIndex).p, true));
+		_carrotLocations.push_back(ItemLocation(veggieSpawnPoints.at(spawnIndex).p, true, ItemLocation::TargetTypes::OTHER));
 	}
 	while (_eggplantLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
 		// spawn
@@ -275,7 +274,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 
 		std::shared_ptr<Entity> eggplant = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::EGGPLANT, veggieSpawnPoints.at(spawnIndex), "EggplantSP");
 		veggieInstances.at(spawnIndex) = eggplant;
-		_eggplantLocations.push_back(ItemLocation(veggieSpawnPoints.at(spawnIndex).p, true));
+		_eggplantLocations.push_back(ItemLocation(veggieSpawnPoints.at(spawnIndex).p, true, ItemLocation::TargetTypes::OTHER));
 	}
 	while (_broccoliLocations.size() < MAX_NB_INSTANCES_OF_EACH_GROCERY_ITEM) {
 		// spawn
@@ -284,7 +283,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 
 		std::shared_ptr<Entity> broccoli = _broker->getPhysicsManager()->instantiateEntity(EntityTypes::BROCCOLI, veggieSpawnPoints.at(spawnIndex), "BroccoliSP");
 		veggieInstances.at(spawnIndex) = broccoli;
-		_broccoliLocations.push_back(ItemLocation(veggieSpawnPoints.at(spawnIndex).p, true));
+		_broccoliLocations.push_back(ItemLocation(veggieSpawnPoints.at(spawnIndex).p, true, ItemLocation::TargetTypes::OTHER));
 	}
 
 
@@ -370,73 +369,72 @@ void AIManager::updateLocations() {
 					if (playerScript->_shoppingList_Flags.at(i)) {
 						switch (playerScript->_shoppingList_Types.at(i)) {
 							case EntityTypes::MILK:
-								_milkLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								_milkLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false, ItemLocation::TargetTypes::OTHER));
 								break;
 							case EntityTypes::WATER:
-								_waterLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								_waterLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false, ItemLocation::TargetTypes::OTHER));
 								break;
 							case EntityTypes::COLA:
-								_colaLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								_colaLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false, ItemLocation::TargetTypes::OTHER));
 								break;
 							case EntityTypes::APPLE:
-								_appleLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								_appleLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false, ItemLocation::TargetTypes::OTHER));
 								break;
 							case EntityTypes::WATERMELON:
-								_watermelonLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								_watermelonLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false, ItemLocation::TargetTypes::OTHER));
 								break;
 							case EntityTypes::BANANA:
-								_bananaLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								_bananaLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false, ItemLocation::TargetTypes::OTHER));
 								break;
 							case EntityTypes::CARROT:
-								_carrotLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								_carrotLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false, ItemLocation::TargetTypes::OTHER));
 								break;
 							case EntityTypes::EGGPLANT:
-								_eggplantLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								_eggplantLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false, ItemLocation::TargetTypes::OTHER));
 								break;
 							case EntityTypes::BROCCOLI:
-								_broccoliLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false));
+								_broccoliLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, false, ItemLocation::TargetTypes::OTHER));
 								break;
 						}
 					}
 				}
-
 				break;
 			}
 			case EntityTypes::COOKIE:
-				_cookieLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				_cookieLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true, ItemLocation::TargetTypes::COOKIE));
 				break;
 			case EntityTypes::MYSTERY_BAG:
-				_mysteryBagLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				_mysteryBagLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true, ItemLocation::TargetTypes::MYSTERY_BAG));
 				break;
 			case EntityTypes::SPARE_CHANGE:
-				_spareChangeLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				_spareChangeLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true, ItemLocation::TargetTypes::OTHER));
 				break;
 			case EntityTypes::MILK:
-				_milkLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				_milkLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true, ItemLocation::TargetTypes::OTHER));
 				break;
 			case EntityTypes::WATER:
-				_waterLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				_waterLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true, ItemLocation::TargetTypes::OTHER));
 				break;
 			case EntityTypes::COLA:
-				_colaLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				_colaLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true, ItemLocation::TargetTypes::OTHER));
 				break;
 			case EntityTypes::APPLE:
-				_appleLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				_appleLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true, ItemLocation::TargetTypes::OTHER));
 				break;
 			case EntityTypes::WATERMELON:
-				_watermelonLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				_watermelonLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true, ItemLocation::TargetTypes::OTHER));
 				break;
 			case EntityTypes::BANANA:
-				_bananaLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				_bananaLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true, ItemLocation::TargetTypes::OTHER));
 				break;
 			case EntityTypes::CARROT:
-				_carrotLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				_carrotLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true, ItemLocation::TargetTypes::OTHER));
 				break;
 			case EntityTypes::EGGPLANT:
-				_eggplantLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				_eggplantLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true, ItemLocation::TargetTypes::OTHER));
 				break;
 			case EntityTypes::BROCCOLI:
-				_broccoliLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true));
+				_broccoliLocations.push_back(ItemLocation(entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p, true, ItemLocation::TargetTypes::OTHER));
 				break;
 		}
 	}
@@ -514,7 +512,7 @@ void AIManager::setNewAITargets() {
 				}
 
 				if (closestCart != nullptr) { // target found...
-					playerScript->_targets.push_back(ItemLocation(closestCartPos, false));
+					playerScript->_targets.push_back(ItemLocation(closestCartPos, false, ItemLocation::TargetTypes::OTHER));
 				}
 			}
 			else {

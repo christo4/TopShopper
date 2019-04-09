@@ -649,6 +649,13 @@ void PlayerScript::navigate() {
 		
 		// force turbo to go up slopes (outer wall and hill slope)
 		if ((targetOnHill && posDistance > hillTopRadius && posDistance <= hillBaseRadius) || (targetOnWall && posDistance >= wallStartRadius)) forcedTurbo = true;
+
+		// ~~~~~~~~~~NOTE: should I only force turbo for cookie until on hill top?
+
+		// force turbo if goind after starting cookie...
+		if (ItemLocation::TargetTypes::COOKIE == _targets.at(0)._targetType) forcedTurbo = true;
+
+		// NOTE: I could also force turbo to get to mystery bag, but since AI are omnipotent, this might make it nearly impossible for humans to get to it, unless they are really close...
 	}
 
 	
