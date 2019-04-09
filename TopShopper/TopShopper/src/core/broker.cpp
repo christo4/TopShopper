@@ -35,7 +35,7 @@ void Broker::initAll() {
 	_cursorPositionSetup = 2;
 	_cursorPositionPause = 1;
 	_nbPlayers = 1;
-	_nbOfControllers = _inputManager->_numGamepads;
+	_nbOfDevices = _inputManager->_numGamepads > 0 ? _inputManager->_numGamepads : 1;
 }
 
 
@@ -167,7 +167,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 		}
 		if (kam->dKey || (playerControlled && player1->leftStickX > 0.5f)) {
 			if (_cursorPositionSetup == 1) {
-				if (_nbPlayers == _nbOfControllers) {
+				if (_nbPlayers == _nbOfDevices) {
 					_nbPlayers = 1;
 				}
 				else {
@@ -179,7 +179,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 		if (kam->aKey || (playerControlled && player1->leftStickX < -0.5f)) {
 			if (_cursorPositionSetup == 1) {
 				if (_nbPlayers == 1) {
-					_nbPlayers = _nbOfControllers;
+					_nbPlayers = _nbOfDevices;
 				}
 				else {
 					_nbPlayers -= 1;
