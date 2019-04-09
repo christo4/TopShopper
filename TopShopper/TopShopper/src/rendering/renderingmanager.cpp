@@ -13,9 +13,11 @@
 
 using namespace physx;
 
+// TODO: reset this map on game load...
 std::map<int, std::deque<float>> gVehicleThetasMap;
 
 //std::deque<float> gVehicleThetas = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }; // I WILL ENFORCE THIS TO BE A FIXED SIZE OF 10 (for now, holds the last 10 frames worth of VEHICLE ROTATIONS)
+// TODO: change this to a map and reset similiar to gVehicleThetasMap
 std::deque<float> gRightStickXValues = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; // always maintain a fixed size (here I use 10) 
 
 RenderingManager::RenderingManager(Broker *broker)
@@ -37,12 +39,13 @@ void RenderingManager::init() {
 
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
 	
-	gVehicleThetasMap[0] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-	gVehicleThetasMap[1] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-	gVehicleThetasMap[2] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-	gVehicleThetasMap[3] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-	gVehicleThetasMap[4] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-	gVehicleThetasMap[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	// NOTE: these starting values are in [-pi, pi], based on the starting rotation of each cart...
+	gVehicleThetasMap[0] = { 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f };
+	gVehicleThetasMap[1] = { 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f };
+	gVehicleThetasMap[2] = { -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f };
+	gVehicleThetasMap[3] = { -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f };
+	gVehicleThetasMap[4] = { -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f };
+	gVehicleThetasMap[5] = { -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f };
 
 	glEnable(GL_DEPTH_TEST);
 	shaderProgram = ShaderTools::InitializeShaders(std::string("vertex"), std::string("fragment"));
@@ -357,7 +360,7 @@ void RenderingManager::renderEndScreen() {
 	std::shared_ptr<ShoppingCartPlayer> player = players[0];
 	std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
 
-	Player scores[3];
+	Player scores[6];
 
 	scores[0].score = script->_points;
 	scores[0].player = "Player1 ";
@@ -372,39 +375,38 @@ void RenderingManager::renderEndScreen() {
 	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
 	scores[2].score = script->_points;
 	scores[2].player = "Player3 "; // Check if its a human or cpu
-	/*
+	
 	player = players[3];
 	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
 	scores[3].score = script->_points;
-	scores[3].player = "Opp4 "; // Check if its a human or cpu
+	scores[3].player = "Player4 "; // Check if its a human or cpu
 
 	player = players[4];
 	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
 	scores[4].score = script->_points;
-	scores[4].player = "Opp5 ";
+	scores[4].player = "Player5 ";
 
 	player = players[5];
 	script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
 	scores[5].score = script->_points;
-	scores[5].player = "Opp6 ";
-	*/
+	scores[5].player = "Player6 ";
 
-	std::sort(scores, scores+3, compareStruct1);
+	std::sort(scores, scores+6, compareStruct1);
 	
 	
 	//renderText("Shopper Ranks", windowWidth*0.35, windowHeight*0.63, 1.7f, glm::vec3(0.0f, 0.0f, 0.0f));
 
-	renderText("1st: " + scores[0].player + std::to_string(scores[0].score), windowWidth*0.35, windowHeight*0.55, 1.5f, glm::vec3(0.93f, 0.84f, 0.03f));
+	renderText("1st: " + scores[0].player + std::to_string(scores[0].score), windowWidth*0.35, windowHeight*0.55, 1.5f, glm::vec3(0.83f, 0.69f, 0.22f));
 
 	renderText("2nd: " + scores[1].player + std::to_string(scores[1].score), windowWidth*0.35, windowHeight*0.46, 1.5f, glm::vec3(0.65f, 0.65f, 0.65f));
 
 	renderText("3rd: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.38, 1.5f, glm::vec3(0.70f, 0.36f, 0.0f));
 
-	renderText("4th: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.33, 1.0f, glm::vec3(0, 0, 0));
+	renderText("4th: " + scores[3].player + std::to_string(scores[3].score), windowWidth*0.35, windowHeight*0.33, 1.0f, glm::vec3(0, 0, 0));
 
-	renderText("5th: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.29, 1.0f, glm::vec3(0, 0, 0));
+	renderText("5th: " + scores[4].player + std::to_string(scores[4].score), windowWidth*0.35, windowHeight*0.29, 1.0f, glm::vec3(0, 0, 0));
 
-	renderText("6th: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.25, 1.0f, glm::vec3(0, 0, 0));
+	renderText("6th: " + scores[5].player + std::to_string(scores[5].score), windowWidth*0.35, windowHeight*0.25, 1.0f, glm::vec3(0, 0, 0));
 
 	renderText("Menu", GLfloat(windowWidth*0.466), GLfloat(windowHeight*0.106), 1.0f, glm::vec3(0, 0, 0));
 	renderSprite(*_buttonHighlightSprite, -0.15, -0.85, 0.15, -0.65);
@@ -805,31 +807,54 @@ void RenderingManager::push3DObjects() {
 		switch (tag) {
 		case EntityTypes::SHOPPING_CART_PLAYER:
 		{
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_CHASSIS_GEO_NO_INDEX));
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_CHASSIS_GEO));
-			//geo.color = glm::vec3(0.2f, 0.65f, 0.95f);
-
+			// CHASSIS RENDERING...
+			const std::vector<std::shared_ptr<ShoppingCartPlayer>> &players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
 			std::shared_ptr<ShoppingCartPlayer> player = std::dynamic_pointer_cast<ShoppingCartPlayer>(entity);
-			std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
-			int playerInputID = script->_inputID;
-
-
-			if (playerInputID == 1) {					//TODO: make this less hacky
-				geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::CART_RED_GEO_NO_INDEX));
-				geo.texture = *_shoppingCartRed;
+			
+			int vehicleID = -1;
+			for (int i = 0; i < players.size(); i++) {
+				if (player == players.at(i)) {
+					vehicleID = i;
+					break;
+				}
+			}
+			if (-1 == vehicleID) {
+				std::cout << "ERROR: push3DObjects() - invalid vehicleID" << std::endl;
+				continue;
 			}
 
-			if (playerInputID == -1) {
-				geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::CART_BLUE_GEO_NO_INDEX));
-				geo.texture = *_shoppingCartBlue;
-			}
-			if (playerInputID == -2) {
-				geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::CART_GREEN_GEO_NO_INDEX));
-				geo.texture = *_shoppingCartGreen;
+			switch (vehicleID) {
+				case 0:
+					geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::CART_RED_GEO_NO_INDEX));
+					geo.texture = *_shoppingCartRed;
+					break;
+				case 1:
+					geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::CART_BLUE_GEO_NO_INDEX));
+					geo.texture = *_shoppingCartBlue;
+					break;
+				case 2:
+					geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::CART_GREEN_GEO_NO_INDEX));
+					geo.texture = *_shoppingCartGreen;
+					break;
+				case 3:
+					geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::CART_PURPLE_GEO_NO_INDEX));
+					geo.texture = *_shoppingCartPurple;
+					break;
+				case 4:
+					geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::CART_ORANGE_GEO_NO_INDEX));
+					geo.texture = *_shoppingCartOrange;
+					break;
+				case 5:
+					geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::CART_BLACK_GEO_NO_INDEX));
+					geo.texture = *_shoppingCartBlack;
+					break;
+				default:
+					break;
 			}
 
+
+			// WHEEL RENDERING...
 			const std::vector<PxShape*> &wheelShapes = player->_shoppingCartBase->_wheelShapes;
-
 			for (PxShape *wheelShape : wheelShapes) {
 
 				Geometry geoWheel = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::VEHICLE_WHEEL_GEO_NO_INDEX));
@@ -856,10 +881,8 @@ void RenderingManager::push3DObjects() {
 				_objects.push_back(geoWheel);
 			}
 
-			// TODO: put color indicators above carts (match color to _inputID?, but AI have inpoutID 0 i think..., I could init theirs to -1, -2, -3, etc.)
 
-			// add hot potato model above cart if it has it...
-
+			// HOT POTATO RENDERING...
 			std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 			if (playerScript->_hasHotPotato) {
 				Geometry geoPotato = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::HOT_POTATO_GEO_NO_INDEX));
@@ -886,58 +909,76 @@ void RenderingManager::push3DObjects() {
 				_objects.push_back(geoPotato);
 
 			}
-			if (playerInputID == 1) {
-				Geometry geoPointer = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::POINTER_GEO_NO_INDEX));
-				geoPointer.color = glm::vec3(0, 0, 0);
-				glm::mat4 model; 
-				PxVec3 otherPos;
 
-				const std::vector<std::shared_ptr<ShoppingCartPlayer>> &players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
-				float yOffset = 0;
 
-				for (std::shared_ptr<ShoppingCartPlayer> otherPlayers : players) {
-					std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(otherPlayers->getComponent(ComponentTypes::PLAYER_SCRIPT));					
-					if (playerScript->_inputID != 1) { //Not current player, Also need to add that players texture
-						if (playerScript->_inputID == -1) {
-							geoPointer.texture = *_shoppingCartBlue;
-						}
-						if (playerScript->_inputID == -2) {
-							geoPointer.texture = *_shoppingCartGreen;
-						}
+			//TODO: only render pointers on a single camera for that 1 player
+			// POINTER RENDERING...
+			Geometry geoPointer = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::POINTER_GEO_NO_INDEX));
+			geoPointer.color = glm::vec3(0, 0, 0);
+			glm::mat4 model; 
+			PxVec3 otherPos;
 
-						otherPos = otherPlayers->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
-						PxVec3 forward = rot.getBasisVector2();
-						PxVec3 cartForward = forward;
-						PxVec3 cartToCart = otherPos - pos;
-						cartForward.y = 0;
-						cartToCart.y = 0;
+			float yOffset = 0;
 
-						float dot = cartForward.dot(cartToCart);
-						float magnitudes = cartForward.magnitude()*cartToCart.magnitude();
-						float angle = acos(dot / magnitudes);
+			for (int i = 0; i < players.size(); i++) {
+				// ignore self...
+				if (i == vehicleID) continue;
 
-						if ((cartForward.cross(cartToCart)).y <= 0)	angle = -angle;
-						PxQuat localRot(angle, PxVec3(0.0f, 1.0f, 0.0f));
-						PxQuat netRotation = rot * localRot;
-						PxMat44 rotation = PxMat44(netRotation);
-
-						PxVec3 pointerOffset(0.0f, yOffset, 5.0f);
-						PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos + rotation.rotate(pointerOffset));
-						PxMat44	pxModel = translation * rotation;
-						model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
-							glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
-							glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
-							glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
-
-						geoPointer.model = model;
-						geoPointer.drawMode = GL_TRIANGLES;
-
-						assignBuffers(geoPointer);
-						setBufferData(geoPointer);
-						_objects.push_back(geoPointer);
-						yOffset += 0.5f;
-					}
+				// create a pointer to this other cart...
+				switch (i) {
+					case 0:
+						geoPointer.texture = *_shoppingCartRed;
+						break;
+					case 1:
+						geoPointer.texture = *_shoppingCartBlue;
+						break;
+					case 2:
+						geoPointer.texture = *_shoppingCartGreen;
+						break;
+					case 3:
+						geoPointer.texture = *_shoppingCartPurple;
+						break;
+					case 4:
+						geoPointer.texture = *_shoppingCartOrange;
+						break;
+					case 5:
+						geoPointer.texture = *_shoppingCartBlack;
+						break;
+					default:
+						break;
 				}
+
+				otherPos = players.at(i)->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
+				PxVec3 forward = rot.getBasisVector2();
+				PxVec3 cartForward = forward;
+				PxVec3 cartToCart = otherPos - pos;
+				cartForward.y = 0;
+				cartToCart.y = 0;
+
+				float dot = cartForward.dot(cartToCart);
+				float magnitudes = cartForward.magnitude()*cartToCart.magnitude();
+				float angle = acos(dot / magnitudes);
+
+				if ((cartForward.cross(cartToCart)).y <= 0)	angle = -angle;
+				PxQuat localRot(angle, PxVec3(0.0f, 1.0f, 0.0f));
+				PxQuat netRotation = rot * localRot;
+				PxMat44 rotation = PxMat44(netRotation);
+
+				PxVec3 pointerOffset(0.0f, yOffset, 5.0f);
+				PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos + rotation.rotate(pointerOffset));
+				PxMat44	pxModel = translation * rotation;
+				model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+					glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+					glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+					glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+				geoPointer.model = model;
+				geoPointer.drawMode = GL_TRIANGLES;
+
+				assignBuffers(geoPointer);
+				setBufferData(geoPointer);
+				_objects.push_back(geoPointer);
+				yOffset += 0.5f;
 			}
 			break;
 		}
@@ -1136,7 +1177,7 @@ void RenderingManager::init3DTextures() {
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/yellow.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(BANANA_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D); // CAN THIS BE REMOVED??
 	_broker->getLoadingManager()->getGeometry(VEHICLE_CHASSIS_GEO_NO_INDEX)->texture = texture;
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/TireTexture.png", GL_TEXTURE_2D);
@@ -1205,11 +1246,12 @@ void RenderingManager::init3DTextures() {
 	//InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
 	//_broker->getLoadingManager()->getGeometry(POINTER_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(_shoppingCartBlue, "../TopShopper/resources/Textures/CartBlueTexture.jpg", GL_TEXTURE_2D);
-	InitializeTexture(_shoppingCartGreen, "../TopShopper/resources/Textures/CartGreenTexture.jpg", GL_TEXTURE_2D);
-	InitializeTexture(_shoppingCartRed, "../TopShopper/resources/Textures/CartRedTexture.jpg", GL_TEXTURE_2D);
-
-
+	InitializeTexture(_shoppingCartRed, "../TopShopper/resources/Textures/CartRedTexture.jpg", GL_TEXTURE_2D); // 0
+	InitializeTexture(_shoppingCartBlue, "../TopShopper/resources/Textures/CartBlueTexture.jpg", GL_TEXTURE_2D); // 1
+	InitializeTexture(_shoppingCartGreen, "../TopShopper/resources/Textures/CartGreenTexture.jpg", GL_TEXTURE_2D); // 2
+	InitializeTexture(_shoppingCartPurple, "../TopShopper/resources/Textures/CartPurpleTexture.jpg", GL_TEXTURE_2D); // 3
+	InitializeTexture(_shoppingCartOrange, "../TopShopper/resources/Textures/CartOrangeTexture.jpg", GL_TEXTURE_2D); // 4
+	InitializeTexture(_shoppingCartBlack, "../TopShopper/resources/Textures/CartBlackTexture.jpg", GL_TEXTURE_2D); // 5
 }
 
 

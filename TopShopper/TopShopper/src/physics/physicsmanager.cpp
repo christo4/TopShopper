@@ -450,36 +450,41 @@ void PhysicsManager::loadScene1() {
 
 
 
+	// VEHICLE 0:
+	std::shared_ptr<ShoppingCartPlayer> vehicle0 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-237.0f, 5.0f, -20.0f, PxQuat(1.5708f, PxVec3(0.0f, 1.0f, 0.0f))), "vehicle0"));
+	std::shared_ptr<PlayerScript> vehicle0Script = std::static_pointer_cast<PlayerScript>(vehicle0->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	vehicle0Script->_playerType = PlayerScript::PlayerTypes::HUMAN;
+	vehicle0Script->_inputID = 1;
+
 	// VEHICLE 1:
-	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-200.0f, 5.0f, 0.0f, PxQuat(PxIdentity)), "vehicle1"));
-	std::shared_ptr<PlayerScript> player1Script = std::static_pointer_cast<PlayerScript>(vehicle1->getComponent(ComponentTypes::PLAYER_SCRIPT));
-	player1Script->_playerType = PlayerScript::PlayerTypes::HUMAN;
-	player1Script->_inputID = 1;
+	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-237.0f, 5.0f, 20.0f, PxQuat(1.5708f, PxVec3(0.0f, 1.0f, 0.0f))), "vehicle1"));
+	std::shared_ptr<PlayerScript> vehicle1Script = std::static_pointer_cast<PlayerScript>(vehicle1->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	vehicle1Script->_playerType = PlayerScript::PlayerTypes::BOT;
+	vehicle1Script->_inputID = -1;
 
-	// VEHICLE 2: (COMMENT OUT WHEN 2 CONTROLLERS ARE NOT PLUGGED IN - NVM this doesnt seem to matter)
-	// FOR TEST PURPOSES - BASHING
-	//std::shared_ptr<ShoppingCartPlayer> vehicle2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(20.0f, 5.0f, 70.0f, PxQuat(PxIdentity)), "vehicle2"));
-	//std::shared_ptr<PlayerScript> player2Script = std::static_pointer_cast<PlayerScript>(vehicle2->getComponent(ComponentTypes::PLAYER_SCRIPT));
-	//player2Script->_inputID = 2;
+	// VEHICLE 2:
+	std::shared_ptr<ShoppingCartPlayer> vehicle2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(101.18f, 5.0f, 215.25f, PxQuat(3.6652f, PxVec3(0.0f, 1.0f, 0.0f))), "vehicle2"));
+	std::shared_ptr<PlayerScript> vehicle2Script = std::static_pointer_cast<PlayerScript>(vehicle2->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	vehicle2Script->_playerType = PlayerScript::PlayerTypes::BOT;
+	vehicle2Script->_inputID = -2;
 
-	// BOT 1:
-	std::shared_ptr<ShoppingCartPlayer> bot1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-190.0f, 5.0f, 0.0f, PxQuat(PxIdentity)), "bot1"));
-	std::shared_ptr<PlayerScript> bot1Script = std::static_pointer_cast<PlayerScript>(bot1->getComponent(ComponentTypes::PLAYER_SCRIPT));
-	bot1Script->_playerType = PlayerScript::PlayerTypes::BOT;
-	bot1Script->_inputID = -1;
+	// VEHICLE 3:
+	std::shared_ptr<ShoppingCartPlayer> vehicle3 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(135.82f, 5.0f, 195.25f, PxQuat(3.6652f, PxVec3(0.0f, 1.0f, 0.0f))), "vehicle3"));
+	std::shared_ptr<PlayerScript> vehicle3Script = std::static_pointer_cast<PlayerScript>(vehicle3->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	vehicle3Script->_playerType = PlayerScript::PlayerTypes::BOT;
+	vehicle3Script->_inputID = -3;
 
-	// BOT 2:
-	std::shared_ptr<ShoppingCartPlayer> bot2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-180.0f, 5.0f, 0.0f, PxQuat(PxIdentity)), "bot2"));
-	std::shared_ptr<PlayerScript> bot2Script = std::static_pointer_cast<PlayerScript>(bot2->getComponent(ComponentTypes::PLAYER_SCRIPT));
-	bot2Script->_playerType = PlayerScript::PlayerTypes::BOT;
-	bot2Script->_inputID = -2;
-
-	// BOT 3:
-
-	//std::shared_ptr<ShoppingCartPlayer> bot3 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-80.0f, 5.0f, -80.0f, PxQuat(PxIdentity)), "bot3"));
-	//std::shared_ptr<PlayerScript> bot3Script = std::static_pointer_cast<PlayerScript>(bot3->getComponent(ComponentTypes::PLAYER_SCRIPT));
-	//bot3Script->_playerType = PlayerScript::PlayerTypes::BOT;
-	//bot3Script->_inputID = -3;
+	// VEHICLE 4:
+	std::shared_ptr<ShoppingCartPlayer> vehicle4 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(135.82f, 5.0f, -195.25f, PxQuat(5.7596f, PxVec3(0.0f, 1.0f, 0.0f))), "vehicle4"));
+	std::shared_ptr<PlayerScript> vehicle4Script = std::static_pointer_cast<PlayerScript>(vehicle4->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	vehicle4Script->_playerType = PlayerScript::PlayerTypes::BOT;
+	vehicle4Script->_inputID = -4;
+	
+	// VEHICLE 5:
+	std::shared_ptr<ShoppingCartPlayer> vehicle5 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(101.18f, 5.0f, -215.25f, PxQuat(5.7596f, PxVec3(0.0f, 1.0f, 0.0f))), "vehicle5"));
+	std::shared_ptr<PlayerScript> vehicle5Script = std::static_pointer_cast<PlayerScript>(vehicle5->getComponent(ComponentTypes::PLAYER_SCRIPT));
+	vehicle5Script->_playerType = PlayerScript::PlayerTypes::BOT;
+	vehicle5Script->_inputID = -5;
 }
 
 

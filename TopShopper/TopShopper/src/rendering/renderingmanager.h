@@ -6,7 +6,7 @@
 #define SHADOW_MAP_WIDTH 6144
 #define SHADOW_MAP_HEIGHT 6144
 
-#define SPLIT_SCREEN false
+#define SPLIT_SCREEN true
 
 
 //**Must include glad and GLFW in this order or it breaks**
@@ -158,10 +158,12 @@ private:
 	MyTexture *_resultsScreenSprite = new MyTexture();
 	MyTexture *_backgroundSprite = new MyTexture();
 	
-
-	MyTexture *_shoppingCartBlue = new MyTexture();
-	MyTexture *_shoppingCartRed = new MyTexture();
-	MyTexture *_shoppingCartGreen = new MyTexture();
+	MyTexture *_shoppingCartRed = new MyTexture(); // 0
+	MyTexture *_shoppingCartBlue = new MyTexture(); // 1
+	MyTexture *_shoppingCartGreen = new MyTexture(); // 2
+	MyTexture *_shoppingCartPurple = new MyTexture(); // 3
+	MyTexture *_shoppingCartOrange = new MyTexture(); // 4
+	MyTexture *_shoppingCartBlack = new MyTexture(); // 5
 };
 
 bool compareStruct1(Player one, Player two);
