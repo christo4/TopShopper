@@ -12,10 +12,17 @@
 
 
 struct ItemLocation {
+	enum TargetTypes {
+		OTHER,
+		COOKIE,
+		MYSTERY_BAG
+	};
+
 	ItemLocation() {}
-	ItemLocation(physx::PxVec3 pos, bool inWorld) : _pos(pos), _inWorld(inWorld) {}
+	ItemLocation(physx::PxVec3 pos, bool inWorld, TargetTypes targetType) : _pos(pos), _inWorld(inWorld), _targetType(targetType) {}
 	physx::PxVec3 _pos;
 	bool _inWorld; // either PHYSICALLY IN WORLD or ON A PLAYER
+	TargetTypes _targetType;
 };
 
 
