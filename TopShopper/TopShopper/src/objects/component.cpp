@@ -616,8 +616,6 @@ void PlayerScript::navigate() {
 
 	// find angle (in xz-plane between forward direction (can get forward vector, remove the y component then normalize it and compare it to a normalized vector from current pos to target pos)
 
-	// NOTE:
-	// assume starting rot = PxIdentity for now...
 	PxVec3 forward(0.0f, 0.0f, 1.0f);
 	forward = rot.rotate(forward);
 	PxVec3 forwardNoY(forward.x, 0.0f, forward.z);
@@ -629,10 +627,12 @@ void PlayerScript::navigate() {
 	bool targetOnHill = false;
 	bool targetOnWall = false;
 	bool forcedTurbo = false;
-	// ~~~NOTE: this depends on the map staying the same size! AND being symmetrically round!
+
+	// NOTE: this depends on the map (hill/walls) being symmetrically round (centered at 0,0,0)
 	const PxVec3 mapCenterPos = PxVec3(0.0f, 0.0f, 0.0f);
-	const float hillRadius = 70.0f; // rounding up to be safe
-	const float wallStartRadius = 253.0f; // rounding down to be safe
+	const float hillTopRadius = 33.0f; // rounding down to be safe
+	const float hillBaseRadius = 70.0f; // rounding up to be safe
+	const float wallStartRadius = 250.0f; // rounding down to be safe
 	if (_targets.size() > 0) {
 		PxVec3 targetPos = _targets.at(0)._pos;
 		PxVec3 diff = targetPos - pos;
@@ -641,13 +641,14 @@ void PlayerScript::navigate() {
 
 		PxVec3 targetPosNoY = PxVec3(targetPos.x, 0.0f, targetPos.z);
 		float targetDistance = (targetPosNoY - mapCenterPos).magnitude();
-		if (targetDistance <= hillRadius) targetOnHill = true;
+		if (targetDistance <= hillBaseRadius) targetOnHill = true;
 		else if (targetDistance >= wallStartRadius) targetOnWall = true;
 
 		PxVec3 posNoY = PxVec3(pos.x, 0.0f, pos.z);
 		float posDistance = (posNoY - mapCenterPos).magnitude();
 		
-		if ((targetOnHill && posDistance <= hillRadius) || (targetOnWall && posDistance >= wallStartRadius)) forcedTurbo = true;
+		// force turbo to go up slopes (outer wall and hill slope)
+		if ((targetOnHill && posDistance > hillTopRadius && posDistance <= hillBaseRadius) || (targetOnWall && posDistance >= wallStartRadius)) forcedTurbo = true;
 	}
 
 	
@@ -703,7 +704,7 @@ void PlayerScript::navigate() {
 					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
 					PxVec3 hitPosNoY = PxVec3(farLeftHit.block.position.x, 0.0f, farLeftHit.block.position.z);
 					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
-					if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+					if (!((targetOnHill && hitDistance <= hillBaseRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
 						if (fabs(farLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 						redirected = true;
 					}
@@ -746,7 +747,7 @@ void PlayerScript::navigate() {
 					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
 					PxVec3 hitPosNoY = PxVec3(midLeftHit.block.position.x, 0.0f, midLeftHit.block.position.z);
 					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
-					if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+					if (!((targetOnHill && hitDistance <= hillBaseRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
 						if (fabs(midLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 						redirected = true;
 					}
@@ -789,7 +790,7 @@ void PlayerScript::navigate() {
 					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
 					PxVec3 hitPosNoY = PxVec3(midRightHit.block.position.x, 0.0f, midRightHit.block.position.z);
 					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
-					if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+					if (!((targetOnHill && hitDistance <= hillBaseRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
 						if (fabs(midRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 						redirected = true;
 					}
@@ -832,7 +833,7 @@ void PlayerScript::navigate() {
 					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
 					PxVec3 hitPosNoY = PxVec3(farRightHit.block.position.x, 0.0f, farRightHit.block.position.z);
 					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
-					if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+					if (!((targetOnHill && hitDistance <= hillBaseRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
 						if (fabs(farRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 						redirected = true;
 					}
@@ -879,7 +880,7 @@ void PlayerScript::navigate() {
 						// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
 						PxVec3 hitPosNoY = PxVec3(centerHit.block.position.x, 0.0f, centerHit.block.position.z);
 						float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
-						if (!((targetOnHill && hitDistance <= hillRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+						if (!((targetOnHill && hitDistance <= hillBaseRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
 							if (fabs(centerHit.block.normal.y - 1.0f) >= 0.0001f) turnDir = 3; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 							redirected = true;
 						}
