@@ -174,7 +174,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 					_nbPlayers += 1;
 				}
 			}
-			delayX = 0.0;
+			delayX = 0.2;
 		}
 		if (kam->aKey || (playerControlled && player1->leftStickX < -0.5f)) {
 			if (_cursorPositionSetup == 1) {
@@ -185,7 +185,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 					_nbPlayers -= 1;
 				}
 			}
-			delayX = 0.0;
+			delayX = 0.2;
 		}
 
 		if ((kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) && _cursorPositionSetup == 0) {
