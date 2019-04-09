@@ -343,20 +343,18 @@ void PlayerScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape *ot
 	if (otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER) { // if we hit another cart with our bash trigger volume at the front of the chassis...
 		ShoppingCartPlayer *otherCart = static_cast<ShoppingCartPlayer*>(otherEntity);
 		ShoppingCartPlayer *localCart = static_cast<ShoppingCartPlayer*>(_entity);
+		std::shared_ptr<PlayerScript> otherScript = std::static_pointer_cast<PlayerScript>(otherCart->getComponent(ComponentTypes::PLAYER_SCRIPT));
 
-		if (localCart->_shoppingCartBase->IsTurboing() && !otherCart->_shoppingCartBase->IsBashProtected()) {
-			std::shared_ptr<PlayerScript> otherScript = std::static_pointer_cast<PlayerScript>(otherCart->getComponent(ComponentTypes::PLAYER_SCRIPT));
+		if (localCart->_shoppingCartBase->IsTurboing() && !otherCart->_shoppingCartBase->IsBashProtected() && !otherScript->_hasHotPotato) {
 			otherScript->bashed();
 			if (_hasHotPotato) {
 				otherScript->giveHotPotato(_hotPotatoTimer);
 				_hasHotPotato = false;
 				_hotPotatoTimer = -1.0;
+				localCart->_shoppingCartBase->setBashProtected(); // after passing off the hot potato, you get bash protected (prevents immediately receiving hot potato again)
 			}
 		}
-		
 	}
-
-
 }
 
 void PlayerScript::onTriggerExit(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity) {}
