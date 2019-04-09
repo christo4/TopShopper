@@ -92,6 +92,37 @@ void RenderingManager::init() {
 }
 
 
+// WARNING: must call this only after PhysicsManager::resetScene1()
+void RenderingManager::loadScene1() {
+	const std::vector<std::shared_ptr<ShoppingCartPlayer>> &carts = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
+
+	for (int i = 0; i < carts.size(); i++) {
+		float startingAngle;
+		PxVec3 startingAxis;
+		carts.at(i)->_actor->is<PxRigidDynamic>()->getGlobalPose().q.toRadiansAndUnitAxis(startingAngle, startingAxis); // NOTE: since 2 starting axes are possible, it returns the axis that results in a non-negative theta
+		//std::cout << "X" << startingAxis.x << "Y" << startingAxis.y << "Z" << startingAxis.z << std::endl;
+		//std::cout << "ANGLE" << startingAngle << std::endl;
+
+		// change their representation to be in range [-pi, pi]
+		if (startingAxis.y < 0.0f) { // will always be -1 or 1, i think
+			startingAngle *= -1;
+		}
+
+		std::deque<float> startingThetas;
+		for (int j = 0; j < 10; j++) {
+			startingThetas.push_back(startingAngle);
+		}
+		gVehicleThetasMap[i] = startingThetas;
+	}
+
+	gRightStickXValuesMap[0] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gRightStickXValuesMap[1] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gRightStickXValuesMap[2] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gRightStickXValuesMap[3] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gRightStickXValuesMap[4] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gRightStickXValuesMap[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+}
+
 
 //UpdateSeconds called every frame from the main loop
 //handles the deletion of objects after completing the rendering of each frame as well as the updating of model positions
@@ -134,20 +165,6 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		RenderMainMenu();
 	}
 	else if (_broker->_scene == LOADING) {
-		// NOTE: these starting values are in [-pi, pi], based on the starting rotation of each cart...
-		gVehicleThetasMap[0] = { 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f };
-		gVehicleThetasMap[1] = { 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f, 1.5708f };
-		gVehicleThetasMap[2] = { -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f };
-		gVehicleThetasMap[3] = { -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f, -2.6180f };
-		gVehicleThetasMap[4] = { -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f };
-		gVehicleThetasMap[5] = { -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f, -0.5236f };
-
-		gRightStickXValuesMap[0] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-		gRightStickXValuesMap[1] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-		gRightStickXValuesMap[2] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-		gRightStickXValuesMap[3] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-		gRightStickXValuesMap[4] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-		gRightStickXValuesMap[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 		RenderLoading();
 	}
 	else if (_broker->_scene == SETUP) {

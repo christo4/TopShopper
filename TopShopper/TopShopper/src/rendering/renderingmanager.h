@@ -62,6 +62,8 @@ public:
 	void updateSeconds(double variableDeltaTime);
 	void cleanup();
 
+	void loadScene1();
+
 	//Renders each object
 	void RenderGameScene(int playerID, int viewBottomLeftx, int viewBottomLeftY, int viewTopRightX, int viewTopRightY);
 	void RenderMainMenu();

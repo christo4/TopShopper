@@ -197,6 +197,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			// NOTE: keep it in this order...
 			_physicsManager->loadScene1(_nbPlayers);
 			_aiManager->loadScene1();
+			_renderingManager->loadScene1();
 		}
 		if ((kam->spaceKeyJustPressed || (playerControlled && player1->bButtonJustPressed))) {
 			_scene = MAIN_MENU;

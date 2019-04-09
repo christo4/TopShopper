@@ -449,42 +449,59 @@ void PhysicsManager::loadScene1(int numPlayers) {
 	std::shared_ptr<Obstacle7> redWallTop = std::dynamic_pointer_cast<Obstacle7>(instantiateEntity(EntityTypes::OBSTACLE7, PxTransform(160.0f, 0.0f, -72.0f, PxQuat(PxIdentity)), "redWallTop"));
 
 
+	// only cases:
+	// numPlayers = 1 -> 1,-1,-2,-3,-4,-5
+	// numPlayers = 2 -> 1, 2, -1, -2, -3, -4
+	// numPlayers = 3 -> 1, 2, 3, -1, -2, -3
+	// numPlayers = 4 -> 1, 2, 3, 4, -1, -2
+
+	// NOTE: I'm specifying starting angle in range [-pi, pi]
+	std::vector<PxTransform> vehicleSpawnTransforms;
+	vehicleSpawnTransforms.push_back(PxTransform(-237.0f, 5.0f, -20.0f, PxQuat(1.5708f, PxVec3(0.0f, 1.0f, 0.0f))));
+	vehicleSpawnTransforms.push_back(PxTransform(-237.0f, 5.0f, 20.0f, PxQuat(1.5708f, PxVec3(0.0f, 1.0f, 0.0f))));
+	vehicleSpawnTransforms.push_back(PxTransform(101.18f, 5.0f, 215.25f, PxQuat(-2.6180f, PxVec3(0.0f, 1.0f, 0.0f))));
+	vehicleSpawnTransforms.push_back(PxTransform(135.82f, 5.0f, 195.25f, PxQuat(-2.6180f, PxVec3(0.0f, 1.0f, 0.0f))));
+	vehicleSpawnTransforms.push_back(PxTransform(135.82f, 5.0f, -195.25f, PxQuat(-0.5236f, PxVec3(0.0f, 1.0f, 0.0f))));
+	vehicleSpawnTransforms.push_back(PxTransform(101.18f, 5.0f, -215.25f, PxQuat(-0.5236f, PxVec3(0.0f, 1.0f, 0.0f))));
+
+	std::random_shuffle(vehicleSpawnTransforms.begin(), vehicleSpawnTransforms.end());
+
 
 	// VEHICLE 0:
-	std::shared_ptr<ShoppingCartPlayer> vehicle0 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-237.0f, 5.0f, -20.0f, PxQuat(1.5708f, PxVec3(0.0f, 1.0f, 0.0f))), "vehicle0"));
+	std::shared_ptr<ShoppingCartPlayer> vehicle0 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, vehicleSpawnTransforms.at(0), "vehicle0"));
 	std::shared_ptr<PlayerScript> vehicle0Script = std::static_pointer_cast<PlayerScript>(vehicle0->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	vehicle0Script->_playerType = PlayerScript::PlayerTypes::HUMAN;
 	vehicle0Script->_inputID = 1;
 
 	// VEHICLE 1:
-	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(-237.0f, 5.0f, 20.0f, PxQuat(1.5708f, PxVec3(0.0f, 1.0f, 0.0f))), "vehicle1"));
+	std::shared_ptr<ShoppingCartPlayer> vehicle1 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, vehicleSpawnTransforms.at(1), "vehicle1"));
 	std::shared_ptr<PlayerScript> vehicle1Script = std::static_pointer_cast<PlayerScript>(vehicle1->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	vehicle1Script->_playerType = PlayerScript::PlayerTypes::BOT;
-	vehicle1Script->_inputID = -1;
+	vehicle1Script->_inputID = numPlayers > 1 ? 2 : -1;
 
 	// VEHICLE 2:
-	std::shared_ptr<ShoppingCartPlayer> vehicle2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(101.18f, 5.0f, 215.25f, PxQuat(3.6652f, PxVec3(0.0f, 1.0f, 0.0f))), "vehicle2"));
+	std::shared_ptr<ShoppingCartPlayer> vehicle2 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, vehicleSpawnTransforms.at(2), "vehicle2"));
 	std::shared_ptr<PlayerScript> vehicle2Script = std::static_pointer_cast<PlayerScript>(vehicle2->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	vehicle2Script->_playerType = PlayerScript::PlayerTypes::BOT;
-	vehicle2Script->_inputID = -2;
+	vehicle2Script->_inputID = numPlayers > 2 ? 3 : (numPlayers - 3);
 
 	// VEHICLE 3:
-	std::shared_ptr<ShoppingCartPlayer> vehicle3 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(135.82f, 5.0f, 195.25f, PxQuat(3.6652f, PxVec3(0.0f, 1.0f, 0.0f))), "vehicle3"));
+	std::shared_ptr<ShoppingCartPlayer> vehicle3 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, vehicleSpawnTransforms.at(3), "vehicle3"));
 	std::shared_ptr<PlayerScript> vehicle3Script = std::static_pointer_cast<PlayerScript>(vehicle3->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	vehicle3Script->_playerType = PlayerScript::PlayerTypes::BOT;
-	vehicle3Script->_inputID = -3;
+	vehicle3Script->_inputID = numPlayers > 3 ? 4 : (numPlayers - 4);
 
 	// VEHICLE 4:
-	std::shared_ptr<ShoppingCartPlayer> vehicle4 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(135.82f, 5.0f, -195.25f, PxQuat(5.7596f, PxVec3(0.0f, 1.0f, 0.0f))), "vehicle4"));
+	std::shared_ptr<ShoppingCartPlayer> vehicle4 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, vehicleSpawnTransforms.at(4), "vehicle4"));
 	std::shared_ptr<PlayerScript> vehicle4Script = std::static_pointer_cast<PlayerScript>(vehicle4->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	vehicle4Script->_playerType = PlayerScript::PlayerTypes::BOT;
-	vehicle4Script->_inputID = -4;
+	vehicle4Script->_inputID = numPlayers - 5;
 	
 	// VEHICLE 5:
-	std::shared_ptr<ShoppingCartPlayer> vehicle5 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, PxTransform(101.18f, 5.0f, -215.25f, PxQuat(5.7596f, PxVec3(0.0f, 1.0f, 0.0f))), "vehicle5"));
+	std::shared_ptr<ShoppingCartPlayer> vehicle5 = std::dynamic_pointer_cast<ShoppingCartPlayer>(instantiateEntity(EntityTypes::SHOPPING_CART_PLAYER, vehicleSpawnTransforms.at(5), "vehicle5"));
 	std::shared_ptr<PlayerScript> vehicle5Script = std::static_pointer_cast<PlayerScript>(vehicle5->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	vehicle5Script->_playerType = PlayerScript::PlayerTypes::BOT;
-	vehicle5Script->_inputID = -5;
+	vehicle5Script->_inputID = numPlayers - 6;
 }
 
 
