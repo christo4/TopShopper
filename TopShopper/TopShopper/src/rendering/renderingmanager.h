@@ -6,8 +6,6 @@
 #define SHADOW_MAP_WIDTH 6144
 #define SHADOW_MAP_HEIGHT 6144
 
-#define SPLIT_SCREEN false
-
 
 //**Must include glad and GLFW in this order or it breaks**
 #include <glad/glad.h>

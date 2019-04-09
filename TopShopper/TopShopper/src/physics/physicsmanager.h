@@ -155,7 +155,7 @@ public:
 	void updateSeconds(double fixedDeltaTime);
 	void cleanup();
 
-	void loadScene1();
+	void loadScene1(int numPlayers);
 	void cleanupScene1();
 
 	std::shared_ptr<Entity> instantiateEntity(EntityTypes type, physx::PxTransform transform, const char *name);

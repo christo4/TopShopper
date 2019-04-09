@@ -63,8 +63,8 @@ public:
 	void updateSeconds(double variableDeltaTime);
 	Gamepad* getGamePad(int gamePadNumber); // 1, 2, 3, or 4
 	KeyboardAndMouse* getKeyboardAndMouse() { return _keyboardAndMouse; }
-private:
 	int _numGamepads;
+private:
 	int _joySticks[4] = { GLFW_JOYSTICK_1 ,GLFW_JOYSTICK_2 ,GLFW_JOYSTICK_3 ,GLFW_JOYSTICK_4 };
 	std::vector<Gamepad*> _gamePads;
 	Broker *_broker = nullptr;

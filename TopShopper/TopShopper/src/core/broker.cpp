@@ -34,6 +34,8 @@ void Broker::initAll() {
 	_cursorPositionStart = 3;
 	_cursorPositionSetup = 2;
 	_cursorPositionPause = 1;
+	_nbPlayers = 1;
+	_nbOfControllers = _inputManager->_numGamepads;
 }
 
 
@@ -163,6 +165,28 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			}
 			delayX = 0.2;
 		}
+		if (kam->dKey || (playerControlled && player1->leftStickX > 0.5f)) {
+			if (_cursorPositionSetup == 1) {
+				if (_nbPlayers == _nbOfControllers) {
+					_nbPlayers = 1;
+				}
+				else {
+					_nbPlayers += 1;
+				}
+			}
+			delayX = 0.0;
+		}
+		if (kam->aKey || (playerControlled && player1->leftStickX < -0.5f)) {
+			if (_cursorPositionSetup == 1) {
+				if (_nbPlayers == 1) {
+					_nbPlayers = _nbOfControllers;
+				}
+				else {
+					_nbPlayers -= 1;
+				}
+			}
+			delayX = 0.0;
+		}
 
 		if ((kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) && _cursorPositionSetup == 0) {
 			_scene = LOADING;
@@ -171,7 +195,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 
 			// NOTE: this is where we need to reset the PhysX and AI (should probably display the loading screen image first before calling reset functions)
 			// NOTE: keep it in this order...
-			_physicsManager->loadScene1();
+			_physicsManager->loadScene1(_nbPlayers);
 			_aiManager->loadScene1();
 		}
 		if ((kam->spaceKeyJustPressed || (playerControlled && player1->bButtonJustPressed))) {

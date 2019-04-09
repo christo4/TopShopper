@@ -42,6 +42,8 @@ public:
 	unsigned int _cursorPositionSetup;
 	unsigned int _cursorPositionPause;
 	double delayX = -1.0; // safety (don't start with a delay)
+	int _nbPlayers;
+	int _nbOfControllers;
 
 private:
 	static Broker* _instance;

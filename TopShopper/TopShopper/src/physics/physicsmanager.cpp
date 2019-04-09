@@ -382,7 +382,7 @@ void PhysicsManager::init() {
 
 
 
-void PhysicsManager::loadScene1() {
+void PhysicsManager::loadScene1(int numPlayers) {
 	// init vehicle stuff, create entities / add their actors into PxScene, position them at starting transforms, etc.....
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
 	sceneDesc.gravity = PxVec3(0.0f, -98.1f, 0.0f);

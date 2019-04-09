@@ -120,13 +120,13 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 		push3DObjects();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		if (SPLIT_SCREEN) {
+		if (_broker->_nbPlayers == 1) {
+			RenderGameScene(0, 0, 0, windowWidth, windowHeight);
+		}
+		else {
 			RenderGameScene(0, 0, windowHeight / 2, windowWidth / 2, windowHeight / 2);						//split screen rendering
 			RenderGameScene(1, windowWidth / 2, windowHeight / 2, windowWidth / 2, windowHeight / 2);
 			RenderGameScene(2, 0, 0, windowWidth / 2, windowHeight / 2);
-		}
-		else {
-			RenderGameScene(0, 0, 0, windowWidth, windowHeight);
 		}
 
 	}
@@ -514,10 +514,10 @@ void RenderingManager::RenderSetup() {
 		renderText("Map < name >", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(0, 0, 0));
 	}
 	if (_broker->_cursorPositionSetup == 1) {
-		renderText("Number of Human Players: 1", GLfloat(windowWidth* 0.3385), GLfloat(windowHeight* 0.3842), 1.0f, glm::vec3(1, 0, 1));
+		renderText("Number of Human Players: " + std::to_string(_broker->_nbPlayers), GLfloat(windowWidth* 0.3385), GLfloat(windowHeight* 0.3842), 1.0f, glm::vec3(1, 0, 1));
 	}
 	else {
-		renderText("Number of Human Players: 1", GLfloat(windowWidth* 0.3385), GLfloat(windowHeight* 0.3842), 1.0f, glm::vec3(0, 0, 0));
+		renderText("Number of Human Players: " + std::to_string(_broker->_nbPlayers), GLfloat(windowWidth* 0.3385), GLfloat(windowHeight* 0.3842), 1.0f, glm::vec3(0, 0, 0));
 	}
 
 	renderText("Start Game", GLfloat(windowWidth* 0.4348), GLfloat(windowHeight* 0.2314), 1.0f, glm::vec3(0, 0, 0));
