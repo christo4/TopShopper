@@ -32,6 +32,8 @@ public:
 	bool cullBackFace;
 	bool isTransparent;
 	bool hasShadow;
+	bool pointer;
+	int player;
 
 	//Data structures for storing vertices, normals colors and uvs
 	std::vector<glm::vec4> verts;
