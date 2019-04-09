@@ -705,188 +705,70 @@ void PlayerScript::navigate() {
 		if (farLeftStatus) {
 			if (farLeftHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(farLeftHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::GROUND) {
-					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
-					PxVec3 hitPosNoY = PxVec3(farLeftHit.block.position.x, 0.0f, farLeftHit.block.position.z);
-					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
-					if (!((targetOnHill && hitDistance <= hillBaseRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
-						if (fabs(farLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
-						redirected = true;
-					}
+				bool suppressHit = false;
+				if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
+					suppressHit = true;
+					forcedTurbo = true;
 				}
-				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
-					// supress raycasts with another cart that has the same target as you...
-					// also supress raycasts if you have hot potato and hit cart is not bash protected...
-					ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
-					std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
 
-					if (_hasHotPotato) {
-						if (hitPlayer->_shoppingCartBase->IsBashProtected()) {
-							turnDir += 1;
+				if (!suppressHit) {
+					if (entityHit->getTag() == EntityTypes::GROUND) {
+						// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
+						PxVec3 hitPosNoY = PxVec3(farLeftHit.block.position.x, 0.0f, farLeftHit.block.position.z);
+						float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
+						if (!((targetOnHill && hitDistance <= hillBaseRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+							if (fabs(farLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 							redirected = true;
 						}
 					}
-					else {
-						if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
-							if (!isApproxEqual(_targets.at(0)._pos, hitPlayerScript->_targets.at(0)._pos)) {
+					else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+						// supress raycasts with another cart that has the same target as you...
+						// also supress raycasts if you have hot potato and hit cart is not bash protected...
+						ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
+						std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
+
+						if (_hasHotPotato) {
+							if (hitPlayer->_shoppingCartBase->IsBashProtected()) { // ~~~~~~~~~~~~~~~~~~~~~~NOTE: this is probably irrelevant now
 								turnDir += 1;
 								redirected = true;
 							}
 						}
-						else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
-							turnDir += 1;
-							redirected = true;
+						else {
+							if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
+								if (!isApproxEqual(_targets.at(0)._pos, hitPlayerScript->_targets.at(0)._pos)) {
+									turnDir += 1;
+									redirected = true;
+								}
+							}
+							else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
+								turnDir += 1;
+								redirected = true;
+							}
 						}
 					}
-				}
-				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2 || entityHit->getTag() == EntityTypes::OBSTACLE3 || entityHit->getTag() == EntityTypes::OBSTACLE4 || entityHit->getTag() == EntityTypes::OBSTACLE5 || entityHit->getTag() == EntityTypes::OBSTACLE6 || entityHit->getTag() == EntityTypes::OBSTACLE7) {
-					turnDir += 1;
-					redirected = true;
+					else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2 || entityHit->getTag() == EntityTypes::OBSTACLE3 || entityHit->getTag() == EntityTypes::OBSTACLE4 || entityHit->getTag() == EntityTypes::OBSTACLE5 || entityHit->getTag() == EntityTypes::OBSTACLE6 || entityHit->getTag() == EntityTypes::OBSTACLE7) {
+						turnDir += 1;
+						redirected = true;
+					}
 				}
 			}
 		}
 		if (midLeftStatus) {
 			if (midLeftHit.hasBlock) {
 				Entity *entityHit = static_cast<Entity*>(midLeftHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::GROUND) {
-					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
-					PxVec3 hitPosNoY = PxVec3(midLeftHit.block.position.x, 0.0f, midLeftHit.block.position.z);
-					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
-					if (!((targetOnHill && hitDistance <= hillBaseRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
-						if (fabs(midLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
-						redirected = true;
-					}
+				bool suppressHit = false;
+				if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
+					suppressHit = true;
+					forcedTurbo = true;
 				}
-				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
-					// supress raycasts with another cart that has the same target as you...
-					// also supress raycasts if you have hot potato and hit cart is not bash protected...
-					ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
-					std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
 
-					if (_hasHotPotato) {
-						if (hitPlayer->_shoppingCartBase->IsBashProtected()) {
-							turnDir += 2;
-							redirected = true;
-						}
-					}
-					else {
-						if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
-							if (!isApproxEqual(_targets.at(0)._pos, hitPlayerScript->_targets.at(0)._pos)) {
-								turnDir += 2;
-								redirected = true;
-							}
-						}
-						else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
-							turnDir += 2;
-							redirected = true;
-						}
-					}
-				}
-				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2 || entityHit->getTag() == EntityTypes::OBSTACLE3 || entityHit->getTag() == EntityTypes::OBSTACLE4 || entityHit->getTag() == EntityTypes::OBSTACLE5 || entityHit->getTag() == EntityTypes::OBSTACLE6 || entityHit->getTag() == EntityTypes::OBSTACLE7) {
-					turnDir += 2;
-					redirected = true;
-				}
-			}
-		}
-		if (midRightStatus) {
-			if (midRightHit.hasBlock) {
-				Entity *entityHit = static_cast<Entity*>(midRightHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::GROUND) {
-					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
-					PxVec3 hitPosNoY = PxVec3(midRightHit.block.position.x, 0.0f, midRightHit.block.position.z);
-					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
-					if (!((targetOnHill && hitDistance <= hillBaseRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
-						if (fabs(midRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
-						redirected = true;
-					}
-				}
-				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
-					// supress raycasts with another cart that has the same target as you...
-					// also supress raycasts if you have hot potato and hit cart is not bash protected...
-					ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
-					std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
-
-					if (_hasHotPotato) {
-						if (hitPlayer->_shoppingCartBase->IsBashProtected()) {
-							turnDir -= 2;
-							redirected = true;
-						}
-					}
-					else {
-						if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
-							if (!isApproxEqual(_targets.at(0)._pos, hitPlayerScript->_targets.at(0)._pos)) {
-								turnDir -= 2;
-								redirected = true;
-							}
-						}
-						else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
-							turnDir -= 2;
-							redirected = true;
-						}
-					}
-				}
-				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2 || entityHit->getTag() == EntityTypes::OBSTACLE3 || entityHit->getTag() == EntityTypes::OBSTACLE4 || entityHit->getTag() == EntityTypes::OBSTACLE5 || entityHit->getTag() == EntityTypes::OBSTACLE6 || entityHit->getTag() == EntityTypes::OBSTACLE7) {
-					turnDir -= 2;
-					redirected = true;
-				}
-			}
-		}
-		if (farRightStatus) {
-			if (farRightHit.hasBlock) {
-				Entity *entityHit = static_cast<Entity*>(farRightHit.block.actor->userData);
-				if (entityHit->getTag() == EntityTypes::GROUND) {
-					// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
-					PxVec3 hitPosNoY = PxVec3(farRightHit.block.position.x, 0.0f, farRightHit.block.position.z);
-					float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
-					if (!((targetOnHill && hitDistance <= hillBaseRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
-						if (fabs(farRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
-						redirected = true;
-					}
-				}
-				else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
-					// supress raycasts with another cart that has the same target as you...
-					// also supress raycasts if you have hot potato and hit cart is not bash protected...
-					ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
-					std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
-
-					if (_hasHotPotato) {
-						if (hitPlayer->_shoppingCartBase->IsBashProtected()) {
-							turnDir -= 1;
-							redirected = true;
-						}
-					}
-					else {
-						if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
-							if (!isApproxEqual(_targets.at(0)._pos, hitPlayerScript->_targets.at(0)._pos)) {
-								turnDir -= 1;
-								redirected = true;
-							}
-						}
-						else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
-							turnDir -= 1;
-							redirected = true;
-						}
-					}
-				}
-				else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2 || entityHit->getTag() == EntityTypes::OBSTACLE3 || entityHit->getTag() == EntityTypes::OBSTACLE4 || entityHit->getTag() == EntityTypes::OBSTACLE5 || entityHit->getTag() == EntityTypes::OBSTACLE6 || entityHit->getTag() == EntityTypes::OBSTACLE7) {
-					turnDir -= 1;
-					redirected = true;
-				}
-			}
-		}
-
-
-
-		if (turnDir == 0) {
-			if (centerStatus) {
-				if (centerHit.hasBlock) {
-					Entity *entityHit = static_cast<Entity*>(centerHit.block.actor->userData);
+				if (!suppressHit) {
 					if (entityHit->getTag() == EntityTypes::GROUND) {
 						// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
-						PxVec3 hitPosNoY = PxVec3(centerHit.block.position.x, 0.0f, centerHit.block.position.z);
+						PxVec3 hitPosNoY = PxVec3(midLeftHit.block.position.x, 0.0f, midLeftHit.block.position.z);
 						float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
 						if (!((targetOnHill && hitDistance <= hillBaseRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
-							if (fabs(centerHit.block.normal.y - 1.0f) >= 0.0001f) turnDir = 3; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+							if (fabs(midLeftHit.block.normal.y - 1.0f) >= 0.0001f) turnDir += 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
 							redirected = true;
 						}
 					}
@@ -898,26 +780,184 @@ void PlayerScript::navigate() {
 
 						if (_hasHotPotato) {
 							if (hitPlayer->_shoppingCartBase->IsBashProtected()) {
-								turnDir = 3;
+								turnDir += 2;
 								redirected = true;
 							}
 						}
 						else {
 							if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
 								if (!isApproxEqual(_targets.at(0)._pos, hitPlayerScript->_targets.at(0)._pos)) {
-									turnDir = 3;
+									turnDir += 2;
 									redirected = true;
 								}
 							}
 							else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
-								turnDir = 3;
+								turnDir += 2;
 								redirected = true;
 							}
 						}
 					}
 					else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2 || entityHit->getTag() == EntityTypes::OBSTACLE3 || entityHit->getTag() == EntityTypes::OBSTACLE4 || entityHit->getTag() == EntityTypes::OBSTACLE5 || entityHit->getTag() == EntityTypes::OBSTACLE6 || entityHit->getTag() == EntityTypes::OBSTACLE7) {
-						turnDir = 3;
+						turnDir += 2;
 						redirected = true;
+					}
+				}
+			}
+		}
+		if (midRightStatus) {
+			if (midRightHit.hasBlock) {
+				Entity *entityHit = static_cast<Entity*>(midRightHit.block.actor->userData);
+				bool suppressHit = false;
+				if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
+					suppressHit = true;
+					forcedTurbo = true;
+				}
+
+				if (!suppressHit) {
+					if (entityHit->getTag() == EntityTypes::GROUND) {
+						// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
+						PxVec3 hitPosNoY = PxVec3(midRightHit.block.position.x, 0.0f, midRightHit.block.position.z);
+						float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
+						if (!((targetOnHill && hitDistance <= hillBaseRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+							if (fabs(midRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 2; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+							redirected = true;
+						}
+					}
+					else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+						// supress raycasts with another cart that has the same target as you...
+						// also supress raycasts if you have hot potato and hit cart is not bash protected...
+						ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
+						std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
+
+						if (_hasHotPotato) {
+							if (hitPlayer->_shoppingCartBase->IsBashProtected()) {
+								turnDir -= 2;
+								redirected = true;
+							}
+						}
+						else {
+							if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
+								if (!isApproxEqual(_targets.at(0)._pos, hitPlayerScript->_targets.at(0)._pos)) {
+									turnDir -= 2;
+									redirected = true;
+								}
+							}
+							else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
+								turnDir -= 2;
+								redirected = true;
+							}
+						}
+					}
+					else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2 || entityHit->getTag() == EntityTypes::OBSTACLE3 || entityHit->getTag() == EntityTypes::OBSTACLE4 || entityHit->getTag() == EntityTypes::OBSTACLE5 || entityHit->getTag() == EntityTypes::OBSTACLE6 || entityHit->getTag() == EntityTypes::OBSTACLE7) {
+						turnDir -= 2;
+						redirected = true;
+					}
+				}
+			}
+		}
+		if (farRightStatus) {
+			if (farRightHit.hasBlock) {
+				Entity *entityHit = static_cast<Entity*>(farRightHit.block.actor->userData);
+				bool suppressHit = false;
+				if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
+					suppressHit = true;
+					forcedTurbo = true;
+				}
+
+				if (!suppressHit) {
+					if (entityHit->getTag() == EntityTypes::GROUND) {
+						// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
+						PxVec3 hitPosNoY = PxVec3(farRightHit.block.position.x, 0.0f, farRightHit.block.position.z);
+						float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
+						if (!((targetOnHill && hitDistance <= hillBaseRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+							if (fabs(farRightHit.block.normal.y - 1.0f) >= 0.0001f) turnDir -= 1; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+							redirected = true;
+						}
+					}
+					else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+						// supress raycasts with another cart that has the same target as you...
+						// also supress raycasts if you have hot potato and hit cart is not bash protected...
+						ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
+						std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
+
+						if (_hasHotPotato) {
+							if (hitPlayer->_shoppingCartBase->IsBashProtected()) {
+								turnDir -= 1;
+								redirected = true;
+							}
+						}
+						else {
+							if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
+								if (!isApproxEqual(_targets.at(0)._pos, hitPlayerScript->_targets.at(0)._pos)) {
+									turnDir -= 1;
+									redirected = true;
+								}
+							}
+							else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
+								turnDir -= 1;
+								redirected = true;
+							}
+						}
+					}
+					else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2 || entityHit->getTag() == EntityTypes::OBSTACLE3 || entityHit->getTag() == EntityTypes::OBSTACLE4 || entityHit->getTag() == EntityTypes::OBSTACLE5 || entityHit->getTag() == EntityTypes::OBSTACLE6 || entityHit->getTag() == EntityTypes::OBSTACLE7) {
+						turnDir -= 1;
+						redirected = true;
+					}
+				}
+			}
+		}
+
+
+
+		if (turnDir == 0) {
+			if (centerStatus) {
+				if (centerHit.hasBlock) {
+					Entity *entityHit = static_cast<Entity*>(centerHit.block.actor->userData);
+					bool suppressHit = false;
+					if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
+						suppressHit = true;
+						forcedTurbo = true;
+					}
+
+					if (!suppressHit) {
+						if (entityHit->getTag() == EntityTypes::GROUND) {
+							// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
+							PxVec3 hitPosNoY = PxVec3(centerHit.block.position.x, 0.0f, centerHit.block.position.z);
+							float hitDistance = (hitPosNoY - mapCenterPos).magnitude();
+							if (!((targetOnHill && hitDistance <= hillBaseRadius) || (targetOnWall && hitDistance >= wallStartRadius))) {
+								if (fabs(centerHit.block.normal.y - 1.0f) >= 0.0001f) turnDir = 3; // BUGFIX FOR NOW: ignore raycasts that hit the ground plane (normal.y = 1)
+								redirected = true;
+							}
+						}
+						else if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
+							// supress raycasts with another cart that has the same target as you...
+							// also supress raycasts if you have hot potato and hit cart is not bash protected...
+							ShoppingCartPlayer *hitPlayer = dynamic_cast<ShoppingCartPlayer*>(entityHit);
+							std::shared_ptr<PlayerScript> hitPlayerScript = std::static_pointer_cast<PlayerScript>(hitPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT));
+
+							if (_hasHotPotato) {
+								if (hitPlayer->_shoppingCartBase->IsBashProtected()) {
+									turnDir = 3;
+									redirected = true;
+								}
+							}
+							else {
+								if (_targets.size() > 0 && hitPlayerScript->_targets.size() > 0) {
+									if (!isApproxEqual(_targets.at(0)._pos, hitPlayerScript->_targets.at(0)._pos)) {
+										turnDir = 3;
+										redirected = true;
+									}
+								}
+								else { // NOTE: this case will always apply if the hitPlayer is a human cart (since targets size == 0)
+									turnDir = 3;
+									redirected = true;
+								}
+							}
+						}
+						else if (entityHit->getTag() == EntityTypes::OBSTACLE1 || entityHit->getTag() == EntityTypes::OBSTACLE2 || entityHit->getTag() == EntityTypes::OBSTACLE3 || entityHit->getTag() == EntityTypes::OBSTACLE4 || entityHit->getTag() == EntityTypes::OBSTACLE5 || entityHit->getTag() == EntityTypes::OBSTACLE6 || entityHit->getTag() == EntityTypes::OBSTACLE7) {
+							turnDir = 3;
+							redirected = true;
+						}
 					}
 				}
 			}

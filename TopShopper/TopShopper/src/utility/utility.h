@@ -8,6 +8,11 @@
 #include <glm/glm.hpp>
 #include <foundation/PxVec3.h>
 #include <foundation/PxQuat.h>
+#include <memory>
+
+
+
+class Entity;
 
 
 
@@ -19,10 +24,11 @@ struct ItemLocation {
 	};
 
 	ItemLocation() {}
-	ItemLocation(physx::PxVec3 pos, bool inWorld, TargetTypes targetType) : _pos(pos), _inWorld(inWorld), _targetType(targetType) {}
+	ItemLocation(physx::PxVec3 pos, bool inWorld, TargetTypes targetType, std::shared_ptr<Entity> targetEntity) : _pos(pos), _inWorld(inWorld), _targetType(targetType), _targetEntity(targetEntity) {}
 	physx::PxVec3 _pos;
 	bool _inWorld; // either PHYSICALLY IN WORLD or ON A PLAYER
 	TargetTypes _targetType;
+	std::shared_ptr<Entity> _targetEntity = nullptr;
 };
 
 
