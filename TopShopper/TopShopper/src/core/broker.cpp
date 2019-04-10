@@ -24,6 +24,7 @@ Broker::Broker() {
 
 
 void Broker::initAll() {
+	_nbPlayers = 1;
 	_loadingManager->init(); // loads in all assets
 	_renderingManager->init(); // inits GLFW
 	_inputManager->init(); // sets up gamepads w/ IDS
@@ -34,7 +35,6 @@ void Broker::initAll() {
 	_cursorPositionStart = 3;
 	_cursorPositionSetup = 2;
 	_cursorPositionPause = 1;
-	_nbPlayers = 1;
 	_nbOfDevices = _inputManager->_numGamepads > 0 ? _inputManager->_numGamepads : 1;
 }
 

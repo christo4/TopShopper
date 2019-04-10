@@ -80,7 +80,22 @@ void RenderingManager::init() {
 		return;
 	}
 
+
+
+
+
+
+
+
+
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
+
+	if (_broker->_nbPlayers == 1) {
+		_shadowMapSize = SHADOW_MAP_SIZE_SINGLE_PLAYER;		//init the shadow resolution based on split screen condition
+	}
+	else {
+		_shadowMapSize = SHADOW_MAP_SIZE_MULTI_PLAYER;
+	}
 
 
 	glUseProgram(shaderProgram);
@@ -147,17 +162,31 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	_objects.clear();
 
 
+	int numPlayers = _broker->_nbPlayers;
+
 	if (_broker->_scene == GAME || _broker->_scene == PAUSED || _broker->_scene == END_SCREEN) {
 		push3DObjects();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		if (_broker->_nbPlayers == 1) {
+		if (numPlayers == 1) {
 			RenderGameScene(0, 0, 0, windowWidth, windowHeight);
+		}
+		else if (numPlayers == 2) {
+			RenderGameScene(0, 0, windowHeight/2, windowWidth, windowHeight/2);
+			RenderGameScene(1, 0, 0, windowWidth, windowHeight/2);
+		}
+		else if (numPlayers == 3) {
+
+			RenderGameScene(0, 0, windowHeight / 2, windowWidth / 2, windowHeight / 2);						//split screen rendering
+			RenderGameScene(1, windowWidth / 2, windowHeight / 2, windowWidth / 2, windowHeight / 2);
+			RenderGameScene(2, 0, 0, windowWidth, windowHeight / 2);
+		
 		}
 		else {
 			RenderGameScene(0, 0, windowHeight / 2, windowWidth / 2, windowHeight / 2);						//split screen rendering
 			RenderGameScene(1, windowWidth / 2, windowHeight / 2, windowWidth / 2, windowHeight / 2);
 			RenderGameScene(2, 0, 0, windowWidth / 2, windowHeight / 2);
+			RenderGameScene(3, windowWidth / 2, 0, windowWidth / 2, windowHeight / 2);
 		}
 
 	}
@@ -200,9 +229,12 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 	glm::mat4 lightProjection = glm::ortho(-270.0f, 270.0f, -270.0f, 270.0f, 1.0f, 500.0f);
 	glm::mat4 lightView = glm::lookAt(glm::vec3(70.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-	glViewport(0, 0, (GLuint)SHADOW_MAP_WIDTH, (GLuint)SHADOW_MAP_HEIGHT);
+	glViewport(0, 0, (GLuint)_shadowMapSize, (GLuint)_shadowMapSize);
 	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
+
+	std::cout << _shadowMapSize << std::endl;
+
 
 	//render the scene from the light and fill the depth buffer for shadows
 	for (Geometry& g : _objects) {
@@ -1024,6 +1056,7 @@ void RenderingManager::push3DObjects() {
 		case EntityTypes::ROOF:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::ROOF_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
 			break;
 		}
 		case EntityTypes::MILK:
@@ -1158,7 +1191,7 @@ void RenderingManager::initFrameBuffers() {
 	glGenFramebuffers(1, &_lightDepthFBO);
 	glGenTextures(1, &_depthMapTex);								//init the texture for the depth map information
 	glBindTexture(GL_TEXTURE_2D, _depthMapTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _shadowMapSize, _shadowMapSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -1543,9 +1576,23 @@ void RenderingManager::openWindow() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	int width = WINDOW_WIDTH;
-	int height = WINDOW_HEIGHT;
-	_window = glfwCreateWindow(width, height, "Top Shopper", 0, 0);
+
+	int width;
+	int height;
+
+
+	if (FULL_SCREEN) {
+		const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		width = mode->width;
+		height = mode->height;
+		_window = glfwCreateWindow(width, height, "Top Shopper", glfwGetPrimaryMonitor(), 0);
+	}
+	else {
+		int width = WINDOW_WIDTH;
+		int height = WINDOW_HEIGHT;
+		_window = glfwCreateWindow(width, height, "Top Shopper", 0, 0);
+	}
+
 	if (!_window) {
 		std::cout << "Program failed to create GLFW window, TERMINATING" << std::endl;
 		glfwTerminate();
