@@ -235,6 +235,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			if (_cursorPositionPause == 1) {
 				_scene = GAME;
 				_cursorPositionPause = 1;
+				_audioManager->resumeAllSFX();
 			}
 			else {
 				_scene = MAIN_MENU;
@@ -250,12 +251,14 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			_scene = GAME;
 			delayX = 0.0;
 			_cursorPositionPause = 1;
+			_audioManager->resumeAllSFX();
 		}
 		break;
-	case (GAME):
+	case (GAME):  
 		if (kam->pKeyJustPressed || (playerControlled && player1->startButtonJustPressed)) {
 			_scene = PAUSED;
 			delayX = 0.0;
+			_audioManager->pauseAllSFX();
 		}
 		break;
 	case (END_SCREEN):
@@ -266,6 +269,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			// NOTE: keep in this order...
 			_physicsManager->cleanupScene1();
 			_aiManager->cleanupScene1();
+			_audioManager->resetAudio();
 		}
 		break;
 	}

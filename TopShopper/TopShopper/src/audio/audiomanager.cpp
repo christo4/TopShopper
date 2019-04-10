@@ -123,6 +123,20 @@ void AudioManager::haltSFX(SoundEffect *mySfx) {
 	}
 }
 
+void AudioManager::pauseAllSFX() {
+	Mix_Pause(-1);
+}
+
+void AudioManager::resumeAllSFX() {
+	cout << "before resume: " << Mix_Paused(-1) << endl;
+	Mix_Resume(-1);
+	cout << "after resume: " << Mix_Paused(-1) << endl;
+}
+
+void AudioManager::resetAudio() {
+	Mix_HaltChannel(-1);
+}
+
 void AudioManager::playSFX(SoundEffect *mySfx) {
 	if (!Mix_Playing(mySfx->channel)) {
 		//Mix_SetPosition(mySfx->channel, mySfx->angle, mySfx->distance);

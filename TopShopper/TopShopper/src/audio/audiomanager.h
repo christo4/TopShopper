@@ -59,6 +59,9 @@ public:
 
 	void playSFX(SoundEffect *mySfx);
 	void haltSFX(SoundEffect *mySfx);
+	void pauseAllSFX();
+	void resumeAllSFX();
+	void resetAudio();
 	void changeVolumeSFX(SoundEffect *mySfx, int volume);
 
 	void changeDistanceSFX(SoundEffect * mySfx, float distance, float angle);

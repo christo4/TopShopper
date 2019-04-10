@@ -339,6 +339,8 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		_matchTimer = 0.0; // clamp at 0 so rendering doesnt screw up
 		//_broker->_isEnd = true; // FOR NOW, we pause the game when match is over
 		_broker->_scene = END_SCREEN;
+		// pause channel
+		_broker->getAudioManager()->pauseAllSFX();
 	}
 }
 
