@@ -708,7 +708,6 @@ void PlayerScript::navigate() {
 				bool suppressHit = false;
 				if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
 					suppressHit = true;
-					forcedTurbo = true;
 				}
 
 				if (!suppressHit) {
@@ -759,7 +758,7 @@ void PlayerScript::navigate() {
 				bool suppressHit = false;
 				if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
 					suppressHit = true;
-					forcedTurbo = true;
+					if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) forcedTurbo = true;
 				}
 
 				if (!suppressHit) {
@@ -810,7 +809,7 @@ void PlayerScript::navigate() {
 				bool suppressHit = false;
 				if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
 					suppressHit = true;
-					forcedTurbo = true;
+					if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) forcedTurbo = true;
 				}
 
 				if (!suppressHit) {
@@ -861,7 +860,6 @@ void PlayerScript::navigate() {
 				bool suppressHit = false;
 				if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
 					suppressHit = true;
-					forcedTurbo = true;
 				}
 
 				if (!suppressHit) {
@@ -908,7 +906,7 @@ void PlayerScript::navigate() {
 		}
 
 
-
+		// NOTE: I might ahve to change this to always be called (no matter the turnDir, so that forcedTurbo always works...
 		if (turnDir == 0) {
 			if (centerStatus) {
 				if (centerHit.hasBlock) {
@@ -916,7 +914,7 @@ void PlayerScript::navigate() {
 					bool suppressHit = false;
 					if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
 						suppressHit = true;
-						forcedTurbo = true;
+						if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) forcedTurbo = true;
 					}
 
 					if (!suppressHit) {
