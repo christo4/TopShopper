@@ -56,6 +56,26 @@ AudioManager::SoundEffect* AudioManager::getSoundEffect(SoundEffectTypes sound) 
 	}
 }
 
+void AudioManager::changeBGM(BGMTypes BGM) {
+	switch (BGM) {
+	case BGMTypes::END_SCENE:
+		bgm.music = loadMusic("../TopShopper/resources/sfx/elevatorMusic.mp3");
+		break;
+	case BGMTypes::GAME_SCENE:
+		bgm.music = loadMusic("../TopShopper/resources/sfx/CoconutMall.mp3");
+		break;
+	case BGMTypes::MENU_SCENE:
+		bgm.music = loadMusic("../TopShopper/resources/sfx/JunesTheme.mp3");
+		break;
+	default:
+		bgm.music = loadMusic("../TopShopper/resources/sfx/JunesTheme.mp3");
+		break;
+	}
+	cout << "load bgm file" << endl;
+	playMusic(&bgm);
+}
+
+
 
 Mix_Music* AudioManager::loadMusic(string filename) {
 	//string fullPath = SDL_GetBasePath();
@@ -70,6 +90,8 @@ Mix_Music* AudioManager::loadMusic(string filename) {
 	}
 	return mMusic[filename];
 }
+
+
 
 Mix_Chunk* AudioManager::loadSFX(string filename) {
 	//string fullPath = SDL_GetBasePath();
@@ -215,9 +237,12 @@ void AudioManager::init() {
 
 
 	// load music from file
-	bgm.music = loadMusic(bgm.filename);
-	cout << "load bgm file" << endl;
-	playMusic(&bgm);
+	//bgm.music = loadMusic(bgm.filename);
+	//cout << "load bgm file" << endl;
+	//playMusic(&bgm);
+
+	changeBGM(MENU_SCENE);
+
 
 
 

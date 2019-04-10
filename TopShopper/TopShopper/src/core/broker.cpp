@@ -207,9 +207,11 @@ void Broker::manageScene(double& accumulator, double vartime) {
 		break;
 	case(LOADING):
 		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
+			_audioManager->changeBGM(BGMTypes::GAME_SCENE);
 			_scene = GAME;
 			accumulator = 0.0; // NOTE: maybe move this above?
 			delayX = 0.0;
+			
 		}
 		break;
 	case(PAUSED):
@@ -238,6 +240,8 @@ void Broker::manageScene(double& accumulator, double vartime) {
 				_audioManager->resumeAllSFX();
 			}
 			else {
+				_audioManager->resetAudio();
+				_audioManager->changeBGM(BGMTypes::MENU_SCENE);
 				_scene = MAIN_MENU;
 				_cursorPositionPause = 1;
 
@@ -263,6 +267,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 		break;
 	case (END_SCREEN):
 		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
+			_audioManager->changeBGM(BGMTypes::MENU_SCENE);
 			_scene = MAIN_MENU;
 			delayX = 0.0;
 

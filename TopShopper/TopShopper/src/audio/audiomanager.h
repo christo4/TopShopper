@@ -25,6 +25,12 @@ enum SoundEffectTypes {
 	TICKING_SOUND
 };
 
+enum BGMTypes {
+	MENU_SCENE,
+	GAME_SCENE,
+	END_SCENE
+};
+
 class AudioManager {
 public:
 	struct SoundEffect {
@@ -42,7 +48,7 @@ public:
 	struct Music {
 		std::string filename = "../TopShopper/resources/sfx/elevatorMusic.mp3";
 		Mix_Music* music;
-		int volume = MIX_MAX_VOLUME / 32;  // only work for mod, mp3 and ogg files
+		int volume = MIX_MAX_VOLUME / 10;  // only work for mod, mp3 and ogg files
 		int loop = -1; // number of times to play, -1 forever, bigger than 0(number of times)
 	};
 
@@ -53,6 +59,7 @@ public:
 	void updateSeconds(double variableDeltaTime);
 
 	SoundEffect* getSoundEffect(SoundEffectTypes sound);
+	void changeBGM(BGMTypes BGM);
 	void playMusic(Music * myMusic);
 	void pauseMusic();
 	void resumeMusic();

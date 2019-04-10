@@ -341,6 +341,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		_broker->_scene = END_SCREEN;
 		// pause channel
 		_broker->getAudioManager()->pauseAllSFX();
+		_broker->getAudioManager()->changeBGM(BGMTypes::END_SCENE);
 	}
 }
 
