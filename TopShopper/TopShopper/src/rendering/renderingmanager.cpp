@@ -656,8 +656,11 @@ bool compareStruct1(Player one, Player two) {
 
 
 void RenderingManager::renderPauseScreen() {
+
+	glViewport(0, 0, windowWidth, windowHeight); 
+
 	//960 540
-	renderText("PAUSED", windowWidth*0.37, windowHeight*0.45, 3.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText("PAUSED", windowWidth*0.37, windowHeight*0.45, 3.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 	renderText("Resume", GLfloat(windowWidth*0.455), GLfloat(windowHeight*0.23), 1.0f, glm::vec3(0, 0, 0));
 	renderText("Menu", GLfloat(windowWidth*0.466), GLfloat(windowHeight*0.106), 1.0f, glm::vec3(0, 0, 0));
 
@@ -1212,9 +1215,6 @@ void RenderingManager::push3DObjects() {
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE6_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			geo.cullBackFace = true;
-			geo.hasShadow = false;
-			geo.isTransparent = true;
-
 			break;
 		}
 		case EntityTypes::OBSTACLE7:
