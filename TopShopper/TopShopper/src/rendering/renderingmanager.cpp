@@ -997,30 +997,31 @@ void RenderingManager::push3DObjects() {
 
 			}
 
+			if (player->_shoppingCartBase->IsBashProtected()) {
+				Geometry geoShield = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SHIELD_GEO_NO_INDEX));
+
+				glm::mat4 model1;
+				PxMat44 rotation = PxMat44(rot);
+				PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos);
+				PxMat44	pxModel = translation * rotation;
+				model1 = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+					glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+					glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+					glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+				geoShield.model = model1;
+				geoShield.hasShadow = false;
+				geoShield.isTransparent = true;
+
+				geoShield.drawMode = GL_TRIANGLES;
+				assignBuffers(geoShield);
+				setBufferData(geoShield);
+				_objects.push_back(geoShield);
+			}
+
 			// SPOTLIGHT UH MOONLIGHT UH RENDERING...
 			//std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
-			
-			/*
-			Geometry geoSpotlight = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SHIELD_GEO_NO_INDEX));
-
-			glm::mat4 model1;
-			PxMat44 rotation = PxMat44(rot);
-			PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos);
-			PxMat44	pxModel = translation * rotation;
-			model1 = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
-				glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
-				glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
-				glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
-
-			geoSpotlight.model = model1;
-			geoSpotlight.hasShadow = false;
-			geoSpotlight.isTransparent = true;
-
-			geoSpotlight.drawMode = GL_TRIANGLES;
-			assignBuffers(geoSpotlight);
-			setBufferData(geoSpotlight);
-			_objects.push_back(geoSpotlight);
-			*/
+	
 		
 			// POINTER RENDERING...
 			Geometry geoPointer = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::POINTER_GEO_NO_INDEX));
