@@ -519,7 +519,7 @@ void RenderingManager::RenderMainMenu() {
 	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 
 	renderText("Start", GLfloat(windowWidth*0.47), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(0, 0, 0));
-	renderText("Controls", GLfloat(windowWidth*0.45), GLfloat(windowHeight* 0.3564), 1.0f, glm::vec3(0, 0, 0));
+	renderText("Rules", GLfloat(windowWidth*0.47), GLfloat(windowHeight* 0.3564), 1.0f, glm::vec3(0, 0, 0));
 	renderText("Credits", GLfloat(windowWidth*0.455), GLfloat(windowHeight* 0.2314), 1.0f, glm::vec3(0, 0, 0));
 	renderText("Quit", GLfloat(windowWidth*0.47), GLfloat(windowHeight* 0.1064), 1.0f, glm::vec3(0, 0, 0));
 
@@ -567,8 +567,8 @@ void RenderingManager::RenderLoading() {
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 
-	renderText("Loading.. Press A", GLfloat(windowWidth*0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
-	renderSprite(*_backgroundSprite, -1, -1, 1, 1);
+	//renderText("Loading.. Press A", GLfloat(windowWidth*0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
+	renderSprite(*_controlsSprite, -1, -1, 1, 1);
 
 	CheckGLErrors();
 }
@@ -623,9 +623,9 @@ void RenderingManager::RenderCredits() {
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 
-	renderText("Credits here", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
+	//renderText("Credits here", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
 
-	renderSprite(*_backgroundSprite, -1, -1, 1, 1);
+	renderSprite(*_creditsSprite, -1, -1, 1, 1);
 
 	CheckGLErrors();
 }
@@ -642,9 +642,9 @@ void RenderingManager::RenderControls() {
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 
-	renderText("Controls here", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
+	//renderText("Controls here", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
 
-	renderSprite(*_backgroundSprite, -1, -1, 1, 1);
+	renderSprite(*_rulesSprite, -1, -1, 1, 1);
 
 	CheckGLErrors();
 }
@@ -1294,6 +1294,9 @@ void RenderingManager::initSpriteTextures() {
 	InitializeTexture(_titleScreenSprite, "../TopShopper/resources/Sprites/TitleScreen.png", GL_TEXTURE_2D);
 	InitializeTexture(_resultsScreenSprite, "../TopShopper/resources/Sprites/ResultsScreen.png", GL_TEXTURE_2D);
 	InitializeTexture(_backgroundSprite, "../TopShopper/resources/Sprites/Background.png", GL_TEXTURE_2D);
+	InitializeTexture(_rulesSprite, "../TopShopper/resources/Sprites/Rules.png", GL_TEXTURE_2D);
+	InitializeTexture(_creditsSprite, "../TopShopper/resources/Sprites/Credits.png", GL_TEXTURE_2D);
+	InitializeTexture(_controlsSprite, "../TopShopper/resources/Sprites/Controls.png", GL_TEXTURE_2D);
 }
 
 void RenderingManager::init3DTextures() {

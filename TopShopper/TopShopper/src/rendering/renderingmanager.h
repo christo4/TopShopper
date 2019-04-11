@@ -159,6 +159,9 @@ private:
 	MyTexture *_titleScreenSprite = new MyTexture();
 	MyTexture *_resultsScreenSprite = new MyTexture();
 	MyTexture *_backgroundSprite = new MyTexture();
+	MyTexture *_rulesSprite = new MyTexture();
+	MyTexture *_creditsSprite = new MyTexture();
+	MyTexture *_controlsSprite = new MyTexture();
 	
 	MyTexture *_shoppingCartRed = new MyTexture(); // 0
 	MyTexture *_shoppingCartBlue = new MyTexture(); // 1
