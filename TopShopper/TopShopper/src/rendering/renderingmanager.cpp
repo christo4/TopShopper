@@ -41,6 +41,7 @@ void RenderingManager::init() {
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
 
 	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
 	shaderProgram = ShaderTools::InitializeShaders(std::string("vertex"), std::string("fragment"));
 	if (shaderProgram == 0) {
 		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
@@ -79,13 +80,6 @@ void RenderingManager::init() {
 		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
 		return;
 	}
-
-
-
-
-
-
-
 
 
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
@@ -138,7 +132,6 @@ void RenderingManager::loadScene1() {
 	gRightStickXValuesMap[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 }
 
-
 //UpdateSeconds called every frame from the main loop
 //handles the deletion of objects after completing the rendering of each frame as well as the updating of model positions
 //calls render scene after pushing back the 3d objects in order to render the scene again. 
@@ -155,18 +148,16 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 			}
 		}
 	}
-
 	for (Geometry& geoDel : _objects) {
 		deleteBufferData(geoDel);
 	}
 	_objects.clear();
 
-
 	int numPlayers = _broker->_nbPlayers;
-
 	if (_broker->_scene == GAME || _broker->_scene == PAUSED || _broker->_scene == END_SCREEN) {
 		push3DObjects();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		RenderShadowMap();
 
 		if (numPlayers == 1) {
 			RenderGameScene(0, 0, 0, windowWidth, windowHeight);
@@ -179,8 +170,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 
 			RenderGameScene(0, 0, windowHeight / 2, windowWidth / 2, windowHeight / 2);						//split screen rendering
 			RenderGameScene(1, windowWidth / 2, windowHeight / 2, windowWidth / 2, windowHeight / 2);
-			RenderGameScene(2, 0, 0, windowWidth, windowHeight / 2);
-		
+			RenderGameScene(2, 0, 0, windowWidth, windowHeight / 2);	
 		}
 		else {
 			RenderGameScene(0, 0, windowHeight / 2, windowWidth / 2, windowHeight / 2);						//split screen rendering
@@ -188,7 +178,6 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 			RenderGameScene(2, 0, 0, windowWidth / 2, windowHeight / 2);
 			RenderGameScene(3, windowWidth / 2, 0, windowWidth / 2, windowHeight / 2);
 		}
-
 	}
 	else if (_broker->_scene == MAIN_MENU) {
 		RenderMainMenu();
@@ -205,27 +194,12 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	else if (_broker->_scene == CONTROLS) {
 		RenderControls();
 	}
-	
 	glfwSwapBuffers(_window);
 }
 
 
-//RenderScene utilizes the current array of objects in the rendering manager, setting and assigning the buffers for each geometry,
-//then sending the vertex info down the openGL pipeline, while utilizing the approprite shaders tied to the geometry.
-//performs multiple rendering passes in order to create shadowsm, while calculating the camera information each time it is called.
-void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int viewBottomLeftY, int viewTopRightX, int viewTopRightY){  
-	//Clears the screen to a light grey background
-	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glEnable(GL_CULL_FACE);
+void RenderingManager::RenderShadowMap() {
 
-	float fov = 65.0f;
-	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
-	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, 1.0f, 800.0f);
-
-	glm::vec3 cameraPos;
-	glm::mat4 View = computeCameraPosition(playerID, cameraPos);	//compute the cameraPosition and view matrix for player 0
 	glm::mat4 lightProjection = glm::ortho(-270.0f, 270.0f, -270.0f, 270.0f, 1.0f, 500.0f);
 	glm::mat4 lightView = glm::lookAt(glm::vec3(70.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -235,9 +209,6 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 
 	//render the scene from the light and fill the depth buffer for shadows
 	for (Geometry& g : _objects) {
-		if (g.player != playerID && g.pointer) {
-			continue;
-		}
 
 		glUseProgram(depthBufferShaderProgram);
 		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
@@ -250,6 +221,26 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 		}
 		glBindVertexArray(0);
 	}
+}
+
+//RenderScene utilizes the current array of objects in the rendering manager, setting and assigning the buffers for each geometry,
+//then sending the vertex info down the openGL pipeline, while utilizing the approprite shaders tied to the geometry.
+//performs multiple rendering passes in order to create shadowsm, while calculating the camera information each time it is called.
+void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int viewBottomLeftY, int viewTopRightX, int viewTopRightY){  
+	//Clears the screen to a light grey background
+	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glEnable(GL_CULL_FACE);
+
+	float fov = 65.0f;
+	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
+	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, 1.0f, 800.0f);
+	glm::vec3 cameraPos;
+	glm::mat4 View = computeCameraPosition(playerID, cameraPos);	//compute the cameraPosition and view matrix for player 0
+	glm::mat4 lightProjection = glm::ortho(-270.0f, 270.0f, -270.0f, 270.0f, 1.0f, 500.0f);
+	glm::mat4 lightView = glm::lookAt(glm::vec3(70.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
 
 	glViewport((GLuint)viewBottomLeftx, (GLuint)viewBottomLeftY, (GLuint)viewTopRightX, (GLuint)viewTopRightY);	//reset the viewport to the full window to render from the camera pov
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -447,6 +438,8 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camer
 
 
 void RenderingManager::renderEndScreen() {
+
+	glViewport(0, 0, windowWidth, windowHeight);
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
 	std::shared_ptr<ShoppingCartPlayer> player = players[0];
 	std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
@@ -1028,9 +1021,7 @@ void RenderingManager::push3DObjects() {
 			setBufferData(geoSpotlight);
 			_objects.push_back(geoSpotlight);
 			*/
-			
-
-
+		
 			// POINTER RENDERING...
 			Geometry geoPointer = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::POINTER_GEO_NO_INDEX));
 			geoPointer.color = glm::vec3(0, 0, 0);
@@ -1098,6 +1089,7 @@ void RenderingManager::push3DObjects() {
 
 				assignBuffers(geoPointer);
 				setBufferData(geoPointer);
+				geoPointer.hasShadow = false;
 				_objects.push_back(geoPointer);
 				yOffset += 0.5f;
 			}
