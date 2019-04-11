@@ -57,12 +57,12 @@ private:
 
 	bool _cookieCanSpawn = true;
 	std::shared_ptr<Cookie> _startingCookie = nullptr; // ONLY SPAWNS ONCE AT START OF GAME
-	physx::PxTransform _startingCookieSpawnPoint = physx::PxTransform(0.0f, 19.0f, 0.0f, physx::PxQuat(physx::PxIdentity));
+	physx::PxTransform _startingCookieSpawnPoint = physx::PxTransform(0.0f, 20.0f, 0.0f, physx::PxQuat(physx::PxIdentity));
 
 
 	bool _mysteryBagCanSpawn = false;
 	std::shared_ptr<MysteryBag> _mysteryBag = nullptr; // ONLY BEGINS SPAWNING AFTER STARTING COOKIE GETS PICKED UP! 
-	physx::PxTransform _mysteryBagSpawnPoint = physx::PxTransform(0.0f, 19.0f, 0.0f, physx::PxQuat(physx::PxIdentity));
+	physx::PxTransform _mysteryBagSpawnPoint = physx::PxTransform(0.0f, 20.0f, 0.0f, physx::PxQuat(physx::PxIdentity));
 	double _mysteryBagSpawnTimer = 30.0; // this will vary from spawn to spawn in range 30-60 secs
 
 
