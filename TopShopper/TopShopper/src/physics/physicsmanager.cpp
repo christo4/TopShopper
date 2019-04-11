@@ -1027,7 +1027,7 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	}
 	case EntityTypes::MILK:
 	{
-		PxReal radius = 1.5f;
+		PxReal radius = 2.5f;
 		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
 		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
 		PxFilterData qryData;
@@ -1051,7 +1051,7 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	}
 	case EntityTypes::WATER:
 	{
-		PxReal radius = 1.5f;
+		PxReal radius = 2.5f;
 		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
 		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
 		PxFilterData qryData;
@@ -1075,7 +1075,7 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	}
 	case EntityTypes::COLA:
 	{
-		PxReal radius = 1.5f;
+		PxReal radius = 2.5f;
 		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
 		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
 		PxFilterData qryData;
@@ -1099,7 +1099,7 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	}
 	case EntityTypes::APPLE:
 	{
-		PxReal radius = 1.5f;
+		PxReal radius = 2.5f;
 		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
 		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
 		PxFilterData qryData;
@@ -1123,7 +1123,7 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	}
 	case EntityTypes::WATERMELON:
 	{
-		PxReal radius = 1.5f;
+		PxReal radius = 2.5f;
 		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
 		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
 		PxFilterData qryData;
@@ -1147,7 +1147,7 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	}
 	case EntityTypes::BANANA:
 	{
-		PxReal radius = 1.5f;
+		PxReal radius = 2.5f;
 		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
 		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
 		PxFilterData qryData;
@@ -1171,7 +1171,7 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	}
 	case EntityTypes::CARROT:
 	{
-		PxReal radius = 1.5f;
+		PxReal radius = 2.5f;
 		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
 		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
 		PxFilterData qryData;
@@ -1195,7 +1195,7 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	}
 	case EntityTypes::EGGPLANT:
 	{
-		PxReal radius = 1.5f;
+		PxReal radius = 2.5f;
 		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
 		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
 		PxFilterData qryData;
@@ -1219,7 +1219,7 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	}
 	case EntityTypes::BROCCOLI:
 	{
-		PxReal radius = 1.5f;
+		PxReal radius = 2.5f;
 		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
 		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
 		PxFilterData qryData;
@@ -1243,7 +1243,7 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	}
 	case EntityTypes::MYSTERY_BAG:
 	{
-		PxReal radius = 1.5f;
+		PxReal radius = 2.5f;
 		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
 		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
 		PxFilterData qryData;
@@ -1267,7 +1267,7 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	}
 	case EntityTypes::COOKIE:
 	{
-		PxReal radius = 1.5f;
+		PxReal radius = 2.5f;
 		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
 		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
 		PxFilterData qryData;
@@ -1291,7 +1291,7 @@ std::shared_ptr<Entity> PhysicsManager::instantiateEntity(EntityTypes type, phys
 	}
 	case EntityTypes::SPARE_CHANGE:
 	{
-		PxReal radius = 1.5f;
+		PxReal radius = 2.5f;
 		PxMaterial *material = gPhysics->createMaterial(1.0f, 1.0f, 1.0f);
 		PxFilterData simData(CollisionFlags::COLLISION_FLAG_PICKUP, CollisionFlags::COLLISION_FLAG_PICKUP_AGAINST, 0, 0);
 		PxFilterData qryData;

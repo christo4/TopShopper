@@ -510,7 +510,7 @@ void PlayerScript::bashed() {
 	PxTransform bashedCartTransform = bashedCartDyn->getGlobalPose();
 	PxVec3 bashedCartPos = bashedCartTransform.p;
 
-	PxVec3 nextSpawnPos = bashedCartPos + PxVec3(0.0f, 5.0f, 0.0f);
+	PxVec3 nextSpawnPos = bashedCartPos + PxVec3(0.0f, 6.0f, 0.0f);
 
 	std::vector<PxVec3> forces = { PxVec3(0.0f, 40.0f, 20.0f), PxVec3(0.0f, 40.0f, -20.0f), PxVec3(20.0f, 40.0f, 0.0f), PxVec3(-20.0f, 40.0f, 0.0f) }; // NOTE: fast HACK for now
 	int forceIndex = 0;
@@ -540,7 +540,7 @@ void PlayerScript::bashed() {
 		forceIndex++;
 		if (forceIndex >= forces.size()) forceIndex = 0;
 
-		nextSpawnPos += PxVec3(0.0f, 3.0f, 0.0f);
+		nextSpawnPos += PxVec3(0.0f, 6.0f, 0.0f);
 	}
 
 
@@ -566,7 +566,7 @@ void PlayerScript::coinExplosion() {
 	PxTransform cartTransform = cartDyn->getGlobalPose();
 	PxVec3 cartPos = cartTransform.p;
 
-	PxVec3 nextSpawnPos = cartPos + PxVec3(0.0f, 11.0f, 0.0f); // NOTE: I'm setting the y-value on the assumption that bashed() will spawn 2 pickups
+	PxVec3 nextSpawnPos = cartPos + PxVec3(0.0f, 24.0f, 0.0f); // NOTE: I'm setting the y-value on the assumption that bashed() will spawn 2 pickups
 
 	std::vector<PxVec3> forces = { PxVec3(0.0f, 40.0f, 20.0f), PxVec3(0.0f, 40.0f, -20.0f), PxVec3(20.0f, 40.0f, 0.0f), PxVec3(-20.0f, 40.0f, 0.0f), PxVec3(0.0f, 40.0f, 30.0f), PxVec3(0.0f, 40.0f, -30.0f), PxVec3(30.0f, 40.0f, 0.0f), PxVec3(-30.0f, 40.0f, 0.0f), PxVec3(0.0f, 40.0f, 40.0f), PxVec3(0.0f, 40.0f, -40.0f), PxVec3(40.0f, 40.0f, 0.0f), PxVec3(-40.0f, 40.0f, 0.0f) };
 	int forceIndex = 0;
@@ -597,7 +597,7 @@ void PlayerScript::coinExplosion() {
 		forceIndex++;
 		if (forceIndex >= forces.size()) forceIndex = 0;
 
-		nextSpawnPos += PxVec3(0.0f, 3.0f, 0.0f); 
+		nextSpawnPos += PxVec3(0.0f, 6.0f, 0.0f); 
 	}
 
 }
