@@ -233,9 +233,6 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	std::cout << _shadowMapSize << std::endl;
-
-
 	//render the scene from the light and fill the depth buffer for shadows
 	for (Geometry& g : _objects) {
 		if (g.player != playerID && g.pointer) {
@@ -243,19 +240,22 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 		}
 
 		glUseProgram(depthBufferShaderProgram);
-
 		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "View"), 1, GL_FALSE, &lightView[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Projection"), 1, GL_FALSE, &lightProjection[0][0]);
 
 		glBindVertexArray(g.vao);
-		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());	//ignore the roof in the shadow map
+		if (g.hasShadow) {
+			glDrawArrays(GL_TRIANGLES, 0, g.verts.size());	//ignore the roof in the shadow map
+		}
 		glBindVertexArray(0);
 	}
 
 	glViewport((GLuint)viewBottomLeftx, (GLuint)viewBottomLeftY, (GLuint)viewTopRightX, (GLuint)viewTopRightY);	//reset the viewport to the full window to render from the camera pov
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	std::vector<Geometry> transparentObjs;
 
 	for (Geometry& g : _objects) {
 		if (g.player != playerID && g.pointer) {
@@ -281,21 +281,17 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 			glBindTexture(g.texture.target, g.texture.textureID);
 			GLuint imageTexUniLocation = glGetUniformLocation(gradientShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
 			glUniform1i(imageTexUniLocation, 0);
+
+			glBindVertexArray(g.vao);
+			glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
+			glUseProgram(0);
+			glBindVertexArray(0);
 		}
 
 		else if (g.isTransparent) {
-			glUseProgram(transparencyShaderProgram);
-			glUniform3f(glGetUniformLocation(transparencyShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
-			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
-			
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(g.texture.target, g.texture.textureID);
-			GLuint imageTexUniLocation = glGetUniformLocation(transparencyShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
-			glUniform1i(imageTexUniLocation, 0);
-		}
-				
+
+			transparentObjs.push_back(g);
+		}	
 		else{
 			glUseProgram(shaderProgram);					//use the default shader program
 
@@ -313,12 +309,44 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
+
+			glBindVertexArray(g.vao);
+			glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
+			glUseProgram(0);
+			glBindVertexArray(0);
 		}
-		glBindVertexArray(g.vao);
-		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
+
+	}
+
+	for (Geometry &transObj : transparentObjs) {
+
+		glUseProgram(transparencyShaderProgram);
+		glUniform3f(glGetUniformLocation(transparencyShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+		glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Model"), 1, GL_FALSE, &transObj.model[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(transObj.texture.target, transObj.texture.textureID);
+		GLuint imageTexUniLocation = glGetUniformLocation(transparencyShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
+		glUniform1i(imageTexUniLocation, 0);
+
+		glBindVertexArray(transObj.vao);
+		glDrawArrays(GL_TRIANGLES, 0, transObj.verts.size());
 		glUseProgram(0);
 		glBindVertexArray(0);
+
+
+		glDepthFunc(GL_LESS);
+
 	}
+
+
+
+
+
+
+
 	if (_broker->_scene == GAME) {
 		renderHud(playerID);
 	}
@@ -973,8 +1001,33 @@ void RenderingManager::push3DObjects() {
 
 			}
 
+			// SPOTLIGHT UH MOONLIGHT UH RENDERING...
+			//std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
+			
+			/*
+			Geometry geoSpotlight = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPOTLIGHT_GEO_NO_INDEX));
 
-			//TODO: only render pointers on a single camera for that 1 player
+			glm::mat4 model1;
+			PxMat44 rotation = PxMat44(rot);
+			PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos);
+			PxMat44	pxModel = translation * rotation;
+			model1 = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+				glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+				glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+				glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+			geoSpotlight.model = model1;
+			geoSpotlight.hasShadow = false;
+			geoSpotlight.isTransparent = true;
+
+			geoSpotlight.drawMode = GL_TRIANGLES;
+			assignBuffers(geoSpotlight);
+			setBufferData(geoSpotlight);
+			_objects.push_back(geoSpotlight);
+			*/
+			
+
+
 			// POINTER RENDERING...
 			Geometry geoPointer = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::POINTER_GEO_NO_INDEX));
 			geoPointer.color = glm::vec3(0, 0, 0);
@@ -1051,12 +1104,14 @@ void RenderingManager::push3DObjects() {
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			geo.cullBackFace = true;
+			geo.hasShadow = false;
 			break;
 		}
 		case EntityTypes::ROOF:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::ROOF_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			geo.cullBackFace = true;
+			geo.hasShadow = false;
 			break;
 		}
 		case EntityTypes::MILK:
@@ -1157,6 +1212,9 @@ void RenderingManager::push3DObjects() {
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE6_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			geo.cullBackFace = true;
+			geo.hasShadow = false;
+			geo.isTransparent = true;
+
 			break;
 		}
 		case EntityTypes::OBSTACLE7:
@@ -1168,6 +1226,9 @@ void RenderingManager::push3DObjects() {
 		default:
 			continue;
 		}
+
+
+
 
 		glm::mat4 model;
 		PxMat44 rotation = PxMat44(rot);
@@ -1255,25 +1316,25 @@ void RenderingManager::init3DTextures() {
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(ROOF_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/BlueWallBotTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(OBSTACLE1_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/BlueWallMidTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(OBSTACLE2_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/BlueWallTopTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(OBSTACLE3_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/GreenWallBotTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(OBSTACLE4_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/GreenWallTopTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(OBSTACLE5_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/RedWallTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(OBSTACLE6_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/RedWallTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(OBSTACLE7_GEO_NO_INDEX)->texture = texture;
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/MilkTexture.png", GL_TEXTURE_2D);
@@ -1308,6 +1369,10 @@ void RenderingManager::init3DTextures() {
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/PotatoTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(HOT_POTATO_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/Yellow.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(SPOTLIGHT_GEO_NO_INDEX)->texture = texture;
+
 
 	//InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
 	//_broker->getLoadingManager()->getGeometry(POINTER_GEO_NO_INDEX)->texture = texture;
