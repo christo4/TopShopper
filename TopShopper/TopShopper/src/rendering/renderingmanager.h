@@ -1,10 +1,11 @@
 #ifndef RENDERINGMANAGER_H_
 #define RENDERINGMANAGER_H_
 
-#define WINDOW_WIDTH 1920
+#define WINDOW_WIDTH 1920	
 #define WINDOW_HEIGHT 1080
-#define SHADOW_MAP_WIDTH 6144
-#define SHADOW_MAP_HEIGHT 6144
+#define SHADOW_MAP_SIZE_SINGLE_PLAYER 4096
+#define SHADOW_MAP_SIZE_MULTI_PLAYER 1500
+#define	FULL_SCREEN false
 
 
 //**Must include glad and GLFW in this order or it breaks**
@@ -128,6 +129,7 @@ private:
 	std::vector<Geometry> _objects;
 	unsigned int _lightDepthFBO;
 	unsigned int _depthMapTex;
+	unsigned int _shadowMapSize;
 	float _gradientDegree;
 	void openWindow();
 
