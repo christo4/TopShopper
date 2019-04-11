@@ -510,7 +510,7 @@ void PlayerScript::bashed() {
 	PxTransform bashedCartTransform = bashedCartDyn->getGlobalPose();
 	PxVec3 bashedCartPos = bashedCartTransform.p;
 
-	PxVec3 nextSpawnPos = bashedCartPos + PxVec3(0.0f, 5.0f, 0.0f);
+	PxVec3 nextSpawnPos = bashedCartPos + PxVec3(0.0f, 6.0f, 0.0f);
 
 	std::vector<PxVec3> forces = { PxVec3(0.0f, 40.0f, 20.0f), PxVec3(0.0f, 40.0f, -20.0f), PxVec3(20.0f, 40.0f, 0.0f), PxVec3(-20.0f, 40.0f, 0.0f) }; // NOTE: fast HACK for now
 	int forceIndex = 0;
@@ -540,7 +540,7 @@ void PlayerScript::bashed() {
 		forceIndex++;
 		if (forceIndex >= forces.size()) forceIndex = 0;
 
-		nextSpawnPos += PxVec3(0.0f, 3.0f, 0.0f);
+		nextSpawnPos += PxVec3(0.0f, 6.0f, 0.0f);
 	}
 
 
@@ -566,7 +566,7 @@ void PlayerScript::coinExplosion() {
 	PxTransform cartTransform = cartDyn->getGlobalPose();
 	PxVec3 cartPos = cartTransform.p;
 
-	PxVec3 nextSpawnPos = cartPos + PxVec3(0.0f, 11.0f, 0.0f); // NOTE: I'm setting the y-value on the assumption that bashed() will spawn 2 pickups
+	PxVec3 nextSpawnPos = cartPos + PxVec3(0.0f, 24.0f, 0.0f); // NOTE: I'm setting the y-value on the assumption that bashed() will spawn 2 pickups
 
 	std::vector<PxVec3> forces = { PxVec3(0.0f, 40.0f, 20.0f), PxVec3(0.0f, 40.0f, -20.0f), PxVec3(20.0f, 40.0f, 0.0f), PxVec3(-20.0f, 40.0f, 0.0f), PxVec3(0.0f, 40.0f, 30.0f), PxVec3(0.0f, 40.0f, -30.0f), PxVec3(30.0f, 40.0f, 0.0f), PxVec3(-30.0f, 40.0f, 0.0f), PxVec3(0.0f, 40.0f, 40.0f), PxVec3(0.0f, 40.0f, -40.0f), PxVec3(40.0f, 40.0f, 0.0f), PxVec3(-40.0f, 40.0f, 0.0f) };
 	int forceIndex = 0;
@@ -597,7 +597,7 @@ void PlayerScript::coinExplosion() {
 		forceIndex++;
 		if (forceIndex >= forces.size()) forceIndex = 0;
 
-		nextSpawnPos += PxVec3(0.0f, 3.0f, 0.0f); 
+		nextSpawnPos += PxVec3(0.0f, 6.0f, 0.0f); 
 	}
 
 }
@@ -646,7 +646,7 @@ void PlayerScript::navigate() {
 		float posDistance = (posNoY - mapCenterPos).magnitude();
 		
 		// force turbo to go up slopes (outer wall and hill slope)
-		if ((targetOnHill && posDistance > hillTopRadius && posDistance <= hillBaseRadius) || (targetOnWall && posDistance >= wallStartRadius)) forcedTurbo = true;
+		if ((targetOnHill && posDistance > hillTopRadius && posDistance <= hillBaseRadius) || (targetOnWall && posDistance >= wallStartRadius)) forcedTurbo = true; // NOTE: shouldn't i also surpress raycasts with ground in this case???, cause hot potato near hill might be problematic since raycasts interfere with steering
 
 		// ~~~~~~~~~~NOTE: should I only force turbo for cookie until on hill top?
 
@@ -697,6 +697,62 @@ void PlayerScript::navigate() {
 	bool farRightStatus = Broker::getInstance()->getPhysicsManager()->raycast(farRightOrigin, farRightUnitDir, farRightDistance, farRightHit);
 
 
+	bool sightLineToTarget = false;
+	if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr) {
+		PxVec3 lOrigin = midLeftOrigin;
+		PxVec3 cOrigin = centerOrigin;
+		PxVec3 rOrigin = midRightOrigin;
+
+		PxVec3 lUnitDir = (_targets.at(0)._pos - lOrigin).getNormalized();
+		PxVec3 cUnitDir = (_targets.at(0)._pos - cOrigin).getNormalized();
+		PxVec3 rUnitDir = (_targets.at(0)._pos - rOrigin).getNormalized();
+
+		PxReal lDistance = 25.0f;
+		PxReal cDistance = 25.0f;
+		PxReal rDistance = 25.0f;
+
+		PxHitBuffer<PxRaycastHit> lHit;
+		PxHitBuffer<PxRaycastHit> cHit;
+		PxHitBuffer<PxRaycastHit> rHit;
+
+		bool lStatus = Broker::getInstance()->getPhysicsManager()->raycast(lOrigin, lUnitDir, lDistance, lHit);
+		bool cStatus = Broker::getInstance()->getPhysicsManager()->raycast(cOrigin, cUnitDir, cDistance, cHit);
+		bool rStatus = Broker::getInstance()->getPhysicsManager()->raycast(rOrigin, rUnitDir, rDistance, rHit);
+
+		if (lStatus || cStatus || rStatus) {
+			sightLineToTarget = true; // assume we have a clear path to target entity...
+		}
+
+		if (lStatus) {
+			if (lHit.hasBlock) {
+				Entity *entityHit = static_cast<Entity*>(lHit.block.actor->userData);
+				if (entityHit != _targets.at(0)._targetEntity.get()) {
+					if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || (lHit.block.shape->getFlags() & PxShapeFlag::eSIMULATION_SHAPE)) sightLineToTarget = false; // special case for carts since they have the trigger collider on their front face, but are nevertheless solid 
+				}
+			}
+		}
+
+		if (cStatus) {
+			if (cHit.hasBlock) {
+				Entity *entityHit = static_cast<Entity*>(cHit.block.actor->userData);
+				if (entityHit != _targets.at(0)._targetEntity.get()) {
+					if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || (cHit.block.shape->getFlags() & PxShapeFlag::eSIMULATION_SHAPE)) sightLineToTarget = false; // special case for carts since they have the trigger collider on their front face, but are nevertheless solid 
+				}
+			}
+		}
+
+		if (rStatus) {
+			if (rHit.hasBlock) {
+				Entity *entityHit = static_cast<Entity*>(rHit.block.actor->userData);
+				if (entityHit != _targets.at(0)._targetEntity.get()) {
+					if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER || (rHit.block.shape->getFlags() & PxShapeFlag::eSIMULATION_SHAPE)) sightLineToTarget = false; // special case for carts since they have the trigger collider on their front face, but are nevertheless solid 
+				}
+			}
+		}
+	}
+
+
+
 	bool redirected = false;
 	if (farLeftStatus || midLeftStatus || centerStatus || midRightStatus || farRightStatus) {
 
@@ -708,7 +764,6 @@ void PlayerScript::navigate() {
 				bool suppressHit = false;
 				if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
 					suppressHit = true;
-					forcedTurbo = true;
 				}
 
 				if (!suppressHit) {
@@ -759,7 +814,7 @@ void PlayerScript::navigate() {
 				bool suppressHit = false;
 				if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
 					suppressHit = true;
-					forcedTurbo = true;
+					if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) forcedTurbo = true;
 				}
 
 				if (!suppressHit) {
@@ -810,7 +865,7 @@ void PlayerScript::navigate() {
 				bool suppressHit = false;
 				if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
 					suppressHit = true;
-					forcedTurbo = true;
+					if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) forcedTurbo = true;
 				}
 
 				if (!suppressHit) {
@@ -861,7 +916,6 @@ void PlayerScript::navigate() {
 				bool suppressHit = false;
 				if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
 					suppressHit = true;
-					forcedTurbo = true;
 				}
 
 				if (!suppressHit) {
@@ -908,7 +962,7 @@ void PlayerScript::navigate() {
 		}
 
 
-
+		// NOTE: I might ahve to change this to always be called (no matter the turnDir, so that forcedTurbo always works...
 		if (turnDir == 0) {
 			if (centerStatus) {
 				if (centerHit.hasBlock) {
@@ -916,7 +970,7 @@ void PlayerScript::navigate() {
 					bool suppressHit = false;
 					if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
 						suppressHit = true;
-						forcedTurbo = true;
+						if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) forcedTurbo = true;
 					}
 
 					if (!suppressHit) {
@@ -962,6 +1016,8 @@ void PlayerScript::navigate() {
 				}
 			}
 		}
+
+		if (sightLineToTarget) redirected = false; // sight line raycasts override other raycasts...
 
 		if (redirected) {
 			PxReal accel = 1.0f;

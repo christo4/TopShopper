@@ -41,6 +41,7 @@ void RenderingManager::init() {
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
 
 	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
 	shaderProgram = ShaderTools::InitializeShaders(std::string("vertex"), std::string("fragment"));
 	if (shaderProgram == 0) {
 		std::cout << "Program could not initialize shaders, TERMINATING" << std::endl;
@@ -80,7 +81,15 @@ void RenderingManager::init() {
 		return;
 	}
 
+
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
+
+	if (_broker->_nbPlayers == 1) {
+		_shadowMapSize = SHADOW_MAP_SIZE_SINGLE_PLAYER;		//init the shadow resolution based on split screen condition
+	}
+	else {
+		_shadowMapSize = SHADOW_MAP_SIZE_MULTI_PLAYER;
+	}
 
 
 	glUseProgram(shaderProgram);
@@ -123,7 +132,6 @@ void RenderingManager::loadScene1() {
 	gRightStickXValuesMap[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 }
 
-
 //UpdateSeconds called every frame from the main loop
 //handles the deletion of objects after completing the rendering of each frame as well as the updating of model positions
 //calls render scene after pushing back the 3d objects in order to render the scene again. 
@@ -140,26 +148,36 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 			}
 		}
 	}
-
 	for (Geometry& geoDel : _objects) {
 		deleteBufferData(geoDel);
 	}
 	_objects.clear();
 
-
+	int numPlayers = _broker->_nbPlayers;
 	if (_broker->_scene == GAME || _broker->_scene == PAUSED || _broker->_scene == END_SCREEN) {
 		push3DObjects();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		RenderShadowMap();
 
-		if (_broker->_nbPlayers == 1) {
+		if (numPlayers == 1) {
 			RenderGameScene(0, 0, 0, windowWidth, windowHeight);
+		}
+		else if (numPlayers == 2) {
+			RenderGameScene(0, 0, windowHeight/2, windowWidth, windowHeight/2);
+			RenderGameScene(1, 0, 0, windowWidth, windowHeight/2);
+		}
+		else if (numPlayers == 3) {
+
+			RenderGameScene(0, 0, windowHeight / 2, windowWidth / 2, windowHeight / 2);						//split screen rendering
+			RenderGameScene(1, windowWidth / 2, windowHeight / 2, windowWidth / 2, windowHeight / 2);
+			RenderGameScene(2, 0, 0, windowWidth, windowHeight / 2);	
 		}
 		else {
 			RenderGameScene(0, 0, windowHeight / 2, windowWidth / 2, windowHeight / 2);						//split screen rendering
 			RenderGameScene(1, windowWidth / 2, windowHeight / 2, windowWidth / 2, windowHeight / 2);
 			RenderGameScene(2, 0, 0, windowWidth / 2, windowHeight / 2);
+			RenderGameScene(3, windowWidth / 2, 0, windowWidth / 2, windowHeight / 2);
 		}
-
 	}
 	else if (_broker->_scene == MAIN_MENU) {
 		RenderMainMenu();
@@ -176,17 +194,41 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	else if (_broker->_scene == CONTROLS) {
 		RenderControls();
 	}
-	
 	glfwSwapBuffers(_window);
 }
 
+
+void RenderingManager::RenderShadowMap() {
+
+	glm::mat4 lightProjection = glm::ortho(-270.0f, 270.0f, -270.0f, 270.0f, 1.0f, 500.0f);
+	glm::mat4 lightView = glm::lookAt(glm::vec3(70.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+	glViewport(0, 0, (GLuint)_shadowMapSize, (GLuint)_shadowMapSize);
+	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	//render the scene from the light and fill the depth buffer for shadows
+	for (Geometry& g : _objects) {
+
+		glUseProgram(depthBufferShaderProgram);
+		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "View"), 1, GL_FALSE, &lightView[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Projection"), 1, GL_FALSE, &lightProjection[0][0]);
+
+		glBindVertexArray(g.vao);
+		if (g.hasShadow) {
+			glDrawArrays(GL_TRIANGLES, 0, g.verts.size());	//ignore the roof in the shadow map
+		}
+		glBindVertexArray(0);
+	}
+}
 
 //RenderScene utilizes the current array of objects in the rendering manager, setting and assigning the buffers for each geometry,
 //then sending the vertex info down the openGL pipeline, while utilizing the approprite shaders tied to the geometry.
 //performs multiple rendering passes in order to create shadowsm, while calculating the camera information each time it is called.
 void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int viewBottomLeftY, int viewTopRightX, int viewTopRightY){  
 	//Clears the screen to a light grey background
-	glClearColor(0.639f, 0.701f, 0.780f, 1.0f);
+	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glEnable(GL_CULL_FACE);
@@ -194,36 +236,17 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 	float fov = 65.0f;
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
 	glm::mat4 Projection = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, 1.0f, 800.0f);
-
 	glm::vec3 cameraPos;
 	glm::mat4 View = computeCameraPosition(playerID, cameraPos);	//compute the cameraPosition and view matrix for player 0
 	glm::mat4 lightProjection = glm::ortho(-270.0f, 270.0f, -270.0f, 270.0f, 1.0f, 500.0f);
 	glm::mat4 lightView = glm::lookAt(glm::vec3(70.0f, 200.0f, 0.0f), glm::vec3(0.1f, 15.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-	glViewport(0, 0, (GLuint)SHADOW_MAP_WIDTH, (GLuint)SHADOW_MAP_HEIGHT);
-	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);
-	glClear(GL_DEPTH_BUFFER_BIT);
-
-	//render the scene from the light and fill the depth buffer for shadows
-	for (Geometry& g : _objects) {
-		if (g.player != playerID && g.pointer) {
-			continue;
-		}
-
-		glUseProgram(depthBufferShaderProgram);
-
-		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "View"), 1, GL_FALSE, &lightView[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Projection"), 1, GL_FALSE, &lightProjection[0][0]);
-
-		glBindVertexArray(g.vao);
-		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());	//ignore the roof in the shadow map
-		glBindVertexArray(0);
-	}
 
 	glViewport((GLuint)viewBottomLeftx, (GLuint)viewBottomLeftY, (GLuint)viewTopRightX, (GLuint)viewTopRightY);	//reset the viewport to the full window to render from the camera pov
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	std::vector<Geometry> transparentObjs;
 
 	for (Geometry& g : _objects) {
 		if (g.player != playerID && g.pointer) {
@@ -249,21 +272,17 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 			glBindTexture(g.texture.target, g.texture.textureID);
 			GLuint imageTexUniLocation = glGetUniformLocation(gradientShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
 			glUniform1i(imageTexUniLocation, 0);
+
+			glBindVertexArray(g.vao);
+			glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
+			glUseProgram(0);
+			glBindVertexArray(0);
 		}
 
 		else if (g.isTransparent) {
-			glUseProgram(transparencyShaderProgram);
-			glUniform3f(glGetUniformLocation(transparencyShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
-			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
-			glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
-			
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(g.texture.target, g.texture.textureID);
-			GLuint imageTexUniLocation = glGetUniformLocation(transparencyShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
-			glUniform1i(imageTexUniLocation, 0);
-		}
-				
+
+			transparentObjs.push_back(g);
+		}	
 		else{
 			glUseProgram(shaderProgram);					//use the default shader program
 
@@ -281,12 +300,44 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
+
+			glBindVertexArray(g.vao);
+			glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
+			glUseProgram(0);
+			glBindVertexArray(0);
 		}
-		glBindVertexArray(g.vao);
-		glDrawArrays(GL_TRIANGLES, 0, g.verts.size());
+
+	}
+
+	for (Geometry &transObj : transparentObjs) {
+
+		glUseProgram(transparencyShaderProgram);
+		glUniform3f(glGetUniformLocation(transparencyShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+		glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Model"), 1, GL_FALSE, &transObj.model[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(transObj.texture.target, transObj.texture.textureID);
+		GLuint imageTexUniLocation = glGetUniformLocation(transparencyShaderProgram, "imageTexture");	//pass the geometry texture into the fragment shader
+		glUniform1i(imageTexUniLocation, 0);
+
+		glBindVertexArray(transObj.vao);
+		glDrawArrays(GL_TRIANGLES, 0, transObj.verts.size());
 		glUseProgram(0);
 		glBindVertexArray(0);
+
+
+		glDepthFunc(GL_LESS);
+
 	}
+
+
+
+
+
+
+
 	if (_broker->_scene == GAME) {
 		renderHud(playerID);
 	}
@@ -387,6 +438,8 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camer
 
 
 void RenderingManager::renderEndScreen() {
+
+	glViewport(0, 0, windowWidth, windowHeight);
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
 	std::shared_ptr<ShoppingCartPlayer> player = players[0];
 	std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
@@ -459,7 +512,7 @@ void RenderingManager::RenderMainMenu() {
 	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 
 	renderText("Start", GLfloat(windowWidth*0.47), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(0, 0, 0));
-	renderText("Controls", GLfloat(windowWidth*0.45), GLfloat(windowHeight* 0.3564), 1.0f, glm::vec3(0, 0, 0));
+	renderText("Rules", GLfloat(windowWidth*0.47), GLfloat(windowHeight* 0.3564), 1.0f, glm::vec3(0, 0, 0));
 	renderText("Credits", GLfloat(windowWidth*0.455), GLfloat(windowHeight* 0.2314), 1.0f, glm::vec3(0, 0, 0));
 	renderText("Quit", GLfloat(windowWidth*0.47), GLfloat(windowHeight* 0.1064), 1.0f, glm::vec3(0, 0, 0));
 
@@ -507,8 +560,8 @@ void RenderingManager::RenderLoading() {
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 
-	renderText("Loading.. Press A", GLfloat(windowWidth*0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
-	renderSprite(*_backgroundSprite, -1, -1, 1, 1);
+	//renderText("Loading.. Press A", GLfloat(windowWidth*0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
+	renderSprite(*_controlsSprite, -1, -1, 1, 1);
 
 	CheckGLErrors();
 }
@@ -563,9 +616,9 @@ void RenderingManager::RenderCredits() {
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 
-	renderText("Credits here", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
+	//renderText("Credits here", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
 
-	renderSprite(*_backgroundSprite, -1, -1, 1, 1);
+	renderSprite(*_creditsSprite, -1, -1, 1, 1);
 
 	CheckGLErrors();
 }
@@ -582,9 +635,9 @@ void RenderingManager::RenderControls() {
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 
-	renderText("Controls here", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
+	//renderText("Controls here", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
 
-	renderSprite(*_backgroundSprite, -1, -1, 1, 1);
+	renderSprite(*_rulesSprite, -1, -1, 1, 1);
 
 	CheckGLErrors();
 }
@@ -596,8 +649,11 @@ bool compareStruct1(Player one, Player two) {
 
 
 void RenderingManager::renderPauseScreen() {
+
+	glViewport(0, 0, windowWidth, windowHeight); 
+
 	//960 540
-	renderText("PAUSED", windowWidth*0.37, windowHeight*0.45, 3.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText("PAUSED", windowWidth*0.37, windowHeight*0.45, 3.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 	renderText("Resume", GLfloat(windowWidth*0.455), GLfloat(windowHeight*0.23), 1.0f, glm::vec3(0, 0, 0));
 	renderText("Menu", GLfloat(windowWidth*0.466), GLfloat(windowHeight*0.106), 1.0f, glm::vec3(0, 0, 0));
 
@@ -941,8 +997,31 @@ void RenderingManager::push3DObjects() {
 
 			}
 
+			// SPOTLIGHT UH MOONLIGHT UH RENDERING...
+			//std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
+			
+			/*
+			Geometry geoSpotlight = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SHIELD_GEO_NO_INDEX));
 
-			//TODO: only render pointers on a single camera for that 1 player
+			glm::mat4 model1;
+			PxMat44 rotation = PxMat44(rot);
+			PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos);
+			PxMat44	pxModel = translation * rotation;
+			model1 = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+				glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+				glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+				glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+			geoSpotlight.model = model1;
+			geoSpotlight.hasShadow = false;
+			geoSpotlight.isTransparent = true;
+
+			geoSpotlight.drawMode = GL_TRIANGLES;
+			assignBuffers(geoSpotlight);
+			setBufferData(geoSpotlight);
+			_objects.push_back(geoSpotlight);
+			*/
+		
 			// POINTER RENDERING...
 			Geometry geoPointer = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::POINTER_GEO_NO_INDEX));
 			geoPointer.color = glm::vec3(0, 0, 0);
@@ -1010,6 +1089,7 @@ void RenderingManager::push3DObjects() {
 
 				assignBuffers(geoPointer);
 				setBufferData(geoPointer);
+				geoPointer.hasShadow = false;
 				_objects.push_back(geoPointer);
 				yOffset += 0.5f;
 			}
@@ -1019,11 +1099,14 @@ void RenderingManager::push3DObjects() {
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX)); // TODO: change this to use specific mesh
 			geo.cullBackFace = true;
+			geo.hasShadow = false;
 			break;
 		}
 		case EntityTypes::ROOF:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::ROOF_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			geo.hasShadow = false;
 			break;
 		}
 		case EntityTypes::MILK:
@@ -1136,6 +1219,9 @@ void RenderingManager::push3DObjects() {
 			continue;
 		}
 
+
+
+
 		glm::mat4 model;
 		PxMat44 rotation = PxMat44(rot);
 		PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos);
@@ -1158,7 +1244,7 @@ void RenderingManager::initFrameBuffers() {
 	glGenFramebuffers(1, &_lightDepthFBO);
 	glGenTextures(1, &_depthMapTex);								//init the texture for the depth map information
 	glBindTexture(GL_TEXTURE_2D, _depthMapTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_MAP_WIDTH, SHADOW_MAP_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _shadowMapSize, _shadowMapSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -1200,6 +1286,9 @@ void RenderingManager::initSpriteTextures() {
 	InitializeTexture(_titleScreenSprite, "../TopShopper/resources/Sprites/TitleScreen.png", GL_TEXTURE_2D);
 	InitializeTexture(_resultsScreenSprite, "../TopShopper/resources/Sprites/ResultsScreen.png", GL_TEXTURE_2D);
 	InitializeTexture(_backgroundSprite, "../TopShopper/resources/Sprites/Background.png", GL_TEXTURE_2D);
+	InitializeTexture(_rulesSprite, "../TopShopper/resources/Sprites/Rules.png", GL_TEXTURE_2D);
+	InitializeTexture(_creditsSprite, "../TopShopper/resources/Sprites/Credits.png", GL_TEXTURE_2D);
+	InitializeTexture(_controlsSprite, "../TopShopper/resources/Sprites/Controls.png", GL_TEXTURE_2D);
 }
 
 void RenderingManager::init3DTextures() {
@@ -1222,25 +1311,25 @@ void RenderingManager::init3DTextures() {
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(ROOF_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/BlueWallBotTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(OBSTACLE1_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/BlueWallMidTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(OBSTACLE2_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/BlueWallTopTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(OBSTACLE3_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/GreenWallBotTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(OBSTACLE4_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/GreenWallTopTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(OBSTACLE5_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/RedWallTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(OBSTACLE6_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/background2-marble.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/RedWallTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(OBSTACLE7_GEO_NO_INDEX)->texture = texture;
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/MilkTexture.png", GL_TEXTURE_2D);
@@ -1275,6 +1364,12 @@ void RenderingManager::init3DTextures() {
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/PotatoTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(HOT_POTATO_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/Yellow.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(SPOTLIGHT_GEO_NO_INDEX)->texture = texture;
+
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/blue.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(SHIELD_GEO_NO_INDEX)->texture = texture;
 
 	//InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
 	//_broker->getLoadingManager()->getGeometry(POINTER_GEO_NO_INDEX)->texture = texture;
@@ -1444,7 +1539,7 @@ void RenderingManager::initTextRender() {
 		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
 
 	FT_Face face;
-	if (FT_New_Face(ft, "../TopShopper/resources/Fonts/lora/Lora-Regular.ttf", 0, &face))
+	if (FT_New_Face(ft, "../TopShopper/resources/Fonts/misc/seguibl.ttf", 0, &face))
 		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 
 	FT_Set_Pixel_Sizes(face, 0, 48);
@@ -1543,9 +1638,23 @@ void RenderingManager::openWindow() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	int width = WINDOW_WIDTH;
-	int height = WINDOW_HEIGHT;
-	_window = glfwCreateWindow(width, height, "Top Shopper", 0, 0);
+
+	int width;
+	int height;
+
+
+	if (FULL_SCREEN) {
+		const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		width = mode->width;
+		height = mode->height;
+		_window = glfwCreateWindow(width, height, "Top Shopper", glfwGetPrimaryMonitor(), 0);
+	}
+	else {
+		int width = WINDOW_WIDTH;
+		int height = WINDOW_HEIGHT;
+		_window = glfwCreateWindow(width, height, "Top Shopper", 0, 0);
+	}
+
 	if (!_window) {
 		std::cout << "Program failed to create GLFW window, TERMINATING" << std::endl;
 		glfwTerminate();

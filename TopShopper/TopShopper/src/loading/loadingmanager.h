@@ -66,7 +66,9 @@ enum GeometryTypes {
 	CART_GREEN_GEO_NO_INDEX,
 	CART_BLUE_GEO_NO_INDEX,
 	CART_ORANGE_GEO_NO_INDEX,
-	CART_PURPLE_GEO_NO_INDEX
+	CART_PURPLE_GEO_NO_INDEX,
+	SPOTLIGHT_GEO_NO_INDEX,
+	SHIELD_GEO_NO_INDEX
 };
 
 class Broker;
@@ -79,6 +81,7 @@ public:
 	void updateSeconds(double variableDeltaTime);
 	bool loadObject(const char* imageName, std::vector<glm::vec4>&returnVertices, std::vector<glm::vec2>&returnUV, std::vector<glm::vec3>&returnNormal, std::vector<unsigned int>&vIndex, std::vector<unsigned int>&uvIndex, std::vector<unsigned int>&normalIndex );
 	
+
 	Geometry* getGeometry(GeometryTypes type);
 
 private:
