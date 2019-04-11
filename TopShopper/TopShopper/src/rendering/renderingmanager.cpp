@@ -1007,8 +1007,8 @@ void RenderingManager::push3DObjects() {
 			// SPOTLIGHT UH MOONLIGHT UH RENDERING...
 			//std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 			
-			/*
-			Geometry geoSpotlight = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPOTLIGHT_GEO_NO_INDEX));
+			
+			Geometry geoSpotlight = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SHIELD_GEO_NO_INDEX));
 
 			glm::mat4 model1;
 			PxMat44 rotation = PxMat44(rot);
@@ -1027,7 +1027,7 @@ void RenderingManager::push3DObjects() {
 			assignBuffers(geoSpotlight);
 			setBufferData(geoSpotlight);
 			_objects.push_back(geoSpotlight);
-			*/
+			
 			
 
 
@@ -1376,6 +1376,8 @@ void RenderingManager::init3DTextures() {
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/Yellow.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(SPOTLIGHT_GEO_NO_INDEX)->texture = texture;
 
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/blue.jpg", GL_TEXTURE_2D);
+	_broker->getLoadingManager()->getGeometry(SHIELD_GEO_NO_INDEX)->texture = texture;
 
 	//InitializeTexture(&texture, "../TopShopper/resources/Textures/gold.jpg", GL_TEXTURE_2D);
 	//_broker->getLoadingManager()->getGeometry(POINTER_GEO_NO_INDEX)->texture = texture;

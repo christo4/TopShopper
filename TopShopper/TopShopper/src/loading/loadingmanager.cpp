@@ -67,6 +67,7 @@ Geometry* CartBlueGeoNoIndex = new Geometry();
 Geometry* CartOrangeGeoNoIndex = new Geometry();
 Geometry* CartPurpleGeoNoIndex = new Geometry();
 Geometry* SpotlightGeoNoIndex = new Geometry();
+Geometry* ShieldGeoNoIndex = new Geometry();
 
 LoadingManager::LoadingManager(Broker *broker) 
 	: _broker(broker)
@@ -1062,6 +1063,29 @@ void LoadingManager::init() {
 	vIndex.clear();
 	uvIndex.clear();
 	normalIndex.clear();
+
+
+	loadObject("../TopShopper/resources/Objects/Shield.obj", returnVertices, returnUV, returnNormal, vIndex, uvIndex, normalIndex);
+
+	for (unsigned int i = 0; i < vIndex.size(); i++) {
+		ShieldGeoNoIndex->verts.push_back(returnVertices[vIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < uvIndex.size(); i++) {
+		ShieldGeoNoIndex->uvs.push_back(returnUV[uvIndex[i]]);
+	}
+
+	for (unsigned int i = 0; i < normalIndex.size(); i++) {
+		ShieldGeoNoIndex->normals.push_back(returnNormal[normalIndex[i]]);
+	}
+
+
+	returnVertices.clear();
+	returnUV.clear();
+	returnNormal.clear();
+	vIndex.clear();
+	uvIndex.clear();
+	normalIndex.clear();
 }
 
 void LoadingManager::updateSeconds(double variableDeltaTime) {
@@ -1274,6 +1298,8 @@ Geometry* LoadingManager::getGeometry(GeometryTypes type) {
 		return PointerGeoNoIndex;
 	case GeometryTypes::SPOTLIGHT_GEO_NO_INDEX:
 		return SpotlightGeoNoIndex;
+	case GeometryTypes::SHIELD_GEO_NO_INDEX:
+		return ShieldGeoNoIndex;
 	default:
 		return nullptr;
 	}
