@@ -1007,7 +1007,7 @@ void RenderingManager::push3DObjects() {
 			// SPOTLIGHT UH MOONLIGHT UH RENDERING...
 			//std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 			
-			
+			/*
 			Geometry geoSpotlight = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SHIELD_GEO_NO_INDEX));
 
 			glm::mat4 model1;
@@ -1027,7 +1027,7 @@ void RenderingManager::push3DObjects() {
 			assignBuffers(geoSpotlight);
 			setBufferData(geoSpotlight);
 			_objects.push_back(geoSpotlight);
-			
+			*/
 			
 
 
