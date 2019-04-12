@@ -13,13 +13,9 @@
 
 using namespace physx;
 
-// TODO: reset this map on game load...
 std::map<int, std::deque<float>> gVehicleThetasMap;
 std::map<int, std::deque<float>> gRightStickXValuesMap;
 
-//std::deque<float> gVehicleThetas = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }; // I WILL ENFORCE THIS TO BE A FIXED SIZE OF 10 (for now, holds the last 10 frames worth of VEHICLE ROTATIONS)
-// TODO: change this to a map and reset similiar to gVehicleThetasMap
-//std::deque<float> gRightStickXValues = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; // always maintain a fixed size (here I use 10) 
 
 RenderingManager::RenderingManager(Broker *broker)
 	: _broker(broker)
@@ -101,7 +97,7 @@ void RenderingManager::init() {
 }
 
 
-// WARNING: must call this only after PhysicsManager::resetScene1()
+// WARNING: must call this only after PhysicsManager::loadScene1()
 void RenderingManager::loadScene1() {
 	const std::vector<std::shared_ptr<ShoppingCartPlayer>> &carts = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
 
@@ -410,7 +406,7 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camer
 		avgRightStickXValue /= gRightStickXValues.size();
 
 		float rightStickTheta = avgRightStickXValue *-1 * 1.0472f; // 60deg (1.0472 rads) max
-		PxMat33 rightStickMat = PxMat33(PxVec3(cos(rightStickTheta), 0, -sin(rightStickTheta)), PxVec3(0, 1, 0), PxVec3(sin(rightStickTheta), 0, cos(rightStickTheta))); // rotation matrix around y-axis
+		PxMat33 rightStickMat = PxMat33(PxVec3(cos(rightStickTheta), 0.0f, -sin(rightStickTheta)), PxVec3(0.0f, 1.0f, 0.0f), PxVec3(sin(rightStickTheta), 0.0f, cos(rightStickTheta))); // rotation matrix around y-axis
 		finalCamVec = rightStickMat * vehicleRotationVecSum;
 	}
 	else {
@@ -480,21 +476,21 @@ void RenderingManager::renderEndScreen() {
 	
 	//renderText("Shopper Ranks", windowWidth*0.35, windowHeight*0.63, 1.7f, glm::vec3(0.0f, 0.0f, 0.0f));
 
-	renderText("1st: " + scores[0].player + std::to_string(scores[0].score), windowWidth*0.35, windowHeight*0.55, 1.5f, glm::vec3(0.83f, 0.69f, 0.22f));
+	renderText("1st: " + scores[0].player + std::to_string(scores[0].score), windowWidth*0.35f, windowHeight*0.55f, 1.5f, glm::vec3(0.83f, 0.69f, 0.22f));
 
-	renderText("2nd: " + scores[1].player + std::to_string(scores[1].score), windowWidth*0.35, windowHeight*0.46, 1.5f, glm::vec3(0.65f, 0.65f, 0.65f));
+	renderText("2nd: " + scores[1].player + std::to_string(scores[1].score), windowWidth*0.35f, windowHeight*0.46f, 1.5f, glm::vec3(0.65f, 0.65f, 0.65f));
 
-	renderText("3rd: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35, windowHeight*0.38, 1.5f, glm::vec3(0.70f, 0.36f, 0.0f));
+	renderText("3rd: " + scores[2].player + std::to_string(scores[2].score), windowWidth*0.35f, windowHeight*0.38f, 1.5f, glm::vec3(0.70f, 0.36f, 0.0f));
 
-	renderText("4th: " + scores[3].player + std::to_string(scores[3].score), windowWidth*0.35, windowHeight*0.33, 1.0f, glm::vec3(0, 0, 0));
+	renderText("4th: " + scores[3].player + std::to_string(scores[3].score), windowWidth*0.35f, windowHeight*0.33f, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 
-	renderText("5th: " + scores[4].player + std::to_string(scores[4].score), windowWidth*0.35, windowHeight*0.29, 1.0f, glm::vec3(0, 0, 0));
+	renderText("5th: " + scores[4].player + std::to_string(scores[4].score), windowWidth*0.35f, windowHeight*0.29f, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 
-	renderText("6th: " + scores[5].player + std::to_string(scores[5].score), windowWidth*0.35, windowHeight*0.25, 1.0f, glm::vec3(0, 0, 0));
+	renderText("6th: " + scores[5].player + std::to_string(scores[5].score), windowWidth*0.35f, windowHeight*0.25f, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 
-	renderText("Menu", GLfloat(windowWidth*0.466), GLfloat(windowHeight*0.106), 1.0f, glm::vec3(0, 0, 0));
-	renderSprite(*_buttonHighlightSprite, -0.15, -0.85, 0.15, -0.65);
-	renderSprite(*_resultsScreenSprite, -0.5, -0.77, 0.5, 1);
+	renderText("Menu", GLfloat(windowWidth*0.466f), GLfloat(windowHeight*0.106f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderSprite(*_buttonHighlightSprite, -0.15f, -0.85f, 0.15f, -0.65f);
+	renderSprite(*_resultsScreenSprite, -0.5f, -0.77f, 0.5f, 1.0f);
 }
 
 
@@ -511,39 +507,39 @@ void RenderingManager::RenderMainMenu() {
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 
-	renderText("Start", GLfloat(windowWidth*0.47), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(0, 0, 0));
-	renderText("Rules", GLfloat(windowWidth*0.47), GLfloat(windowHeight* 0.3564), 1.0f, glm::vec3(0, 0, 0));
-	renderText("Credits", GLfloat(windowWidth*0.455), GLfloat(windowHeight* 0.2314), 1.0f, glm::vec3(0, 0, 0));
-	renderText("Quit", GLfloat(windowWidth*0.47), GLfloat(windowHeight* 0.1064), 1.0f, glm::vec3(0, 0, 0));
+	renderText("Start", GLfloat(windowWidth*0.47f), GLfloat(windowHeight* 0.4768f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText("Rules", GLfloat(windowWidth*0.47f), GLfloat(windowHeight* 0.3564f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText("Credits", GLfloat(windowWidth*0.455f), GLfloat(windowHeight* 0.2314f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText("Quit", GLfloat(windowWidth*0.47f), GLfloat(windowHeight* 0.1064f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 
 	switch (_broker->_cursorPositionStart) {
 	case (0):// Quit highlighted
-		renderSprite(*_buttonSprite, -0.15, -0.1, 0.15, 0.1);
-		renderSprite(*_buttonSprite, -0.15, -0.35, 0.15, -0.15);
-		renderSprite(*_buttonSprite, -0.15, -0.6, 0.15, -0.4);
-		renderSprite(*_buttonHighlightSprite, -0.15, -0.85, 0.15, -0.65);
+		renderSprite(*_buttonSprite, -0.15f, -0.1f, 0.15f, 0.1f);
+		renderSprite(*_buttonSprite, -0.15f, -0.35f, 0.15f, -0.15f);
+		renderSprite(*_buttonSprite, -0.15f, -0.6f, 0.15f, -0.4f);
+		renderSprite(*_buttonHighlightSprite, -0.15f, -0.85f, 0.15f, -0.65f);
 		break;
 	case(1):
-		renderSprite(*_buttonSprite, -0.15, -0.1, 0.15, 0.1);
-		renderSprite(*_buttonSprite, -0.15, -0.35, 0.15, -0.15);
-		renderSprite(*_buttonHighlightSprite, -0.15, -0.6, 0.15, -0.4);
-		renderSprite(*_buttonSprite, -0.15, -0.85, 0.15, -0.65);
+		renderSprite(*_buttonSprite, -0.15f, -0.1f, 0.15f, 0.1f);
+		renderSprite(*_buttonSprite, -0.15f, -0.35f, 0.15f, -0.15f);
+		renderSprite(*_buttonHighlightSprite, -0.15f, -0.6f, 0.15f, -0.4f);
+		renderSprite(*_buttonSprite, -0.15f, -0.85f, 0.15f, -0.65f);
 		break;
 	case(2):
-		renderSprite(*_buttonSprite, -0.15, -0.1, 0.15, 0.1);
-		renderSprite(*_buttonHighlightSprite, -0.15, -0.35, 0.15, -0.15);
-		renderSprite(*_buttonSprite, -0.15, -0.6, 0.15, -0.4);
-		renderSprite(*_buttonSprite, -0.15, -0.85, 0.15, -0.65);
+		renderSprite(*_buttonSprite, -0.15f, -0.1f, 0.15f, 0.1f);
+		renderSprite(*_buttonHighlightSprite, -0.15f, -0.35f, 0.15f, -0.15f);
+		renderSprite(*_buttonSprite, -0.15f, -0.6f, 0.15f, -0.4f);
+		renderSprite(*_buttonSprite, -0.15f, -0.85f, 0.15f, -0.65f);
 		break;
 	case(3):
-		renderSprite(*_buttonHighlightSprite, -0.15, -0.1, 0.15, 0.1);
-		renderSprite(*_buttonSprite, -0.15, -0.35, 0.15, -0.15);
-		renderSprite(*_buttonSprite, -0.15, -0.6, 0.15, -0.4);
-		renderSprite(*_buttonSprite, -0.15, -0.85, 0.15, -0.65);
+		renderSprite(*_buttonHighlightSprite, -0.15f, -0.1f, 0.15f, 0.1f);
+		renderSprite(*_buttonSprite, -0.15f, -0.35f, 0.15f, -0.15f);
+		renderSprite(*_buttonSprite, -0.15f, -0.6f, 0.15f, -0.4f);
+		renderSprite(*_buttonSprite, -0.15f, -0.85f, 0.15f, -0.65f);
 		break;
 	}
 
-	renderSprite(*_titleScreenSprite, -1, -1, 1, 1);
+	renderSprite(*_titleScreenSprite, -1.0f, -1.0f, 1.0f, 1.0f);
 
 	CheckGLErrors();
 }
@@ -561,7 +557,7 @@ void RenderingManager::RenderLoading() {
 	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 
 	//renderText("Loading.. Press A", GLfloat(windowWidth*0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
-	renderSprite(*_controlsSprite, -1, -1, 1, 1);
+	renderSprite(*_controlsSprite, -1.0f, -1.0f, 1.0f, 1.0f);
 
 	CheckGLErrors();
 }
@@ -578,28 +574,28 @@ void RenderingManager::RenderSetup() {
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 	if (_broker->_cursorPositionSetup == 2) {
-		renderText("Map < name >", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
+		renderText("Map < name >", GLfloat(windowWidth * 0.4192f), GLfloat(windowHeight* 0.4768f), 1.0f, glm::vec3(1.0f, 0.0f, 1.0f));
 	}
 	else {
-		renderText("Map < name >", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(0, 0, 0));
+		renderText("Map < name >", GLfloat(windowWidth * 0.4192f), GLfloat(windowHeight* 0.4768f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 	}
 	if (_broker->_cursorPositionSetup == 1) {
-		renderText("Number of Human Players: " + std::to_string(_broker->_nbPlayers), GLfloat(windowWidth* 0.3385), GLfloat(windowHeight* 0.3842), 1.0f, glm::vec3(1, 0, 1));
+		renderText("Number of Human Players: " + std::to_string(_broker->_nbPlayers), GLfloat(windowWidth* 0.3385f), GLfloat(windowHeight* 0.3842f), 1.0f, glm::vec3(1.0f, 0.0f, 1.0f));
 	}
 	else {
-		renderText("Number of Human Players: " + std::to_string(_broker->_nbPlayers), GLfloat(windowWidth* 0.3385), GLfloat(windowHeight* 0.3842), 1.0f, glm::vec3(0, 0, 0));
+		renderText("Number of Human Players: " + std::to_string(_broker->_nbPlayers), GLfloat(windowWidth* 0.3385f), GLfloat(windowHeight* 0.3842f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 	}
 
-	renderText("Start Game", GLfloat(windowWidth* 0.4348), GLfloat(windowHeight* 0.2314), 1.0f, glm::vec3(0, 0, 0));
+	renderText("Start Game", GLfloat(windowWidth* 0.4348f), GLfloat(windowHeight* 0.2314f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 
 	if (_broker->_cursorPositionSetup == 0) {
-		renderSprite(*_buttonHighlightSprite, -0.15, -0.6, 0.15, -0.4);
+		renderSprite(*_buttonHighlightSprite, -0.15f, -0.6f, 0.15f, -0.4f);
 	}
 	else {
-		renderSprite(*_buttonSprite, -0.15, -0.6, 0.15, -0.4);
+		renderSprite(*_buttonSprite, -0.15f, -0.6f, 0.15f, -0.4f);
 	}
 
-	renderSprite(*_titleScreenSprite, -1, -1, 1, 1);
+	renderSprite(*_titleScreenSprite, -1.0f, -1.0f, 1.0f, 1.0f);
 
 	CheckGLErrors();
 }
@@ -618,7 +614,7 @@ void RenderingManager::RenderCredits() {
 
 	//renderText("Credits here", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
 
-	renderSprite(*_creditsSprite, -1, -1, 1, 1);
+	renderSprite(*_creditsSprite, -1.0f, -1.0f, 1.0f, 1.0f);
 
 	CheckGLErrors();
 }
@@ -637,7 +633,7 @@ void RenderingManager::RenderControls() {
 
 	//renderText("Controls here", GLfloat(windowWidth * 0.4192), GLfloat(windowHeight* 0.4768), 1.0f, glm::vec3(1, 0, 1));
 
-	renderSprite(*_rulesSprite, -1, -1, 1, 1);
+	renderSprite(*_rulesSprite, -1.0f, -1.0f, 1.0f, 1.0f);
 
 	CheckGLErrors();
 }
@@ -653,18 +649,18 @@ void RenderingManager::renderPauseScreen() {
 	glViewport(0, 0, windowWidth, windowHeight); 
 
 	//960 540
-	renderText("PAUSED", windowWidth*0.37, windowHeight*0.45, 3.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-	renderText("Resume", GLfloat(windowWidth*0.455), GLfloat(windowHeight*0.23), 1.0f, glm::vec3(0, 0, 0));
-	renderText("Menu", GLfloat(windowWidth*0.466), GLfloat(windowHeight*0.106), 1.0f, glm::vec3(0, 0, 0));
+	renderText("PAUSED", windowWidth*0.37f, windowHeight*0.45f, 3.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+	renderText("Resume", GLfloat(windowWidth*0.455f), GLfloat(windowHeight*0.23f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText("Menu", GLfloat(windowWidth*0.466f), GLfloat(windowHeight*0.106f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 
 	switch (_broker->_cursorPositionPause) {
 	case (0):
-		renderSprite(*_buttonSprite, -0.15, -0.6, 0.15, -0.4);
-		renderSprite(*_buttonHighlightSprite, -0.15, -0.85, 0.15, -0.65);
+		renderSprite(*_buttonSprite, -0.15f, -0.6f, 0.15f, -0.4f);
+		renderSprite(*_buttonHighlightSprite, -0.15f, -0.85f, 0.15f, -0.65f);
 		break;
 	case(1):
-		renderSprite(*_buttonHighlightSprite, -0.15, -0.6, 0.15, -0.4);
-		renderSprite(*_buttonSprite, -0.15, -0.85, 0.15, -0.65);
+		renderSprite(*_buttonHighlightSprite, -0.15f, -0.6f, 0.15f, -0.4f);
+		renderSprite(*_buttonSprite, -0.15f, -0.85f, 0.15f, -0.65f);
 		break;
 	}
 }
@@ -683,11 +679,11 @@ void RenderingManager::renderHud(int playerID) {
 	//INPUT PLAYER STUFF BELOW
 	//render the input players boost meter
 	for (int i = 0; i < boost; i++) {
-		renderSprite(*_boostSprite, -0.95 + (i * 0.15), -0.95, -0.75 + (i * 0.15), -0.75);
+		renderSprite(*_boostSprite, -0.95f + (i * 0.15f), -0.95f, -0.75f + (i * 0.15f), -0.75f);
 	}
 
 	//render the input players shopping list on the bottom of the screen
-	float offset = 0.10;
+	float offset = 0.10f;
 	int i = 0;
 	for (EntityTypes eType : script->_shoppingList_Types) {
 
@@ -701,7 +697,7 @@ void RenderingManager::renderHud(int playerID) {
 
 	renderSprite(*getPlayerBorderSprite(playerID), -0.15f, -0.92f, 0.16f, -0.73f);
 	std::string pointDisplay = std::to_string(points);
-	renderText("Your Score: " + pointDisplay, windowWidth*0.795, windowHeight*0.93, 1.0f, getPlayerColor(playerID));
+	renderText("Your Score: " + pointDisplay, windowWidth*0.795f, windowHeight*0.93f, 1.0f, getPlayerColor(playerID));
 	
 
 	//OTHER PLAYER STUFF BELOW
@@ -741,7 +737,7 @@ void RenderingManager::renderHud(int playerID) {
 		renderSprite(*getPlayerBorderSprite(otherPlayerID), 0.69f, 0.55f + shoppingListOffSetAccum, 0.90f, 0.70f + shoppingListOffSetAccum);
 
 		pointDisplay = std::to_string(points);
-		renderText("Score: " + pointDisplay, windowWidth*0.82, windowHeight*(0.88 + scoreOffsetAccum), 0.8f, getPlayerColor(otherPlayerID));
+		renderText("Score: " + pointDisplay, windowWidth*0.82f, windowHeight*(0.88f + scoreOffsetAccum), 0.8f, getPlayerColor(otherPlayerID));
 
 
 		shoppingListOffSetAccum += shoppingListYOffset;
@@ -750,12 +746,12 @@ void RenderingManager::renderHud(int playerID) {
 
 	std::string timeString = _broker->getAIManager()->getMatchTimePrettyFormat();
 	//renderText(timeString, 870, 1010, 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
-	renderText(timeString, windowWidth*0.45, windowHeight*0.94, 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText(timeString, windowWidth*0.45f, windowHeight*0.94f, 1.2f, glm::vec3(0.0f, 0.0f, 0.0f));
 
 	//renderText("Boost:", 100, 100, 1.5f, glm::vec3(0.0f, 0.0f, 0.0f));
-	renderText("Boost:", windowWidth*0.04, windowHeight*0.101, 1.5f, glm::vec3(0.0f, 0.0f, 0.0f));
+	renderText("Boost:", windowWidth*0.04f, windowHeight*0.101f, 1.5f, glm::vec3(0.0f, 0.0f, 0.0f));
 
-	renderSprite(*_timeBoxSprite, -0.18, 0.83, 0.13, 1);
+	renderSprite(*_timeBoxSprite, -0.18f, 0.83f, 0.13f, 1.0f);
 }
 
 
@@ -849,13 +845,13 @@ void RenderingManager::renderText(std::string text, GLfloat x, GLfloat y, GLfloa
 		GLfloat h = ch.Size.y * scale;
 		// Update VBO for each character
 		GLfloat vertices[6][4] = {
-			{ xpos,     ypos + h,   0.0, 0.0 },
-			{ xpos,     ypos,       0.0, 1.0 },
-			{ xpos + w, ypos,       1.0, 1.0 },
+			{ xpos,     ypos + h,   0.0f, 0.0f },
+			{ xpos,     ypos,       0.0f, 1.0f },
+			{ xpos + w, ypos,       1.0f, 1.0f },
 
-			{ xpos,     ypos + h,   0.0, 0.0 },
-			{ xpos + w, ypos,       1.0, 1.0 },
-			{ xpos + w, ypos + h,   1.0, 0.0 }
+			{ xpos,     ypos + h,   0.0f, 0.0f },
+			{ xpos + w, ypos,       1.0f, 1.0f },
+			{ xpos + w, ypos + h,   1.0f, 0.0f }
 		};
 		// Render glyph texture over quad
 		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
@@ -1025,13 +1021,13 @@ void RenderingManager::push3DObjects() {
 		
 			// POINTER RENDERING...
 			Geometry geoPointer = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::POINTER_GEO_NO_INDEX));
-			geoPointer.color = glm::vec3(0, 0, 0);
+			geoPointer.color = glm::vec3(0.0f, 0.0f, 0.0f);
 			geoPointer.pointer = true;
 			geoPointer.player = vehicleID;
 			glm::mat4 model; 
 			PxVec3 otherPos;
 
-			float yOffset = 0;
+			float yOffset = 0.0f;
 
 			for (int i = 0; i < players.size(); i++) {
 				// ignore self...
@@ -1065,14 +1061,14 @@ void RenderingManager::push3DObjects() {
 				PxVec3 forward = rot.getBasisVector2();
 				PxVec3 cartForward = forward;
 				PxVec3 cartToCart = otherPos - pos;
-				cartForward.y = 0;
-				cartToCart.y = 0;
+				cartForward.y = 0.0f;
+				cartToCart.y = 0.0f;
 
 				float dot = cartForward.dot(cartToCart);
 				float magnitudes = cartForward.magnitude()*cartToCart.magnitude();
 				float angle = acos(dot / magnitudes);
 
-				if ((cartForward.cross(cartToCart)).y <= 0)	angle = -angle;
+				if ((cartForward.cross(cartToCart)).y <= 0.0f)	angle = -angle;
 				PxQuat localRot(angle, PxVec3(0.0f, 1.0f, 0.0f));
 				PxQuat netRotation = rot * localRot;
 				PxMat44 rotation = PxMat44(netRotation);

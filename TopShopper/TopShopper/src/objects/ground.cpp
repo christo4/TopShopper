@@ -8,8 +8,6 @@ Ground::Ground(PxRigidStatic *actor)
 	: Entity(actor, EntityTypes::GROUND)
 {
 	_actor->userData = this;
-
-	//addComponent(ComponentTypes::MESH);
 }
 
 

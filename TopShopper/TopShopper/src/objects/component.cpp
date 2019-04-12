@@ -24,7 +24,7 @@ MysteryBagScript::MysteryBagScript(Entity *entity) : BehaviourScript(entity, Com
 
 void MysteryBagScript::onSpawn() {
 	_entity->_actor->is<PxRigidDynamic>()->setAngularDamping(0.0f);
-	_entity->_actor->is<PxRigidDynamic>()->setAngularVelocity(PxVec3(1, 5, 1));
+	_entity->_actor->is<PxRigidDynamic>()->setAngularVelocity(PxVec3(1.0f, 5.0f, 1.0f));
 }
 
 void MysteryBagScript::fixedUpdate(double fixedDeltaTime) {}
@@ -40,13 +40,12 @@ void MysteryBagScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape
 
 		int rng = rand() % 100; // 0-99
 		if (rng < _cookiePercent) { // IT WAS A COOKIE!...
-			std::cout << "MYSTERY BAG REVEALED... A COOKIE!" << std::endl;
+			//std::cout << "MYSTERY BAG REVEALED... A COOKIE!" << std::endl;
 			//TODO: display some UI notification (cookie sprite)
 			playerScript->addPoints(_cookiePoints); // increase player points by this pickup's value
 		}
 		else { // IT WAS A HOT POTATO!...
-			std::cout << "MYSTERY BAG REVEALED... A HOT POTATO!" << std::endl;
-			//TODO: display some UI notification (hot potato sprite) - this may be unnecessary since hot potato sprite will show up next to player list?
+			//std::cout << "MYSTERY BAG REVEALED... A HOT POTATO!" << std::endl;
 			playerScript->giveHotPotato(_hotPotatoDuration);
 			// start the sound here
 			Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TICKING_SOUND));
@@ -68,7 +67,7 @@ PickupScript::PickupScript(Entity *entity) : BehaviourScript(entity, ComponentTy
 
 void PickupScript::onSpawn() {
 	_entity->_actor->is<PxRigidDynamic>()->setAngularDamping(0.0f);
-	_entity->_actor->is<PxRigidDynamic>()->setAngularVelocity(PxVec3(1, 5, 1));
+	_entity->_actor->is<PxRigidDynamic>()->setAngularVelocity(PxVec3(1.0f, 5.0f, 1.0f));
 }
 
 void PickupScript::fixedUpdate(double fixedDeltaTime) {
@@ -238,8 +237,8 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 
 			float speed = myVelocity.magnitude();
 			float distanceBetween = (myPos - playerPos).magnitude() + 20;
-			if (distanceBetween >= 255)
-				distanceBetween = 255;
+			if (distanceBetween >= 255.0f)
+				distanceBetween = 255.0f;
 
 			physx::PxQuat playerRot = player1->_actor->is<physx::PxRigidDynamic>()->getGlobalPose().q;
 			physx::PxVec3 forward(0.0f, 0.0f, 1.0f); // on spawn the forward vector of a cart is pointing in the +z direction
@@ -306,8 +305,8 @@ void PlayerScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *
 
 	float speed = myVelocity.magnitude();
 	float distanceBetween = (myPos - playerPos).magnitude() + 20;
-	if (distanceBetween >= 255)
-		distanceBetween = 255;
+	if (distanceBetween >= 255.0f)
+		distanceBetween = 255.0f;
 
 	physx::PxQuat playerRot = player1->_actor->is<physx::PxRigidDynamic>()->getGlobalPose().q;
 	physx::PxVec3 forward(0.0f, 0.0f, 1.0f); // on spawn the forward vector of a cart is pointing in the +z direction
@@ -336,7 +335,7 @@ void PlayerScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *
 		PxVec3 impulseDir = contacts->normal;
 		// now, make sure the collision normal points towards the cart body...
 		PxVec3 contactPosToCartCenter = (_entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p - contacts->position).getNormalized();
-		if (impulseDir.dot(contactPosToCartCenter) < 0) impulseDir *= -1; // switch normal direction to point in same hemispehere as cart body
+		if (impulseDir.dot(contactPosToCartCenter) < 0.0f) impulseDir *= -1; // switch normal direction to point in same hemispehere as cart body
 		
 		float impulseMag;
 		if (otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER) {
@@ -405,11 +404,6 @@ void PlayerScript::generateNewShoppingList() {
 	if (rng == 0) _shoppingList_Types.at(2) = EntityTypes::CARROT;
 	else if (rng == 1) _shoppingList_Types.at(2) = EntityTypes::EGGPLANT;
 	else _shoppingList_Types.at(2) = EntityTypes::BROCCOLI;
-
-
-	//std::cout << "COMPONENT.CPP | NEW SHOPPING LIST!" << std::endl;
-	//std::cout << _shoppingList_Types.at(0) << "|" << _shoppingList_Types.at(1) << "|" << _shoppingList_Types.at(2) << std::endl;
-
 }
 
 
@@ -432,8 +426,8 @@ void PlayerScript::pickedUpItem(EntityTypes pickupType) {
 
 	float speed = myVelocity.magnitude();
 	float distanceBetween = (myPos - playerPos).magnitude() + 20;
-	if (distanceBetween >= 255)
-		distanceBetween = 255;
+	if (distanceBetween >= 255.0f)
+		distanceBetween = 255.0f;
 
 	physx::PxQuat playerRot = player1->_actor->is<physx::PxRigidDynamic>()->getGlobalPose().q;
 	physx::PxVec3 forward(0.0f, 0.0f, 1.0f); // on spawn the forward vector of a cart is pointing in the +z direction
@@ -452,7 +446,7 @@ void PlayerScript::pickedUpItem(EntityTypes pickupType) {
 	if (!isCCW) angle = 360 - angle;
 	if(!(_playerType == PlayerTypes::HUMAN))
 		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND), distanceBetween, angle);
-	Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND));
+		Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND));
 	for (int i = 0; i < 3; i++) { // loop through shopping list...
 		if (_shoppingList_Types.at(i) == pickupType) { // if we just picked up item on our list...
 			_shoppingList_Flags.at(i) = true; // flag that it has been picked up
@@ -493,8 +487,8 @@ void PlayerScript::bashed() {
 
 	float speed = myVelocity.magnitude();
 	float distanceBetween = (myPos - playerPos).magnitude() + 20;
-	if (distanceBetween >= 255)
-		distanceBetween = 255;
+	if (distanceBetween >= 255.0f)
+		distanceBetween = 255.0f;
 
 	physx::PxQuat playerRot = player1->_actor->is<physx::PxRigidDynamic>()->getGlobalPose().q;
 	physx::PxVec3 forward(0.0f, 0.0f, 1.0f); // on spawn the forward vector of a cart is pointing in the +z direction
@@ -560,9 +554,6 @@ void PlayerScript::bashed() {
 
 		nextSpawnPos += PxVec3(0.0f, 6.0f, 0.0f);
 	}
-
-
-	//std::cout << "BASH EVENT" << std::endl;
 }
 
 
@@ -617,7 +608,6 @@ void PlayerScript::coinExplosion() {
 
 		nextSpawnPos += PxVec3(0.0f, 6.0f, 0.0f); 
 	}
-
 }
 
 
@@ -667,8 +657,6 @@ void PlayerScript::navigate() {
 		
 		// force turbo to go up slopes (outer wall and hill slope)
 		if ((targetOnHill && posDistance > hillTopRadius && posDistance <= hillBaseRadius) || (targetOnWall && posDistance >= wallStartRadius)) forcedTurbo = true; // NOTE: shouldn't i also surpress raycasts with ground in this case???, cause hot potato near hill might be problematic since raycasts interfere with steering
-
-		// ~~~~~~~~~~NOTE: should I only force turbo for cookie until on hill top?
 
 		// force turbo if goind after starting cookie...
 		if (ItemLocation::TargetTypes::COOKIE == _targets.at(0)._targetType) forcedTurbo = true;
@@ -1101,7 +1089,6 @@ void PlayerScript::navigate() {
 	if (!redirected) {
 		if (_targets.size() == 0) { // if bot doesnt have a current target for some reason...
 			//std::cout << "BOT WITHOUT A JOB!" << std::endl;
-			//player->_shoppingCartBase->processRawInputDataController(0.0f, 0.0f, 1.0f, 0.0f, false); // put bot into a braking mode
 			return;
 		}
 
@@ -1150,17 +1137,6 @@ void PlayerScript::navigate() {
 
 		player->_shoppingCartBase->processRawInputDataController(accel, reverse, handbrake, steer, turboButtonPressed);
 	}
-
-
-	// now check if we have arrived at (close) to our destination...
-/*
-	if (_targets.size() > 0) {
-		float diffNoYMag = diffNoY.magnitude();
-		if (diffNoYMag < 5.0f) {
-			_targets.erase(_targets.begin() + 0); // erase first target (element 0)
-		}
-	}
-*/	
 }
 
 
@@ -1191,8 +1167,8 @@ void PlayerScript::tickHotPotatoTimer(double fixedDeltaTime) {
 
 	float speed = myVelocity.magnitude();
 	float distanceBetween = (myPos - playerPos).magnitude() + 20;
-	if (distanceBetween >= 255)
-		distanceBetween = 255;
+	if (distanceBetween >= 255.0f)
+		distanceBetween = 255.0f;
 
 	physx::PxQuat playerRot = player1->_actor->is<physx::PxRigidDynamic>()->getGlobalPose().q;
 	physx::PxVec3 forward(0.0f, 0.0f, 1.0f); // on spawn the forward vector of a cart is pointing in the +z direction
@@ -1243,8 +1219,8 @@ void PlayerScript::explodeHotPotato() {
 
 	float speed = myVelocity.magnitude();
 	float distanceBetween = (myPos - playerPos).magnitude() + 20;
-	if (distanceBetween >= 255)
-		distanceBetween = 255;
+	if (distanceBetween >= 255.0f)
+		distanceBetween = 255.0f;
 
 	physx::PxQuat playerRot = player1->_actor->is<physx::PxRigidDynamic>()->getGlobalPose().q;
 	physx::PxVec3 forward(0.0f, 0.0f, 1.0f); // on spawn the forward vector of a cart is pointing in the +z direction
