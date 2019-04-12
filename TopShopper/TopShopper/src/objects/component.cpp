@@ -1252,8 +1252,8 @@ void PlayerScript::tickHotPotatoTimer(double fixedDeltaTime) {
 void PlayerScript::explodeHotPotato() {
 	_hasHotPotato = false;
 	_hotPotatoTimer = -1.0;
-	const int hotPotatoLostPoints = 75;
-	subPoints(75);
+	const int hotPotatoLostPoints = 100;
+	subPoints(hotPotatoLostPoints);
 	bashed();
 	//TODO: UI indicator that you exploded/points were lost???
 

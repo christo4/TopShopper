@@ -147,7 +147,7 @@ struct PlayerScript : BehaviourScript {
 
 	void pickedUpItem(EntityTypes pickupType);
 
-	static const int SHOPPING_LIST_COMPLETED_POINTS = 50;
+	static const int SHOPPING_LIST_COMPLETED_POINTS = 100;
 
 	void bashed();
 	void coinExplosion();
