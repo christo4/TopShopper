@@ -1152,6 +1152,8 @@ void RenderingManager::pushDynamicObjects() {
 				_objects.push_back(geoPotato);
 			}
 
+
+			
 			if (player->_shoppingCartBase->IsBashProtected()) {
 				Geometry geoShield = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SHIELD_GEO_NO_INDEX));
 
