@@ -69,6 +69,7 @@ public:
 	void RenderGameScene(int playerID, int viewBottomLeftx, int viewBottomLeftY, int viewTopRightX, int viewTopRightY);
 	void RenderMainMenu();
 	void RenderLoading();
+	void RenderTimer();
 	void RenderSetup();
 	void RenderCredits();
 	void RenderControls();

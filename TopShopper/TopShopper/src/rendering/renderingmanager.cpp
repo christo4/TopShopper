@@ -10,6 +10,9 @@
 #include FT_FREETYPE_H
 #include "vehicle/VehicleShoppingCart.h"
 #include <deque>
+#include <sstream>
+#include <ios>
+#include <iomanip>
 
 using namespace physx;
 
@@ -123,7 +126,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	_objects.clear();
 
 	int numPlayers = _broker->_nbPlayers;
-	if (_broker->_scene == GAME || _broker->_scene == PAUSED || _broker->_scene == END_SCREEN) {
+	if (_broker->_scene == TIMER || _broker->_scene == GAME || _broker->_scene == PAUSED || _broker->_scene == END_SCREEN) {
 		pushDynamicObjects();
 		if (firstRun) {
 			pushStaticObjects();
@@ -151,6 +154,10 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 			RenderGameScene(1, windowWidth / 2, windowHeight / 2, windowWidth / 2, windowHeight / 2);
 			RenderGameScene(2, 0, 0, windowWidth / 2, windowHeight / 2);
 			RenderGameScene(3, windowWidth / 2, 0, windowWidth / 2, windowHeight / 2);
+		}
+
+		if (_broker->_scene == TIMER) {
+			RenderTimer();
 		}
 	}
 	else if (_broker->_scene == MAIN_MENU) {
@@ -326,7 +333,7 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 
 	if (_broker->_scene == GAME) {
 		if (bagText > 0) {
-			renderText("A PaperBag has spawned!", windowWidth*0.10f, windowHeight*0.45f, 2.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+			renderText("PAPER BAG has spawned!", windowWidth*0.10f, windowHeight*0.45f, 2.5f, glm::vec3(0.8f, 0.8f, 0.8f));
 		}
 		renderHud(playerID);
 	}
@@ -672,7 +679,7 @@ void RenderingManager::renderPauseScreen() {
 	glViewport(0, 0, windowWidth, windowHeight); 
 
 	//960 540
-	renderText("PAUSED", windowWidth*0.37f, windowHeight*0.45f, 3.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+	renderText("PAUSED", windowWidth*0.37f, windowHeight*0.45f, 3.0f, glm::vec3(0.8f, 0.8f, 0.8f));
 	renderText("Resume", GLfloat(windowWidth*0.455f), GLfloat(windowHeight*0.23f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 	renderText("Menu", GLfloat(windowWidth*0.466f), GLfloat(windowHeight*0.106f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 
@@ -687,6 +694,21 @@ void RenderingManager::renderPauseScreen() {
 		break;
 	}
 }
+
+
+
+void RenderingManager::RenderTimer() {
+
+	glViewport(0, 0, windowWidth, windowHeight);
+
+	//960 540
+	std::stringstream ss;
+	ss << std::fixed << std::setprecision(2) << _broker->_gameStartTimer;
+	std::string timerStr = ss.str();
+
+	renderText(timerStr, windowWidth*0.42f, windowHeight*0.45f, 3.0f, glm::vec3(0.8f, 0.8f, 0.8f));
+}
+
 
 
 //TODO: *****needs to retrieve all the other players in the game to render to the side of the screen 

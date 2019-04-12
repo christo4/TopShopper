@@ -16,6 +16,7 @@ enum Scenes {
 	CONTROLS,
 	SETUP,
 	LOADING,
+	TIMER,
 	GAME,
 	PAUSED,
 	END_SCREEN
@@ -44,6 +45,7 @@ public:
 	double delayX = -1.0; // safety (don't start with a delay)
 	int _nbPlayers;
 	int _nbOfDevices; // e.g. 1 keyboard if 0 controllers plugged in. 1 controller, 0 keyboard if 1 controller plugged in
+	double _gameStartTimer = 3.0; // 3 sec
 
 private:
 	static Broker* _instance;

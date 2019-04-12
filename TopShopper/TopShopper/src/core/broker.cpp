@@ -221,12 +221,19 @@ void Broker::manageScene(double& accumulator, double vartime) {
 	case(LOADING):
 		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
 			_audioManager->changeBGM(BGMTypes::GAME_SCENE);
-			_scene = GAME;
+			_scene = TIMER;
 			accumulator = 0.0; // NOTE: maybe move this above?
 			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			delayX = 0.0;
-			
 		}
+		break;
+	case(TIMER):
+		_gameStartTimer -= vartime;
+		if (_gameStartTimer <= 0.0) {
+			_gameStartTimer = 3.0; // reset for another round in future
+			_scene = GAME;
+		}
+		delayX = 0.0;
 		break;
 	case(PAUSED):
 		if (kam->wKey || (playerControlled && player1->leftStickY > 0.5f)) {
