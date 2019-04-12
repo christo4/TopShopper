@@ -94,36 +94,7 @@ void RenderingManager::init() {
 }
 
 
-// WARNING: must call this only after PhysicsManager::loadScene1()
-void RenderingManager::loadScene1() {
-	const std::vector<std::shared_ptr<ShoppingCartPlayer>> &carts = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
 
-	for (int i = 0; i < carts.size(); i++) {
-		float startingAngle;
-		PxVec3 startingAxis;
-		carts.at(i)->_actor->is<PxRigidDynamic>()->getGlobalPose().q.toRadiansAndUnitAxis(startingAngle, startingAxis); // NOTE: since 2 starting axes are possible, it returns the axis that results in a non-negative theta
-		//std::cout << "X" << startingAxis.x << "Y" << startingAxis.y << "Z" << startingAxis.z << std::endl;
-		//std::cout << "ANGLE" << startingAngle << std::endl;
-
-		// change their representation to be in range [-pi, pi]
-		if (startingAxis.y < 0.0f) { // will always be -1 or 1, i think
-			startingAngle *= -1;
-		}
-
-		std::deque<float> startingThetas;
-		for (int j = 0; j < 10; j++) {
-			startingThetas.push_back(startingAngle);
-		}
-		gVehicleThetasMap[i] = startingThetas;
-	}
-
-	gRightStickXValuesMap[0] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-	gRightStickXValuesMap[1] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-	gRightStickXValuesMap[2] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-	gRightStickXValuesMap[3] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-	gRightStickXValuesMap[4] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-	gRightStickXValuesMap[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-}
 
 //UpdateSeconds called every frame from the main loop
 //handles the deletion of objects after completing the rendering of each frame as well as the updating of model positions
@@ -207,6 +178,12 @@ void RenderingManager::RenderShadowMap() {
 	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
+	/*
+	std::vector<Geometry> allObjects = _objects;
+	allObjects.insert(allObjects.end(), _staticObjects.begin(), _staticObjects.end());
+	*/
+
+
 	//render the scene from the light and fill the depth buffer for shadows
 	for (Geometry& g : _objects) {
 
@@ -227,17 +204,11 @@ void RenderingManager::RenderShadowMap() {
 //then sending the vertex info down the openGL pipeline, while utilizing the approprite shaders tied to the geometry.
 //performs multiple rendering passes in order to create shadowsm, while calculating the camera information each time it is called.
 void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int viewBottomLeftY, int viewTopRightX, int viewTopRightY){  
-	//Clears the screen to a light grey background
-	
-
 
 	std::vector<std::shared_ptr<ShoppingCartPlayer>> players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
 	std::shared_ptr<ShoppingCartPlayer> player = players[playerID];
 	std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
 	std::array<EntityTypes,3> listElements = script->_shoppingList_Types;
-
-	//std::cout << listElements[0] << " " << listElements[1] << " " << listElements[2] << std::endl;
-
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -445,6 +416,36 @@ glm::mat4 RenderingManager::computeCameraPosition(int playerID, glm::vec3 &camer
 	return View;
 }
 
+// WARNING: must call this only after PhysicsManager::loadScene1()
+void RenderingManager::loadScene1() {
+	const std::vector<std::shared_ptr<ShoppingCartPlayer>> &carts = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
+
+	for (int i = 0; i < carts.size(); i++) {
+		float startingAngle;
+		PxVec3 startingAxis;
+		carts.at(i)->_actor->is<PxRigidDynamic>()->getGlobalPose().q.toRadiansAndUnitAxis(startingAngle, startingAxis); // NOTE: since 2 starting axes are possible, it returns the axis that results in a non-negative theta
+		//std::cout << "X" << startingAxis.x << "Y" << startingAxis.y << "Z" << startingAxis.z << std::endl;
+		//std::cout << "ANGLE" << startingAngle << std::endl;
+
+		// change their representation to be in range [-pi, pi]
+		if (startingAxis.y < 0.0f) { // will always be -1 or 1, i think
+			startingAngle *= -1;
+		}
+
+		std::deque<float> startingThetas;
+		for (int j = 0; j < 10; j++) {
+			startingThetas.push_back(startingAngle);
+		}
+		gVehicleThetasMap[i] = startingThetas;
+	}
+
+	gRightStickXValuesMap[0] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gRightStickXValuesMap[1] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gRightStickXValuesMap[2] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gRightStickXValuesMap[3] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gRightStickXValuesMap[4] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	gRightStickXValuesMap[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+}
 
 
 void RenderingManager::renderEndScreen() {

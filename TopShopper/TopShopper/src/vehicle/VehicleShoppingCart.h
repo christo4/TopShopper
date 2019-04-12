@@ -62,7 +62,7 @@ class VehicleShoppingCart {
 
 
 		const float _turboConsumptionRate = 0.5f; // -0.5 / second
-		const float _turboRechargeRate = 0.25f; // +0.25 / second
+		const float _turboRechargeRate = 0.5f; // +0.25 / second
 };
 
 
