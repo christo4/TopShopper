@@ -66,8 +66,8 @@ private:
 	double _mysteryBagSpawnTimer = 30.0; // this will vary from spawn to spawn in range 30-60 secs
 
 
-	static const int NB_SPARE_CHANGE_SPAWN_POINTS = 32;
-	const double SPARE_CHANGE_RESPAWN_TIME = 10.0; // seconds
+	static const int NB_SPARE_CHANGE_SPAWN_POINTS = 51;
+	const double SPARE_CHANGE_RESPAWN_TIME = 30.0; // seconds
 	std::array<std::shared_ptr<SpareChange>, NB_SPARE_CHANGE_SPAWN_POINTS> spareChangeInstances;
 	std::array<physx::PxTransform, NB_SPARE_CHANGE_SPAWN_POINTS> spareChangeSpawnPoints;
 	std::array<double, NB_SPARE_CHANGE_SPAWN_POINTS> spareChangeSpawnTimers; // spawn timers in seconds
