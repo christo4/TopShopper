@@ -103,8 +103,6 @@ struct PickupScript : BehaviourScript {
 	// SPECIFICS...
 
 	int _points = 0; // value of this pickup
-	//double _rotationSpeed = 0.0;
-
 };
 
 

@@ -40,7 +40,7 @@ class AudioManager {
 public:
 	struct SoundEffect {
 		std::string filename;
-		Mix_Chunk* sfx;
+		Mix_Chunk* sfx = NULL;
 		//map<string, Mix_Chunk*> mySFX; // <full path, acutal chunk>
 		Uint8 distance = 200;  // 0 at your loaction
 		Sint16 angle = 0;  // 0 at front, 90 at right, 180 at back, 270 at left
@@ -52,7 +52,7 @@ public:
 
 	struct Music {
 		std::string filename = "../TopShopper/resources/sfx/elevatorMusic.mp3";
-		Mix_Music* music;
+		Mix_Music* music = NULL;
 		int volume = MIX_MAX_VOLUME / 10;  // only work for mod, mp3 and ogg files
 		int loop = -1; // number of times to play, -1 forever, bigger than 0(number of times)
 	};
@@ -95,8 +95,8 @@ private:
 
 
 	// for testing
-	glm::vec3 testV1 = glm::vec3(10, 0, 1);
-	glm::vec3 testV2 = glm::vec3(1, 0, 3);
+	glm::vec3 testV1 = glm::vec3(10.0f, 0.0f, 1.0f);
+	glm::vec3 testV2 = glm::vec3(1.0f, 0.0f, 3.0f);
 };
 
 

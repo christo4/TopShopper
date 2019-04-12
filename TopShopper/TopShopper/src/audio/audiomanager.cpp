@@ -86,7 +86,7 @@ void AudioManager::changeBGM(BGMTypes BGM) {
 		bgm.music = loadMusic("../TopShopper/resources/sfx/JunesTheme.mp3");
 		break;
 	}
-	cout << "load bgm file" << endl;
+	//cout << "load bgm file" << endl;
 	playMusic(&bgm);
 }
 
@@ -176,9 +176,9 @@ void AudioManager::pauseAllSFX() {
 }
 
 void AudioManager::resumeAllSFX() {
-	cout << "before resume: " << Mix_Paused(-1) << endl;
+	//cout << "before resume: " << Mix_Paused(-1) << endl;
 	Mix_Resume(-1);
-	cout << "after resume: " << Mix_Paused(-1) << endl;
+	//cout << "after resume: " << Mix_Paused(-1) << endl;
 }
 
 void AudioManager::resetAudio() {

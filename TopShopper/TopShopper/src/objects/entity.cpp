@@ -33,21 +33,6 @@ void Entity::addComponent(ComponentTypes componentType) {
 
 	// otherwise, just create a default version of the component type and store in the array
 	switch (componentType) {
-		//case ComponentTypes::AUDIO_LISTENER:
-			//_components.at(index) = std::make_shared<AudioListener>(this);
-			//break;
-		//case ComponentTypes::AUDIO_SOURCE:
-			//_components.at(index) = std::make_shared<AudioSource>(this);
-			//break;
-		//case ComponentTypes::CAMERA:
-			//_components.at(index) = std::make_shared<Camera>(this);
-			//break;
-		//case ComponentTypes::MESH:
-			//_components.at(index) = std::make_shared<Mesh>(this);
-			//break;
-		//case ComponentTypes::NAV_MESH_AGENT:
-			//_components.at(index) = std::make_shared<NavMeshAgent>(this);
-			//break;
 		case ComponentTypes::MYSTERY_BAG_SCRIPT:
 			_components.at(index) = std::make_shared<MysteryBagScript>(this);
 			break;

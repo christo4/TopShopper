@@ -1,4 +1,3 @@
-
 #ifndef GAMESCENE_H_
 #define GAMESCENE_H_
 

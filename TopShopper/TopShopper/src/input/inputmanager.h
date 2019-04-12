@@ -69,8 +69,6 @@ private:
 	std::vector<Gamepad*> _gamePads;
 	Broker *_broker = nullptr;
 	KeyboardAndMouse *_keyboardAndMouse = new KeyboardAndMouse();
-
-	//void passAlongInputsToCarts();
 };
 
 #endif // INPUTMANAGER_H_

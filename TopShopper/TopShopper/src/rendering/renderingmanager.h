@@ -115,7 +115,8 @@ public:
 
 	GLFWwindow* getWindow();
 	void QueryGLVersion();
-	void push3DObjects();
+	void pushStaticObjects();
+	void pushDynamicObjects();
 	std::map<GLchar, Character> Characters;
 
 	int windowHeight;
@@ -123,11 +124,15 @@ public:
 
 	float pi = 3.14159265;
 
+	
+
 private:
 
+	bool firstRun = true;
 	Broker *_broker = nullptr;
 	GLFWwindow *_window = nullptr;
 	std::vector<Geometry> _objects;
+	std::vector<Geometry> _staticObjects;
 	unsigned int _lightDepthFBO;
 	unsigned int _depthMapTex;
 	unsigned int _shadowMapSize;
@@ -163,13 +168,20 @@ private:
 	MyTexture *_rulesSprite = new MyTexture();
 	MyTexture *_creditsSprite = new MyTexture();
 	MyTexture *_controlsSprite = new MyTexture();
-	
+
+
 	MyTexture *_shoppingCartRed = new MyTexture(); // 0
 	MyTexture *_shoppingCartBlue = new MyTexture(); // 1
 	MyTexture *_shoppingCartGreen = new MyTexture(); // 2
 	MyTexture *_shoppingCartPurple = new MyTexture(); // 3
 	MyTexture *_shoppingCartOrange = new MyTexture(); // 4
 	MyTexture *_shoppingCartBlack = new MyTexture(); // 5
+	MyTexture *_redTexture = new MyTexture(); // 0
+	MyTexture *_blueTexture = new MyTexture(); // 1
+	MyTexture *_greenTexture = new MyTexture(); // 2
+	MyTexture *_purpleTexture = new MyTexture(); // 3
+	MyTexture *_orangeTexture = new MyTexture(); // 4
+	MyTexture *_blackTexture = new MyTexture(); // 5
 };
 
 bool compareStruct1(Player one, Player two);
