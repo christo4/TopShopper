@@ -530,28 +530,26 @@ void AIManager::setNewAITargets() {
 				if (getNewTarget) {
 					playerScript->_targets.clear();
 
-					PxVec3 playerPos = player->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
+					// NOTE: i'm changing this to seek out the player (not-self, not-bash protected) that has the highest amount of points (tiebreak by first-come-first-serve)
 
-					std::shared_ptr<ShoppingCartPlayer> closestCart = nullptr;
-					PxVec3 closestCartPos;
-					float smallestSeparation = FLT_MAX;
+					std::shared_ptr<ShoppingCartPlayer> topScorer = nullptr;
+					int topPoints = -1;
 
 					for (std::shared_ptr<ShoppingCartPlayer> otherPlayer : players) {
 						if (player == otherPlayer) continue; // ignore comparison with self...
 						if (otherPlayer->_shoppingCartBase->IsBashProtected()) continue; // ignore comparison with bash protected carts...
 
-						PxVec3 otherPlayerPos = otherPlayer->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
-
-						float separation = (otherPlayerPos - playerPos).magnitude();
-						if (separation < smallestSeparation) {
-							smallestSeparation = separation;
-							closestCart = otherPlayer;
-							closestCartPos = otherPlayerPos;
+						std::shared_ptr<PlayerScript> otherPlayerScript = std::static_pointer_cast<PlayerScript>(otherPlayer->getComponent(ComponentTypes::PLAYER_SCRIPT)); \
+						int otherPlayerPoints = otherPlayerScript->_points;
+						if (otherPlayerPoints > topPoints) {
+							topPoints = otherPlayerPoints;
+							topScorer = otherPlayer;
 						}
 					}
 
-					if (closestCart != nullptr) { // target found...
-						playerScript->_targets.push_back(ItemLocation(closestCartPos, false, ItemLocation::TargetTypes::PASS_OFF_HOT_POTATO, closestCart));
+					if (nullptr != topScorer) {
+						PxVec3 topScorerPos = topScorer->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
+						playerScript->_targets.push_back(ItemLocation(topScorerPos, false, ItemLocation::TargetTypes::PASS_OFF_HOT_POTATO, topScorer));
 					}
 				}
 			}
