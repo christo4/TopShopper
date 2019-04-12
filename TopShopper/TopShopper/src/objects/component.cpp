@@ -665,7 +665,7 @@ void PlayerScript::navigate() {
 
 	// NOTE: this depends on the map (hill/walls) being symmetrically round (centered at 0,0,0)
 	const PxVec3 mapCenterPos = PxVec3(0.0f, 0.0f, 0.0f);
-	const float hillTopRadius = 36.0f; // rounding up to be safe
+	const float hillTopRadius = 40.0f; // rounding up to be safe
 	const float hillBaseRadius = 73.0f; // rounding up to be safe
 	const float wallStartRadius = 250.0f; // rounding down to be safe
 	if (_targets.size() > 0) {
