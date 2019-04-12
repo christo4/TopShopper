@@ -115,6 +115,7 @@ public:
 
 	GLFWwindow* getWindow();
 	void QueryGLVersion();
+	void pushStaticObjects();
 	void push3DObjects();
 	std::map<GLchar, Character> Characters;
 
@@ -123,11 +124,15 @@ public:
 
 	float pi = 3.14159265;
 
+	
+
 private:
 
+	bool firstRun = true;
 	Broker *_broker = nullptr;
 	GLFWwindow *_window = nullptr;
 	std::vector<Geometry> _objects;
+	std::vector<Geometry> _staticObjects;
 	unsigned int _lightDepthFBO;
 	unsigned int _depthMapTex;
 	unsigned int _shadowMapSize;

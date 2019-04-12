@@ -130,6 +130,7 @@ void RenderingManager::loadScene1() {
 	gRightStickXValuesMap[3] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 	gRightStickXValuesMap[4] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 	gRightStickXValuesMap[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	
 }
 
 //UpdateSeconds called every frame from the main loop
@@ -156,6 +157,11 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	int numPlayers = _broker->_nbPlayers;
 	if (_broker->_scene == GAME || _broker->_scene == PAUSED || _broker->_scene == END_SCREEN) {
 		push3DObjects();
+		if (firstRun) {
+			pushStaticObjects();
+			firstRun = false;
+		}
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		RenderShadowMap();
 
@@ -248,7 +254,10 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 
 	std::vector<Geometry> transparentObjs;
 
-	for (Geometry& g : _objects) {
+	std::vector<Geometry> allObjects = _objects;
+	allObjects.insert(allObjects.end(), _staticObjects.begin(), _staticObjects.end());
+
+	for (Geometry& g : allObjects) {
 		if (g.player != playerID && g.pointer) {
 			continue;
 		}
@@ -881,6 +890,96 @@ void RenderingManager::renderText(std::string text, GLfloat x, GLfloat y, GLfloa
 }
 
 
+void RenderingManager::pushStaticObjects() {
+	for (const std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
+		PxRigidActor *actor = entity->_actor->is<PxRigidActor>();
+		PxTransform transform = actor->getGlobalPose();
+		PxVec3 pos = transform.p;
+		const PxQuat rot = transform.q;
+		EntityTypes tag = entity->getTag();
+
+		Geometry geo;
+		switch (tag) {
+		case EntityTypes::GROUND:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			geo.hasShadow = false;
+			break;
+		}
+		case EntityTypes::ROOF:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::ROOF_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			geo.hasShadow = false;
+			break;
+		}
+		case EntityTypes::OBSTACLE1:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE1_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			break;
+		}
+		case EntityTypes::OBSTACLE2:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE2_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			break;
+		}
+		case EntityTypes::OBSTACLE3:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE3_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			break;
+		}
+		case EntityTypes::OBSTACLE4:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE4_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			break;
+		}
+		case EntityTypes::OBSTACLE5:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE5_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			break;
+		}
+		case EntityTypes::OBSTACLE6:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE6_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			break;
+		}
+		case EntityTypes::OBSTACLE7:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE7_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			break;
+		}
+		default:
+			continue;
+		}
+		glm::mat4 model;
+		PxMat44 rotation = PxMat44(rot);
+		PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos);
+		PxMat44	pxModel = translation * rotation;
+		model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+			glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+			glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+			glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+		geo.model = model;
+		geo.drawMode = GL_TRIANGLES;
+
+		assignBuffers(geo);
+		setBufferData(geo);
+		_staticObjects.push_back(geo);
+
+	}
+}
+
+
+
 void RenderingManager::push3DObjects() {
 	for (const std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
 		PxRigidActor *actor = entity->_actor->is<PxRigidActor>();
@@ -1096,20 +1195,6 @@ void RenderingManager::push3DObjects() {
 			}
 			break;
 		}
-		case EntityTypes::GROUND:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			geo.hasShadow = false;
-			break;
-		}
-		case EntityTypes::ROOF:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::ROOF_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			geo.hasShadow = false;
-			break;
-		}
 		case EntityTypes::MILK:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::MILK_GEO_NO_INDEX)); // TODO: change this to use specific mesh
@@ -1174,55 +1259,9 @@ void RenderingManager::push3DObjects() {
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX));
 			break;
 		}
-		case EntityTypes::OBSTACLE1:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE1_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			break;
-		}
-		case EntityTypes::OBSTACLE2:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE2_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			break;
-		}
-		case EntityTypes::OBSTACLE3:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE3_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			break;
-		}
-		case EntityTypes::OBSTACLE4:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE4_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			break;
-		}
-		case EntityTypes::OBSTACLE5:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE5_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			break;
-		}
-		case EntityTypes::OBSTACLE6:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE6_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			break;
-		}
-		case EntityTypes::OBSTACLE7:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE7_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			break;
-		}
 		default:
 			continue;
 		}
-
-
-
-
 		glm::mat4 model;
 		PxMat44 rotation = PxMat44(rot);
 		PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos);
