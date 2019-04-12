@@ -31,6 +31,7 @@ RenderingManager::~RenderingManager() {
 //Initializes the Rendering Manager by compiling all shaders and textures while also setting the inital state of openGL
 //Called upon the start of the game, to set the state of OpenGL and all subsequent rendering passes
 void RenderingManager::init() {
+	bagText = 0;
 	openWindow();
 	initTextRender();
 
@@ -100,6 +101,10 @@ void RenderingManager::init() {
 //handles the deletion of objects after completing the rendering of each frame as well as the updating of model positions
 //calls render scene after pushing back the 3d objects in order to render the scene again. 
 void RenderingManager::updateSeconds(double variableDeltaTime) {
+	if (bagText > 0) {
+		bagText -= 1;
+	}
+
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
 	if (_broker->_scene == GAME) {
 		// call LATEUPDATE() for all behaviour scripts...
@@ -139,7 +144,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 
 			RenderGameScene(0, 0, windowHeight / 2, windowWidth / 2, windowHeight / 2);						//split screen rendering
 			RenderGameScene(1, windowWidth / 2, windowHeight / 2, windowWidth / 2, windowHeight / 2);
-			RenderGameScene(2, 0, 0, windowWidth, windowHeight / 2);	
+			RenderGameScene(2, 0, 0, windowWidth/2, windowHeight / 2);	
 		}
 		else {
 			RenderGameScene(0, 0, windowHeight / 2, windowWidth / 2, windowHeight / 2);						//split screen rendering
@@ -320,6 +325,9 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 	}
 
 	if (_broker->_scene == GAME) {
+		if (bagText > 0) {
+			renderText("A PaperBag has spawned!", windowWidth*0.10f, windowHeight*0.45f, 2.5f, glm::vec3(1.0f, 1.0f, 1.0f));
+		}
 		renderHud(playerID);
 	}
 	else if (_broker->_scene == END_SCREEN) {
@@ -589,10 +597,10 @@ void RenderingManager::RenderSetup() {
 	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, (GLuint)windowWidth, (GLuint)windowHeight);	//reset the viewport to the full window to render from the camera pov
 	if (_broker->_cursorPositionSetup == 2) {
-		renderText("Map < name >", GLfloat(windowWidth * 0.4192f), GLfloat(windowHeight* 0.4768f), 1.0f, glm::vec3(1.0f, 0.0f, 1.0f));
+		renderText("Grocery Grotto", GLfloat(windowWidth * 0.4192f), GLfloat(windowHeight* 0.4768f), 1.0f, glm::vec3(1.0f, 0.0f, 1.0f));
 	}
 	else {
-		renderText("Map < name >", GLfloat(windowWidth * 0.4192f), GLfloat(windowHeight* 0.4768f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
+		renderText("Grocery Grotto", GLfloat(windowWidth * 0.4192f), GLfloat(windowHeight* 0.4768f), 1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
 	}
 	if (_broker->_cursorPositionSetup == 1) {
 		renderText("Number of Human Players: " + std::to_string(_broker->_nbPlayers), GLfloat(windowWidth* 0.3385f), GLfloat(windowHeight* 0.3842f), 1.0f, glm::vec3(1.0f, 0.0f, 1.0f));

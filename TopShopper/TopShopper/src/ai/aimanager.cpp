@@ -185,6 +185,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 			std::shared_ptr<MysteryBag> mysteryBag = std::dynamic_pointer_cast<MysteryBag>(_broker->getPhysicsManager()->instantiateEntity(EntityTypes::MYSTERY_BAG, _mysteryBagSpawnPoint, "mysteryBag"));
 			_mysteryBag = mysteryBag;
 			_mysteryBagLocations.push_back(ItemLocation(_mysteryBagSpawnPoint.p, true, ItemLocation::TargetTypes::MYSTERY_BAG, mysteryBag));
+			_broker->getRenderingManager()->bagText = 75;
 		}
 	}
 

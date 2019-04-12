@@ -123,6 +123,8 @@ public:
 
 	float pi = 3.14159265;
 
+	double bagText;
+
 	
 
 private:
