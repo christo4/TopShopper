@@ -71,7 +71,25 @@ void PickupScript::onSpawn() {
 	_entity->_actor->is<PxRigidDynamic>()->setAngularVelocity(PxVec3(1, 5, 1));
 }
 
-void PickupScript::fixedUpdate(double fixedDeltaTime) {}
+void PickupScript::fixedUpdate(double fixedDeltaTime) {
+	// SAFETY CHECK,,,
+	// if a pickup somehow gets outside the playable space (rough estimate with a bounding box overlapping map), then flag it to be destroyed, so that it doesn't screw up spawn count...
+
+	PxVec3 pos = _entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
+
+	// rough guess... (DON'T RESIZE MAP AND FORGET TO CHANGE THESE...)
+	float minX = -320.0f;
+	float maxX = 320.0f;
+	float minY = -20.0f;
+	float maxY = 120.0f;
+	float minZ = -320.0f;
+	float maxZ = 320.0f;
+
+	if (pos.x < minX || pos.x > maxX || pos.y < minY || pos.y > maxY || pos.z < minZ || pos.z > maxZ) {
+		_entity->destroy();
+		//std::cout << "PICKUP DESTROYED BY FALLING OUT OF MAP BOUNDING BOX" << std::endl;
+	}
+}
 
 void PickupScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {
 	// NOTE: this will only get called for pickups instantiated by a bash collision which will then land on the ground somewhere.
@@ -605,6 +623,7 @@ void PlayerScript::coinExplosion() {
 
 
 // NOTE: the bots should be raycasting every single frame to prevent slowing down and getting stuck
+// TODO: test if ground plane still have a normal of ~ 0,1,0. if not this could be causing invalid raycasts with ground plane
 void PlayerScript::navigate() {
 
 	ShoppingCartPlayer *player = dynamic_cast<ShoppingCartPlayer*>(_entity);
@@ -625,11 +644,12 @@ void PlayerScript::navigate() {
 	bool targetOnHill = false;
 	bool targetOnWall = false;
 	bool forcedTurbo = false;
+	//bool forcedTurbo = true; // for testing navigation when AI is turboing...
 
 	// NOTE: this depends on the map (hill/walls) being symmetrically round (centered at 0,0,0)
 	const PxVec3 mapCenterPos = PxVec3(0.0f, 0.0f, 0.0f);
-	const float hillTopRadius = 33.0f; // rounding down to be safe
-	const float hillBaseRadius = 70.0f; // rounding up to be safe
+	const float hillTopRadius = 36.0f; // rounding up to be safe
+	const float hillBaseRadius = 73.0f; // rounding up to be safe
 	const float wallStartRadius = 250.0f; // rounding down to be safe
 	if (_targets.size() > 0) {
 		PxVec3 targetPos = _targets.at(0)._pos;
@@ -752,6 +772,9 @@ void PlayerScript::navigate() {
 	}
 
 
+	// TODO... supress raycast hit with GROUND when a cart is either boosting or has hot potato...
+	// BUG... maybe i introduced thus now, but the pruple cart got stuck turboing on lower part of wall...
+	// this was probably due to a list item getting outside map area causing AI to infintely seek it (this should be fixed now)
 
 	bool redirected = false;
 	if (farLeftStatus || midLeftStatus || centerStatus || midRightStatus || farRightStatus) {
@@ -765,6 +788,10 @@ void PlayerScript::navigate() {
 				if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
 					suppressHit = true;
 				}
+
+				//if (player->_shoppingCartBase->IsTurboing() && entityHit->getTag() == EntityTypes::GROUND) {
+				//	suppressHit = true;
+				//}
 
 				if (!suppressHit) {
 					if (entityHit->getTag() == EntityTypes::GROUND) {
@@ -817,6 +844,10 @@ void PlayerScript::navigate() {
 					if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) forcedTurbo = true;
 				}
 
+				//if (player->_shoppingCartBase->IsTurboing() && entityHit->getTag() == EntityTypes::GROUND) {
+				//	suppressHit = true;
+				//}
+
 				if (!suppressHit) {
 					if (entityHit->getTag() == EntityTypes::GROUND) {
 						// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
@@ -868,6 +899,10 @@ void PlayerScript::navigate() {
 					if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) forcedTurbo = true;
 				}
 
+				//if (player->_shoppingCartBase->IsTurboing() && entityHit->getTag() == EntityTypes::GROUND) {
+				//	suppressHit = true;
+				//}
+
 				if (!suppressHit) {
 					if (entityHit->getTag() == EntityTypes::GROUND) {
 						// supress raycast if target on hill and hit point on hill OR target on wall and hit point on wall
@@ -917,6 +952,10 @@ void PlayerScript::navigate() {
 				if (_targets.size() > 0 && _targets.at(0)._targetEntity != nullptr && entityHit == _targets.at(0)._targetEntity.get()) {
 					suppressHit = true;
 				}
+
+				//if (player->_shoppingCartBase->IsTurboing() && entityHit->getTag() == EntityTypes::GROUND) {
+				//	suppressHit = true;
+				//}
 
 				if (!suppressHit) {
 					if (entityHit->getTag() == EntityTypes::GROUND) {
@@ -972,6 +1011,10 @@ void PlayerScript::navigate() {
 						suppressHit = true;
 						if (entityHit->getTag() == EntityTypes::SHOPPING_CART_PLAYER) forcedTurbo = true;
 					}
+
+					//if (player->_shoppingCartBase->IsTurboing() && entityHit->getTag() == EntityTypes::GROUND) {
+					//	suppressHit = true;
+					//}
 
 					if (!suppressHit) {
 						if (entityHit->getTag() == EntityTypes::GROUND) {
@@ -1089,6 +1132,17 @@ void PlayerScript::navigate() {
 
 		if (steerAbs < 0.01) steer = 0.0;
 		else steer = isCCW ? 1.0f : -1.0f;
+
+		// 90deg = dot of 0, this gets steerAbs of 1.0
+		// 0 deg = dot of 1 or -1, this gets steerAbs of 0.0
+		// maybe set a minimum steerAbs to like 0.1 so AI close to target can hit it?
+
+/*
+		float steerAbs = 1.0f - abs(dotProd); // this is wrong...
+		if (steerAbs < 0.01f) steerAbs = 0.0f;
+		else if (steerAbs < 0.1f) steerAbs = 0.1f;
+		steer = isCCW ? steerAbs : steerAbs * -1;
+*/
 
 
 		bool turboButtonPressed = (_hasHotPotato || forcedTurbo);
