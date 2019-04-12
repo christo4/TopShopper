@@ -83,15 +83,12 @@ void RenderingManager::init() {
 
 
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
-
 	if (_broker->_nbPlayers == 1) {
 		_shadowMapSize = SHADOW_MAP_SIZE_SINGLE_PLAYER;		//init the shadow resolution based on split screen condition
 	}
 	else {
 		_shadowMapSize = SHADOW_MAP_SIZE_MULTI_PLAYER;
 	}
-
-
 	glUseProgram(shaderProgram);
 
 	/*TODO: Should do this in loading manager or a texture manager class*/
@@ -130,7 +127,6 @@ void RenderingManager::loadScene1() {
 	gRightStickXValuesMap[3] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 	gRightStickXValuesMap[4] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 	gRightStickXValuesMap[5] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-	
 }
 
 //UpdateSeconds called every frame from the main loop
@@ -156,7 +152,7 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 
 	int numPlayers = _broker->_nbPlayers;
 	if (_broker->_scene == GAME || _broker->_scene == PAUSED || _broker->_scene == END_SCREEN) {
-		push3DObjects();
+		pushDynamicObjects();
 		if (firstRun) {
 			pushStaticObjects();
 			firstRun = false;
@@ -203,7 +199,9 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	glfwSwapBuffers(_window);
 }
 
-
+/*
+updates the contents of the shadow map, should be called once every frame before rendering the split screen
+*/
 void RenderingManager::RenderShadowMap() {
 
 	glm::mat4 lightProjection = glm::ortho(-270.0f, 270.0f, -270.0f, 270.0f, 1.0f, 500.0f);
@@ -336,16 +334,8 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 		glUseProgram(0);
 		glBindVertexArray(0);
 
-
 		glDepthFunc(GL_LESS);
-
 	}
-
-
-
-
-
-
 
 	if (_broker->_scene == GAME) {
 		renderHud(playerID);
@@ -890,6 +880,9 @@ void RenderingManager::renderText(std::string text, GLfloat x, GLfloat y, GLfloa
 }
 
 
+
+/* pushed the static objects to be rendered. Should only be called once during the program's lifetime as these are never cleared
+*/
 void RenderingManager::pushStaticObjects() {
 	for (const std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
 		PxRigidActor *actor = entity->_actor->is<PxRigidActor>();
@@ -974,13 +967,13 @@ void RenderingManager::pushStaticObjects() {
 		assignBuffers(geo);
 		setBufferData(geo);
 		_staticObjects.push_back(geo);
-
 	}
 }
 
 
-
-void RenderingManager::push3DObjects() {
+/* Pushes the dyanamic objects to be rendered, these objects are cleared each frame and should be pushed back every frame
+*/
+void RenderingManager::pushDynamicObjects() {
 	for (const std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
 		PxRigidActor *actor = entity->_actor->is<PxRigidActor>();
 		PxTransform transform = actor->getGlobalPose();
@@ -1067,7 +1060,6 @@ void RenderingManager::push3DObjects() {
 				_objects.push_back(geoWheel);
 			}
 
-
 			// HOT POTATO RENDERING...
 			std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 			if (playerScript->_hasHotPotato) {
@@ -1093,7 +1085,6 @@ void RenderingManager::push3DObjects() {
 				assignBuffers(geoPotato);
 				setBufferData(geoPotato);
 				_objects.push_back(geoPotato);
-
 			}
 
 			if (player->_shoppingCartBase->IsBashProtected()) {
@@ -1121,7 +1112,6 @@ void RenderingManager::push3DObjects() {
 			// SPOTLIGHT UH MOONLIGHT UH RENDERING...
 			//std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	
-		
 			// POINTER RENDERING...
 			Geometry geoPointer = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::POINTER_GEO_NO_INDEX));
 			geoPointer.color = glm::vec3(0, 0, 0);
@@ -1139,27 +1129,26 @@ void RenderingManager::push3DObjects() {
 				// create a pointer to this other cart...
 				switch (i) {
 					case 0:
-						geoPointer.texture = *_shoppingCartRed;
+						geoPointer.texture = *_redTexture;
 						break;
 					case 1:
-						geoPointer.texture = *_shoppingCartBlue;
+						geoPointer.texture = *_blueTexture;
 						break;
 					case 2:
-						geoPointer.texture = *_shoppingCartGreen;
+						geoPointer.texture = *_greenTexture;
 						break;
 					case 3:
-						geoPointer.texture = *_shoppingCartPurple;
+						geoPointer.texture = *_purpleTexture;
 						break;
 					case 4:
-						geoPointer.texture = *_shoppingCartOrange;
+						geoPointer.texture = *_orangeTexture;
 						break;
 					case 5:
-						geoPointer.texture = *_shoppingCartBlack;
+						geoPointer.texture = *_blackTexture;
 						break;
 					default:
 						break;
 				}
-
 				otherPos = players.at(i)->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
 				PxVec3 forward = rot.getBasisVector2();
 				PxVec3 cartForward = forward;
@@ -1243,15 +1232,11 @@ void RenderingManager::push3DObjects() {
 		case EntityTypes::MYSTERY_BAG:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::MYSTERY_BAG_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			//geo.color = glm::vec3(0.05f, 0.5f, 0.2f);
 			break;
 		}
 		case EntityTypes::COOKIE:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::COOKIE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			//geo.color = glm::vec3(0.05f, 0.5f, 0.2f);
 			break;
 		}
 		case EntityTypes::SPARE_CHANGE:
@@ -1420,6 +1405,12 @@ void RenderingManager::init3DTextures() {
 	InitializeTexture(_shoppingCartPurple, "../TopShopper/resources/Textures/CartPurpleTexture.jpg", GL_TEXTURE_2D); // 3
 	InitializeTexture(_shoppingCartOrange, "../TopShopper/resources/Textures/CartOrangeTexture.jpg", GL_TEXTURE_2D); // 4
 	InitializeTexture(_shoppingCartBlack, "../TopShopper/resources/Textures/CartBlackTexture.jpg", GL_TEXTURE_2D); // 5
+	InitializeTexture(_redTexture, "../TopShopper/resources/Textures/red.jpg", GL_TEXTURE_2D); // 0
+	InitializeTexture(_blueTexture, "../TopShopper/resources/Textures/blue.jpg", GL_TEXTURE_2D); // 1
+	InitializeTexture(_greenTexture, "../TopShopper/resources/Textures/green.jpg", GL_TEXTURE_2D); // 2
+	InitializeTexture(_purpleTexture, "../TopShopper/resources/Textures/purple.jpg", GL_TEXTURE_2D); // 3
+	InitializeTexture(_orangeTexture, "../TopShopper/resources/Textures/orange.jpg", GL_TEXTURE_2D); // 4
+	InitializeTexture(_blackTexture, "../TopShopper/resources/Textures/black.jpg", GL_TEXTURE_2D); // 5
 }
 
 
