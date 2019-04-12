@@ -93,6 +93,19 @@ void PickupScript::fixedUpdate(double fixedDeltaTime) {
 void PickupScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *otherShape, Entity *otherEntity, physx::PxContactPairPoint *contacts, physx::PxU32 nbContacts) {
 	// NOTE: this will only get called for pickups instantiated by a bash collision which will then land on the ground somewhere.
 	if (otherEntity->getTag() == EntityTypes::GROUND) {
+
+		// prevent pickups from getting stuck too high up on outer walls...
+		// pickup can only go back to trigger if within a radius from center of map...
+
+		PxVec3 pos = _entity->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
+		PxVec3 posNoY = PxVec3(pos.x, 0.0f, pos.z);
+		PxVec3 centerOfMap(0.0f, 0.0f, 0.0f);
+		float distanceFromCenter = (posNoY - centerOfMap).magnitude();
+		
+		if (distanceFromCenter > 275.0f) return;
+
+
+
 		// make pickup back into a trigger...
 		localShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
 		localShape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
