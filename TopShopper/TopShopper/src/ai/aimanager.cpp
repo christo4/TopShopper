@@ -487,38 +487,49 @@ void AIManager::setNewAITargets() {
 		std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 		if (playerScript->_playerType == PlayerScript::BOT) {
 
-			// change up the target every frame, so need to clear it first...
-			playerScript->_targets.clear();
-
-
 			// 0. IF AN AI HAS THE HOT POTATO THEY WILL SIMPLY TRY TO FIND THE NEAREST (NON BASH_PROTECTED) PLAYER TO BASH AND PASS ON THE HOT POTATO...
 			if (playerScript->_hasHotPotato) {
 
-				PxVec3 playerPos = player->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
-
-				std::shared_ptr<ShoppingCartPlayer> closestCart = nullptr;
-				PxVec3 closestCartPos;
-				float smallestSeparation = FLT_MAX;
-
-				for (std::shared_ptr<ShoppingCartPlayer> otherPlayer : players) {
-					if (player == otherPlayer) continue; // ignore comparison with self...
-					if (otherPlayer->_shoppingCartBase->IsBashProtected()) continue; // ignore comparison with bash protected carts...
-
-					PxVec3 otherPlayerPos = otherPlayer->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
-
-					float separation = (otherPlayerPos - playerPos).magnitude();
-					if (separation < smallestSeparation) {
-						smallestSeparation = separation;
-						closestCart = otherPlayer;
-						closestCartPos = otherPlayerPos;
+				bool getNewTarget = true; // assume AI needs to seek a new target...
+				if (playerScript->_targets.size() > 0) {
+					if (playerScript->_targets.at(0)._targetType == ItemLocation::TargetTypes::PASS_OFF_HOT_POTATO && !std::static_pointer_cast<ShoppingCartPlayer>(playerScript->_targets.at(0)._targetEntity)->_shoppingCartBase->IsBashProtected()) { // if current target has gone bash protected...
+						getNewTarget = false;
+						// update position of target though...
+						playerScript->_targets.at(0)._pos = playerScript->_targets.at(0)._targetEntity->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
 					}
 				}
 
-				if (closestCart != nullptr) { // target found...
-					playerScript->_targets.push_back(ItemLocation(closestCartPos, false, ItemLocation::TargetTypes::OTHER, closestCart));
+				if (getNewTarget) {
+					playerScript->_targets.clear();
+
+					PxVec3 playerPos = player->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
+
+					std::shared_ptr<ShoppingCartPlayer> closestCart = nullptr;
+					PxVec3 closestCartPos;
+					float smallestSeparation = FLT_MAX;
+
+					for (std::shared_ptr<ShoppingCartPlayer> otherPlayer : players) {
+						if (player == otherPlayer) continue; // ignore comparison with self...
+						if (otherPlayer->_shoppingCartBase->IsBashProtected()) continue; // ignore comparison with bash protected carts...
+
+						PxVec3 otherPlayerPos = otherPlayer->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
+
+						float separation = (otherPlayerPos - playerPos).magnitude();
+						if (separation < smallestSeparation) {
+							smallestSeparation = separation;
+							closestCart = otherPlayer;
+							closestCartPos = otherPlayerPos;
+						}
+					}
+
+					if (closestCart != nullptr) { // target found...
+						playerScript->_targets.push_back(ItemLocation(closestCartPos, false, ItemLocation::TargetTypes::PASS_OFF_HOT_POTATO, closestCart));
+					}
 				}
 			}
 			else {
+				playerScript->_targets.clear();
+
 				// 1. IF STARTING COOKIE ON FIELD, DROP WHAT YOU'RE DOING AND SEEK IT OUT...
 
 				if (_cookieLocations.size() > 0) {

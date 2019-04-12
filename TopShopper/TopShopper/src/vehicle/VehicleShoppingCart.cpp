@@ -347,7 +347,7 @@ void VehicleShoppingCart::smoothAndFeedInputs(double fixedDeltaTime) {
 void VehicleShoppingCart::setBashProtected() {
 	_isBashProtected = true;
 	_bashProtectionTimer = 5.0;
-	std::cout << "BASH PROTECTED FOR 5 Seconds" << std::endl;
+	//std::cout << "BASH PROTECTED FOR 5 Seconds" << std::endl;
 }
 
 
@@ -355,7 +355,7 @@ void VehicleShoppingCart::tickBashProtectionTimer(double fixedDeltaTime) {
 	_bashProtectionTimer -= fixedDeltaTime;
 	if (_bashProtectionTimer <= 0.0) {
 		_isBashProtected = false;
-		std::cout << "BASH PROTECTION LIFTED" << std::endl;
+		//std::cout << "BASH PROTECTION LIFTED" << std::endl;
 	}
 }
 
