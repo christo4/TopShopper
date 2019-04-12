@@ -20,7 +20,8 @@ struct ItemLocation {
 	enum TargetTypes {
 		OTHER,
 		COOKIE,
-		MYSTERY_BAG
+		MYSTERY_BAG,
+		PASS_OFF_HOT_POTATO
 	};
 
 	ItemLocation() {}
