@@ -86,6 +86,8 @@ enum EntityTypes {
 	COOKIE,								
 	SPARE_CHANGE,						
 	CHECK_MARK,
+	NONE,
+	SHIELD,
 
 	NUMBER_OF_ENTITY_TYPES
 };

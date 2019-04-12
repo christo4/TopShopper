@@ -7,6 +7,7 @@ in vec3 Normal;
 in vec3 FragPos;
 in vec3 look;
 in vec2 uv;
+in float transparency;
 
 // first output is mapped to the framebuffer's colour index by default
 out vec4 FragmentColour;
@@ -22,6 +23,6 @@ void main()
     vec3 ambient = 3.25 * color;
 
     vec3 lighting = ambient;    
-	FragmentColour = vec4(lighting, 0.7);
+	FragmentColour = vec4(lighting, transparency);
 	
 }

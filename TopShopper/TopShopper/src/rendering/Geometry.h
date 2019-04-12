@@ -18,6 +18,7 @@
 #include <GLFW/glfw3.h>
 #include <string>
 #include "texture.h"
+#include "../objects/entity.h"
 
 class Geometry {
 public:
@@ -28,9 +29,11 @@ public:
 	glm::mat4 model;
 	glm::vec3 color;
 	MyTexture texture;
+	EntityTypes EntityType;
 	bool gradientShader;
 	bool cullBackFace;
 	bool isTransparent;
+	float transDegree;
 	bool hasShadow;
 	bool pointer;
 	int player;

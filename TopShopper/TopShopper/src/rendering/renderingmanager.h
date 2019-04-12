@@ -53,7 +53,6 @@ enum SpriteTexture {
 };
 
 
-
 class RenderingManager {
 public:
 	RenderingManager(Broker *broker);

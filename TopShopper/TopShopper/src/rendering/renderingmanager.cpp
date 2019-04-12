@@ -229,6 +229,16 @@ void RenderingManager::RenderShadowMap() {
 void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int viewBottomLeftY, int viewTopRightX, int viewTopRightY){  
 	//Clears the screen to a light grey background
 	
+
+
+	std::vector<std::shared_ptr<ShoppingCartPlayer>> players = _broker->getPhysicsManager()->getActiveScene()->getAllShoppingCartPlayers();
+	std::shared_ptr<ShoppingCartPlayer> player = players[playerID];
+	std::shared_ptr<PlayerScript> script = std::static_pointer_cast<PlayerScript>(player->getComponent(PLAYER_SCRIPT));
+	std::array<EntityTypes,3> listElements = script->_shoppingList_Types;
+
+	//std::cout << listElements[0] << " " << listElements[1] << " " << listElements[2] << std::endl;
+
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glEnable(GL_CULL_FACE);
@@ -247,7 +257,6 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	std::vector<Geometry> transparentObjs;
-
 	std::vector<Geometry> allObjects = _objects;
 	allObjects.insert(allObjects.end(), _staticObjects.begin(), _staticObjects.end());
 
@@ -309,16 +318,22 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 			glUseProgram(0);
 			glBindVertexArray(0);
 		}
-
 	}
-
 	for (Geometry &transObj : transparentObjs) {
+
+		if (listElements[0] == transObj.EntityType || listElements[1] == transObj.EntityType || listElements[2] == transObj.EntityType || transObj.EntityType == EntityTypes::SHIELD) {
+			transObj.transDegree = 0.5f;
+		}
+		else {
+			transObj.transDegree = 0.0f;
+		}
 
 		glUseProgram(transparencyShaderProgram);
 		glUniform3f(glGetUniformLocation(transparencyShaderProgram, "CameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
 		glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Model"), 1, GL_FALSE, &transObj.model[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "View"), 1, GL_FALSE, &View[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(transparencyShaderProgram, "Projection"), 1, GL_FALSE, &Projection[0][0]);
+		glUniform1f(glGetUniformLocation(transparencyShaderProgram, "transDegree"), transObj.transDegree);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(transObj.texture.target, transObj.texture.textureID);
@@ -967,6 +982,10 @@ void RenderingManager::pushStaticObjects() {
 }
 
 
+
+
+
+
 /* Pushes the dyanamic objects to be rendered, these objects are cleared each frame and should be pushed back every frame
 */
 void RenderingManager::pushDynamicObjects() {
@@ -978,6 +997,26 @@ void RenderingManager::pushDynamicObjects() {
 		EntityTypes tag = entity->getTag();
 
 		Geometry geo;
+
+		glm::mat4 model;
+		PxMat44 rotation = PxMat44(rot);
+		PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos);
+		PxMat44	pxModel = translation * rotation;
+		model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+			glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+			glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+			glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+		glm::mat4 spotlightModel;
+		PxMat44 spotRotation = PxMat44(PxIdentity);
+		PxMat44 spotTranslation = PxMat44(PxMat33(PxIdentity), pos);
+		PxMat44	spotPxModel = spotTranslation * spotRotation;
+		spotlightModel = glm::mat4(glm::vec4(spotPxModel.column0.x, spotPxModel.column0.y, spotPxModel.column0.z, spotPxModel.column0.w),
+			glm::vec4(spotPxModel.column1.x, spotPxModel.column1.y, spotPxModel.column1.z, spotPxModel.column1.w),
+			glm::vec4(spotPxModel.column2.x, spotPxModel.column2.y, spotPxModel.column2.z, spotPxModel.column2.w),
+			glm::vec4(spotPxModel.column3.x, spotPxModel.column3.y, spotPxModel.column3.z, spotPxModel.column3.w));
+
+
 
 		switch (tag) {
 		case EntityTypes::SHOPPING_CART_PLAYER:
@@ -1026,7 +1065,6 @@ void RenderingManager::pushDynamicObjects() {
 				default:
 					break;
 			}
-
 
 			// WHEEL RENDERING...
 			const std::vector<PxShape*> &wheelShapes = player->_shoppingCartBase->_wheelShapes;
@@ -1098,6 +1136,7 @@ void RenderingManager::pushDynamicObjects() {
 				geoShield.model = model1;
 				geoShield.hasShadow = false;
 				geoShield.isTransparent = true;
+				geoShield.EntityType = EntityTypes::SHIELD;
 
 				geoShield.drawMode = GL_TRIANGLES;
 				assignBuffers(geoShield);
@@ -1183,74 +1222,149 @@ void RenderingManager::pushDynamicObjects() {
 		case EntityTypes::MILK:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::MILK_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			Geometry pillarGeo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPOTLIGHT_GEO_NO_INDEX));
+			pillarGeo.EntityType = EntityTypes::MILK;
+			pillarGeo.model = spotlightModel;
+			pillarGeo.isTransparent = true;
+			pillarGeo.hasShadow = false;
+			assignBuffers(pillarGeo);
+			setBufferData(pillarGeo);
+			_objects.push_back(pillarGeo);
 			break;
 		}
 		case EntityTypes::WATER:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::WATER_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			Geometry pillarGeo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPOTLIGHT_GEO_NO_INDEX));
+			pillarGeo.EntityType = EntityTypes::WATER;
+			pillarGeo.model = spotlightModel;
+			pillarGeo.isTransparent = true;
+			pillarGeo.hasShadow = false;
+			assignBuffers(pillarGeo);
+			setBufferData(pillarGeo);
+			_objects.push_back(pillarGeo);
 			break;
 		}
 		case EntityTypes::COLA:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::COLA_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			Geometry pillarGeo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPOTLIGHT_GEO_NO_INDEX));
+			pillarGeo.EntityType = EntityTypes::COLA;
+			pillarGeo.model = spotlightModel;
+			pillarGeo.isTransparent = true;
+			pillarGeo.hasShadow = false;
+			assignBuffers(pillarGeo);
+			setBufferData(pillarGeo);
+			_objects.push_back(pillarGeo);
 			break;
 		}
 		case EntityTypes::APPLE:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::APPLE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			Geometry pillarGeo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPOTLIGHT_GEO_NO_INDEX));
+			pillarGeo.EntityType = EntityTypes::APPLE;
+			pillarGeo.model = spotlightModel;
+			pillarGeo.isTransparent = true;
+			pillarGeo.hasShadow = false;
+			assignBuffers(pillarGeo);
+			setBufferData(pillarGeo);
+			_objects.push_back(pillarGeo);
 			break;
 		}
 		case EntityTypes::WATERMELON:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::WATERMELON_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			Geometry pillarGeo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPOTLIGHT_GEO_NO_INDEX));
+			pillarGeo.EntityType = EntityTypes::WATERMELON;
+			pillarGeo.model = spotlightModel;
+			pillarGeo.isTransparent = true;
+			pillarGeo.hasShadow = false;
+			assignBuffers(pillarGeo);
+			setBufferData(pillarGeo);
+			_objects.push_back(pillarGeo);
 			break;
 		}
 		case EntityTypes::BANANA:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::BANANA_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			Geometry pillarGeo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPOTLIGHT_GEO_NO_INDEX));
+			pillarGeo.EntityType = EntityTypes::BANANA;
+			pillarGeo.model = spotlightModel;
+			pillarGeo.isTransparent = true;
+			pillarGeo.hasShadow = false;
+			assignBuffers(pillarGeo);
+			setBufferData(pillarGeo);
+			_objects.push_back(pillarGeo);
 			break;
 		}
 		case EntityTypes::CARROT:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::CARROT_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			Geometry pillarGeo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPOTLIGHT_GEO_NO_INDEX));
+			pillarGeo.EntityType = EntityTypes::CARROT;
+			pillarGeo.model = spotlightModel;
+			pillarGeo.isTransparent = true;
+			pillarGeo.hasShadow = false;
+			assignBuffers(pillarGeo);
+			setBufferData(pillarGeo);
+			_objects.push_back(pillarGeo);
 			break;
 		}
 		case EntityTypes::EGGPLANT:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::EGGPLANT_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			Geometry pillarGeo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPOTLIGHT_GEO_NO_INDEX));
+			pillarGeo.EntityType = EntityTypes::EGGPLANT;
+			pillarGeo.model = spotlightModel;
+			pillarGeo.isTransparent = true;
+			pillarGeo.hasShadow = false;
+			assignBuffers(pillarGeo);
+			setBufferData(pillarGeo);
+			_objects.push_back(pillarGeo);
 			break;
 		}
 		case EntityTypes::BROCCOLI:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::BROCCOLI_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			Geometry pillarGeo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPOTLIGHT_GEO_NO_INDEX));
+			pillarGeo.EntityType = EntityTypes::BROCCOLI;
+			pillarGeo.model = spotlightModel;
+			pillarGeo.isTransparent = true;
+			pillarGeo.hasShadow = false;
+			assignBuffers(pillarGeo);
+			setBufferData(pillarGeo);
+			_objects.push_back(pillarGeo);
 			break;
 		}
 		case EntityTypes::MYSTERY_BAG:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::MYSTERY_BAG_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.EntityType = EntityTypes::MYSTERY_BAG;
 			break;
 		}
 		case EntityTypes::COOKIE:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::COOKIE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			Geometry pillarGeo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPOTLIGHT_GEO_NO_INDEX));
+			pillarGeo.EntityType = EntityTypes::COOKIE;
+			pillarGeo.model = spotlightModel;
+			pillarGeo.isTransparent = true;
+			pillarGeo.hasShadow = false;
+			assignBuffers(pillarGeo);
+			setBufferData(pillarGeo);
+			_objects.push_back(pillarGeo);
 			break;
 		}
 		case EntityTypes::SPARE_CHANGE:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX));
+			geo.EntityType = EntityTypes::SPARE_CHANGE;
 			break;
 		}
 		default:
 			continue;
 		}
-		glm::mat4 model;
-		PxMat44 rotation = PxMat44(rot);
-		PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos);
-		PxMat44	pxModel = translation * rotation;
-		model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
-			glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
-			glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
-			glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
 
 		geo.model = model;
 		geo.drawMode = GL_TRIANGLES;
@@ -1386,7 +1500,7 @@ void RenderingManager::init3DTextures() {
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/PotatoTexture.png", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(HOT_POTATO_GEO_NO_INDEX)->texture = texture;
 
-	InitializeTexture(&texture, "../TopShopper/resources/Textures/Yellow.jpg", GL_TEXTURE_2D);
+	InitializeTexture(&texture, "../TopShopper/resources/Textures/yellow.jpg", GL_TEXTURE_2D);
 	_broker->getLoadingManager()->getGeometry(SPOTLIGHT_GEO_NO_INDEX)->texture = texture;
 
 	InitializeTexture(&texture, "../TopShopper/resources/Textures/blue.jpg", GL_TEXTURE_2D);
