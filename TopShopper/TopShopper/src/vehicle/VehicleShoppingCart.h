@@ -6,15 +6,6 @@
 
 
 
-//enum VehicleStates {
-	//NORMAL,
-	//TURBO,
-	//TURBO_STUCK,
-
-//};
-
-
-
 class VehicleShoppingCart {
 	public:
 		VehicleShoppingCart(physx::PxPhysics *physics, physx::PxCooking *cooking);
@@ -44,11 +35,6 @@ class VehicleShoppingCart {
 
 
 		std::vector<physx::PxShape*> _wheelShapes;
-		//physx::PxShape *_lookAtShape = nullptr;
-		//physx::PxShape *_cameraShape = nullptr;
-
-		//int getNBBoosts() { return _nbBoosts; }
-
 
 		void consumeTurbo(double fixedDeltaTime);
 		void rechargeTurbo(double fixedDeltaTime);
@@ -74,17 +60,9 @@ class VehicleShoppingCart {
 		bool _isBashProtected = false;
 		double _bashProtectionTimer = -1.0;
 
-		//double _stateTimer = DBL_MAX; // use DBL_MAX for practically infinite timer
-
-
-
-		
-
-
 
 		const float _turboConsumptionRate = 0.5f; // -0.5 / second
 		const float _turboRechargeRate = 0.25f; // +0.25 / second
-
 };
 
 

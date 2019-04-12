@@ -8,8 +8,6 @@ Obstacle6::Obstacle6(PxRigidStatic *actor)
 	: Entity(actor, EntityTypes::OBSTACLE6)
 {
 	_actor->userData = this;
-
-	//addComponent(ComponentTypes::MESH);
 }
 
 

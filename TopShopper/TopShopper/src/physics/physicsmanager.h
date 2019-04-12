@@ -62,8 +62,6 @@ enum CollisionFlags {
 	COLLISION_FLAG_OBSTACLE				= (1 << 3),
 	COLLISION_FLAG_DRIVABLE_OBSTACLE	= (1 << 4),
 	COLLISION_FLAG_PICKUP				= (1 << 5),
-	//COLLISION_FLAG_LOOKAT_SHAPE			= (1 << 6),
-	//COLLISION_FLAG_CAMERA_SHAPE		    = (1 << 7),
 
 	COLLISION_FLAG_GROUND_AGAINST				=						  COLLISION_FLAG_WHEEL | COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE | COLLISION_FLAG_PICKUP,
 	COLLISION_FLAG_WHEEL_AGAINST				= COLLISION_FLAG_GROUND | COLLISION_FLAG_WHEEL | COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE |	COLLISION_FLAG_DRIVABLE_OBSTACLE | COLLISION_FLAG_PICKUP,
@@ -71,8 +69,6 @@ enum CollisionFlags {
 	COLLISION_FLAG_OBSTACLE_AGAINST				= COLLISION_FLAG_GROUND | COLLISION_FLAG_WHEEL | COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE | COLLISION_FLAG_PICKUP,
 	COLLISION_FLAG_DRIVABLE_OBSTACLE_AGAINST	= COLLISION_FLAG_GROUND | COLLISION_FLAG_WHEEL | COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE | COLLISION_FLAG_PICKUP,
 	COLLISION_FLAG_PICKUP_AGAINST				= COLLISION_FLAG_GROUND | COLLISION_FLAG_WHEEL | COLLISION_FLAG_CHASSIS | COLLISION_FLAG_OBSTACLE | COLLISION_FLAG_DRIVABLE_OBSTACLE | COLLISION_FLAG_PICKUP
-	//COLLISION_FLAG_LOOKAT_SHAPE_AGAINST = 0,
-	//COLLISION_FLAG_CAMERA_SHAPE_AGAINST = 0
 };
 
 
@@ -159,21 +155,8 @@ public:
 	void cleanupScene1();
 
 	std::shared_ptr<Entity> instantiateEntity(EntityTypes type, physx::PxTransform transform, const char *name);
-	//void switchToScene1();
 	std::shared_ptr<GameScene> getActiveScene() { return _activeScene; }
 
-
-	
-
-	/*
-	// MAYBE MOVE THESE INTO A SPECIAL PHYSICS COMPONENT
-	void disableShapeInContactTests(physx::PxShape *shape);
-	void enableShapeInContactTests(physx::PxShape *shape);
-	void disableShapeInSceneQueryTests(physx::PxShape *shape);
-	void enableShapeInSceneQueryTests(physx::PxShape *shape);
-	void setShapeTrigger(physx::PxShape *shape);
-	void setShapeSolid(physx::PxShape *shape);
-	*/
 
 	physx::PxShape** getAllShapes();
 	physx::PxU32 getNbShapes();
@@ -181,9 +164,6 @@ public:
 
 	// returns true if any touching/blocking hit was found
 	bool raycast(const physx::PxVec3 &origin, const physx::PxVec3 &unitDir, const physx::PxReal distance, physx::PxRaycastCallback &hitCall);
-
-
-
 
 private:
 	Broker *_broker = nullptr;
@@ -194,9 +174,6 @@ private:
 	physx::PxShape* createSphereCollider(physx::PxReal radius, physx::PxMaterial *material, const physx::PxFilterData& simData, const physx::PxFilterData& qryData, bool isExclusive, physx::PxShapeFlags shapeFlags);
 	physx::PxShape* createBoxCollider(physx::PxReal xSize, physx::PxReal ySize, physx::PxReal zSize, physx::PxMaterial *material, const physx::PxFilterData& simData, const physx::PxFilterData& qryData, bool isExclusive, physx::PxShapeFlags shapeFlags);
 	physx::PxShape* createTriMeshCollider(const std::vector<physx::PxVec3>& verts, const std::vector<physx::PxU32>& indices, physx::PxMaterial *material, const physx::PxFilterData& simData, const physx::PxFilterData& qryData, bool isExclusive, physx::PxShapeFlags shapeFlags);
-
-
-
 };
 
 

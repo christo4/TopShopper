@@ -1,6 +1,5 @@
 #include "VehicleShoppingCart.h"
 #include "physics/physicsmanager.h"
-
 #include <iostream>
 
 
@@ -8,21 +7,6 @@ using namespace physx;
 using namespace snippetvehicle;
 
 
-
-// can tweak this stuff to feel more cartoony... (in terms of turn radius)
-/* ORIGINAL
-PxF32 gSteerVsForwardSpeedData[2 * 8] =
-{
-	0.0f,		0.75f,
-	5.0f,		0.75f,
-	30.0f,		0.125f,
-	120.0f,		0.1f,
-	PX_MAX_F32, PX_MAX_F32,
-	PX_MAX_F32, PX_MAX_F32,
-	PX_MAX_F32, PX_MAX_F32,
-	PX_MAX_F32, PX_MAX_F32
-};
-*/
 // same turn angle at every speed...
 PxF32 gSteerVsForwardSpeedData[2 * 8] =
 {
@@ -81,16 +65,8 @@ VehicleDesc initVehicleDesc(PxPhysics *physics)
 	//Set up the chassis mass, dimensions, moment of inertia, and center of mass offset.
 	//The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
 	//Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
-	//const PxF32 chassisMass = 1500.0f; // ORIGINAL
 	const PxF32 chassisMass = 500.0f; // WARNING: DONT SET IT TO A LOW VALUE WITHOUT CHANGING OTHER STUFF, cause it causes the cart to flip over and over
-	//const PxVec3 chassisDims(2.5f, 2.0f, 5.0f); // ORIGINAL
 	const PxVec3 chassisDims(3.5f, 3.0f, 5.0f);
-
-	//const PxVec3 chassisDims(25.0f, 2.0f, 5.0f); // REALLY WIDE (X is widescreen axis)
-	//const PxVec3 chassisDims(2.5f, 20.0f, 5.0f); // REALLY TALL (Y is up)
-	//const PxVec3 chassisDims(2.5f, 2.0f, 50.0f); // REALLY LONG (Z is towards you)
-	//const PxVec3 chassisDims(3.0f, 3.5f, 5.0f); // MORE SHOPPING CART SIZED
-
 
 	const PxVec3 chassisMOI
 	((chassisDims.y*chassisDims.y + chassisDims.z*chassisDims.z)*chassisMass / 12.0f,
@@ -105,7 +81,6 @@ VehicleDesc initVehicleDesc(PxPhysics *physics)
 	const PxF32 wheelRadius = 1.0f;
 	const PxF32 wheelWidth = 0.8f;
 	const PxF32 wheelMOI = 0.5f*wheelMass*wheelRadius*wheelRadius;
-	//const PxU32 nbWheels = 6; // ORIGINAL
 	const PxU32 nbWheels = 4;
 
 	VehicleDesc vehicleDesc;
@@ -364,7 +339,7 @@ void VehicleShoppingCart::tickBashProtectionTimer(double fixedDeltaTime) {
 
 void VehicleShoppingCart::consumeTurbo(double fixedDeltaTime) {
 	_turboFuel -= _turboConsumptionRate * fixedDeltaTime;
-	if (_turboFuel < 0.0) _turboFuel = 0.0f;
+	if (_turboFuel < 0.0f) _turboFuel = 0.0f;
 	_nbBoosts = glm::clamp((int)(floorf(_turboFuel)), 0, 4);
 
 	//std::cout << "CONSUME RESULT FUEL " << _turboFuel << std::endl;
@@ -372,7 +347,7 @@ void VehicleShoppingCart::consumeTurbo(double fixedDeltaTime) {
 
 void VehicleShoppingCart::rechargeTurbo(double fixedDeltaTime) {
 	_turboFuel += _turboRechargeRate * fixedDeltaTime;
-	if (_turboFuel > 4.0) _turboFuel = 4.0f;
+	if (_turboFuel > 4.0f) _turboFuel = 4.0f;
 	_nbBoosts = glm::clamp((int)(floorf(_turboFuel)), 0, 4);
 
 	//std::cout << "RECHARGE RESULT FUEL " << _turboFuel << std::endl;
