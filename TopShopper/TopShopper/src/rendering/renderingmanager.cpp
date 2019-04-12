@@ -190,14 +190,14 @@ void RenderingManager::RenderShadowMap() {
 	glBindFramebuffer(GL_FRAMEBUFFER, _lightDepthFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	/*
+	
 	std::vector<Geometry> allObjects = _objects;
 	allObjects.insert(allObjects.end(), _staticObjects.begin(), _staticObjects.end());
-	*/
+	
 
 
 	//render the scene from the light and fill the depth buffer for shadows
-	for (Geometry& g : _objects) {
+	for (Geometry& g : allObjects) {
 
 		glUseProgram(depthBufferShaderProgram);
 		glUniformMatrix4fv(glGetUniformLocation(depthBufferShaderProgram, "Model"), 1, GL_FALSE, &g.model[0][0]);
