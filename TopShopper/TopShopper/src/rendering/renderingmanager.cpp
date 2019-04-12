@@ -83,15 +83,12 @@ void RenderingManager::init() {
 
 
 	glfwGetWindowSize(_window, &windowWidth, &windowHeight);
-
 	if (_broker->_nbPlayers == 1) {
 		_shadowMapSize = SHADOW_MAP_SIZE_SINGLE_PLAYER;		//init the shadow resolution based on split screen condition
 	}
 	else {
 		_shadowMapSize = SHADOW_MAP_SIZE_MULTI_PLAYER;
 	}
-
-
 	glUseProgram(shaderProgram);
 
 	/*TODO: Should do this in loading manager or a texture manager class*/
@@ -155,7 +152,12 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 
 	int numPlayers = _broker->_nbPlayers;
 	if (_broker->_scene == GAME || _broker->_scene == PAUSED || _broker->_scene == END_SCREEN) {
-		push3DObjects();
+		pushDynamicObjects();
+		if (firstRun) {
+			pushStaticObjects();
+			firstRun = false;
+		}
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		RenderShadowMap();
 
@@ -197,7 +199,9 @@ void RenderingManager::updateSeconds(double variableDeltaTime) {
 	glfwSwapBuffers(_window);
 }
 
-
+/*
+updates the contents of the shadow map, should be called once every frame before rendering the split screen
+*/
 void RenderingManager::RenderShadowMap() {
 
 	glm::mat4 lightProjection = glm::ortho(-270.0f, 270.0f, -270.0f, 270.0f, 1.0f, 500.0f);
@@ -248,7 +252,10 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 
 	std::vector<Geometry> transparentObjs;
 
-	for (Geometry& g : _objects) {
+	std::vector<Geometry> allObjects = _objects;
+	allObjects.insert(allObjects.end(), _staticObjects.begin(), _staticObjects.end());
+
+	for (Geometry& g : allObjects) {
 		if (g.player != playerID && g.pointer) {
 			continue;
 		}
@@ -327,16 +334,8 @@ void RenderingManager::RenderGameScene(int playerID, int viewBottomLeftx, int vi
 		glUseProgram(0);
 		glBindVertexArray(0);
 
-
 		glDepthFunc(GL_LESS);
-
 	}
-
-
-
-
-
-
 
 	if (_broker->_scene == GAME) {
 		renderHud(playerID);
@@ -881,7 +880,100 @@ void RenderingManager::renderText(std::string text, GLfloat x, GLfloat y, GLfloa
 }
 
 
-void RenderingManager::push3DObjects() {
+
+/* pushed the static objects to be rendered. Should only be called once during the program's lifetime as these are never cleared
+*/
+void RenderingManager::pushStaticObjects() {
+	for (const std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
+		PxRigidActor *actor = entity->_actor->is<PxRigidActor>();
+		PxTransform transform = actor->getGlobalPose();
+		PxVec3 pos = transform.p;
+		const PxQuat rot = transform.q;
+		EntityTypes tag = entity->getTag();
+
+		Geometry geo;
+		switch (tag) {
+		case EntityTypes::GROUND:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			geo.hasShadow = false;
+			break;
+		}
+		case EntityTypes::ROOF:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::ROOF_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			geo.hasShadow = false;
+			break;
+		}
+		case EntityTypes::OBSTACLE1:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE1_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			break;
+		}
+		case EntityTypes::OBSTACLE2:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE2_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			break;
+		}
+		case EntityTypes::OBSTACLE3:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE3_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			break;
+		}
+		case EntityTypes::OBSTACLE4:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE4_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			break;
+		}
+		case EntityTypes::OBSTACLE5:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE5_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			break;
+		}
+		case EntityTypes::OBSTACLE6:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE6_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			break;
+		}
+		case EntityTypes::OBSTACLE7:
+		{
+			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE7_GEO_NO_INDEX)); // TODO: change this to use specific mesh
+			geo.cullBackFace = true;
+			break;
+		}
+		default:
+			continue;
+		}
+		glm::mat4 model;
+		PxMat44 rotation = PxMat44(rot);
+		PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos);
+		PxMat44	pxModel = translation * rotation;
+		model = glm::mat4(glm::vec4(pxModel.column0.x, pxModel.column0.y, pxModel.column0.z, pxModel.column0.w),
+			glm::vec4(pxModel.column1.x, pxModel.column1.y, pxModel.column1.z, pxModel.column1.w),
+			glm::vec4(pxModel.column2.x, pxModel.column2.y, pxModel.column2.z, pxModel.column2.w),
+			glm::vec4(pxModel.column3.x, pxModel.column3.y, pxModel.column3.z, pxModel.column3.w));
+
+		geo.model = model;
+		geo.drawMode = GL_TRIANGLES;
+
+		assignBuffers(geo);
+		setBufferData(geo);
+		_staticObjects.push_back(geo);
+	}
+}
+
+
+/* Pushes the dyanamic objects to be rendered, these objects are cleared each frame and should be pushed back every frame
+*/
+void RenderingManager::pushDynamicObjects() {
 	for (const std::shared_ptr<Entity> &entity : _broker->getPhysicsManager()->getActiveScene()->_entities) {
 		PxRigidActor *actor = entity->_actor->is<PxRigidActor>();
 		PxTransform transform = actor->getGlobalPose();
@@ -968,7 +1060,6 @@ void RenderingManager::push3DObjects() {
 				_objects.push_back(geoWheel);
 			}
 
-
 			// HOT POTATO RENDERING...
 			std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 			if (playerScript->_hasHotPotato) {
@@ -994,7 +1085,6 @@ void RenderingManager::push3DObjects() {
 				assignBuffers(geoPotato);
 				setBufferData(geoPotato);
 				_objects.push_back(geoPotato);
-
 			}
 
 			if (player->_shoppingCartBase->IsBashProtected()) {
@@ -1022,7 +1112,6 @@ void RenderingManager::push3DObjects() {
 			// SPOTLIGHT UH MOONLIGHT UH RENDERING...
 			//std::shared_ptr<PlayerScript> playerScript = std::static_pointer_cast<PlayerScript>(player->getComponent(ComponentTypes::PLAYER_SCRIPT));
 	
-		
 			// POINTER RENDERING...
 			Geometry geoPointer = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::POINTER_GEO_NO_INDEX));
 			geoPointer.color = glm::vec3(0, 0, 0);
@@ -1040,27 +1129,26 @@ void RenderingManager::push3DObjects() {
 				// create a pointer to this other cart...
 				switch (i) {
 					case 0:
-						geoPointer.texture = *_shoppingCartRed;
+						geoPointer.texture = *_redTexture;
 						break;
 					case 1:
-						geoPointer.texture = *_shoppingCartBlue;
+						geoPointer.texture = *_blueTexture;
 						break;
 					case 2:
-						geoPointer.texture = *_shoppingCartGreen;
+						geoPointer.texture = *_greenTexture;
 						break;
 					case 3:
-						geoPointer.texture = *_shoppingCartPurple;
+						geoPointer.texture = *_purpleTexture;
 						break;
 					case 4:
-						geoPointer.texture = *_shoppingCartOrange;
+						geoPointer.texture = *_orangeTexture;
 						break;
 					case 5:
-						geoPointer.texture = *_shoppingCartBlack;
+						geoPointer.texture = *_blackTexture;
 						break;
 					default:
 						break;
 				}
-
 				otherPos = players.at(i)->_actor->is<PxRigidDynamic>()->getGlobalPose().p;
 				PxVec3 forward = rot.getBasisVector2();
 				PxVec3 cartForward = forward;
@@ -1094,20 +1182,6 @@ void RenderingManager::push3DObjects() {
 				_objects.push_back(geoPointer);
 				yOffset += 0.5f;
 			}
-			break;
-		}
-		case EntityTypes::GROUND:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::GROUND_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			geo.hasShadow = false;
-			break;
-		}
-		case EntityTypes::ROOF:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::ROOF_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			geo.hasShadow = false;
 			break;
 		}
 		case EntityTypes::MILK:
@@ -1158,15 +1232,11 @@ void RenderingManager::push3DObjects() {
 		case EntityTypes::MYSTERY_BAG:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::MYSTERY_BAG_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			//geo.color = glm::vec3(0.05f, 0.5f, 0.2f);
 			break;
 		}
 		case EntityTypes::COOKIE:
 		{
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::COOKIE_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			//geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO));
-			//geo.color = glm::vec3(0.05f, 0.5f, 0.2f);
 			break;
 		}
 		case EntityTypes::SPARE_CHANGE:
@@ -1174,55 +1244,9 @@ void RenderingManager::push3DObjects() {
 			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::SPARE_CHANGE_GEO_NO_INDEX));
 			break;
 		}
-		case EntityTypes::OBSTACLE1:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE1_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			break;
-		}
-		case EntityTypes::OBSTACLE2:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE2_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			break;
-		}
-		case EntityTypes::OBSTACLE3:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE3_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			break;
-		}
-		case EntityTypes::OBSTACLE4:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE4_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			break;
-		}
-		case EntityTypes::OBSTACLE5:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE5_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			break;
-		}
-		case EntityTypes::OBSTACLE6:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE6_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			break;
-		}
-		case EntityTypes::OBSTACLE7:
-		{
-			geo = *(_broker->getLoadingManager()->getGeometry(GeometryTypes::OBSTACLE7_GEO_NO_INDEX)); // TODO: change this to use specific mesh
-			geo.cullBackFace = true;
-			break;
-		}
 		default:
 			continue;
 		}
-
-
-
-
 		glm::mat4 model;
 		PxMat44 rotation = PxMat44(rot);
 		PxMat44 translation = PxMat44(PxMat33(PxIdentity), pos);
@@ -1381,6 +1405,12 @@ void RenderingManager::init3DTextures() {
 	InitializeTexture(_shoppingCartPurple, "../TopShopper/resources/Textures/CartPurpleTexture.jpg", GL_TEXTURE_2D); // 3
 	InitializeTexture(_shoppingCartOrange, "../TopShopper/resources/Textures/CartOrangeTexture.jpg", GL_TEXTURE_2D); // 4
 	InitializeTexture(_shoppingCartBlack, "../TopShopper/resources/Textures/CartBlackTexture.jpg", GL_TEXTURE_2D); // 5
+	InitializeTexture(_redTexture, "../TopShopper/resources/Textures/red.jpg", GL_TEXTURE_2D); // 0
+	InitializeTexture(_blueTexture, "../TopShopper/resources/Textures/blue.jpg", GL_TEXTURE_2D); // 1
+	InitializeTexture(_greenTexture, "../TopShopper/resources/Textures/green.jpg", GL_TEXTURE_2D); // 2
+	InitializeTexture(_purpleTexture, "../TopShopper/resources/Textures/purple.jpg", GL_TEXTURE_2D); // 3
+	InitializeTexture(_orangeTexture, "../TopShopper/resources/Textures/orange.jpg", GL_TEXTURE_2D); // 4
+	InitializeTexture(_blackTexture, "../TopShopper/resources/Textures/black.jpg", GL_TEXTURE_2D); // 5
 }
 
 
