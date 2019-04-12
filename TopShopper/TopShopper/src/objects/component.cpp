@@ -161,6 +161,7 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 				bool turboButtonPressed = (_hasHotPotato || pad->bButton);
 				bool turboTank = PlayerScript::getNBBoosts() > 0;
 				if (turboButtonPressed && !(turboState) && turboTank) {
+					//Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TURBO_SOUND), 10);
 					Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::TURBO_SOUND));
 					turboState = true;
 				}
@@ -533,6 +534,7 @@ void PlayerScript::bashed() {
 	if (!(_playerType == PlayerTypes::HUMAN))
 		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::DROPITEM_SOUND), distanceBetween, angle);
 
+	Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::DROPITEM_SOUND), 150);
 	Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::DROPITEM_SOUND));
 
 	std::vector<EntityTypes> lostItems; // can have size 0,1 or 2

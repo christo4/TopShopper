@@ -97,6 +97,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 	if (player1 == nullptr) playerControlled = false;
 	KeyboardAndMouse *kam = getInputManager()->getKeyboardAndMouse();	
 	_audioManager->assignFreeChanel(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
+	_audioManager->changeVolumeSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND), MIX_MAX_VOLUME);
 	switch (_scene) {
 	case (MAIN_MENU):
 		if (kam->wKey || (playerControlled && player1->leftStickY > 0.5f)) {

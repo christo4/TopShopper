@@ -151,7 +151,7 @@ void AudioManager::changeVolumeSFX(SoundEffect *mySfx, int volume) {
 
 void AudioManager::assignFreeChanel(SoundEffect *mySfx) {
 	if (Mix_Playing(mySfx->channel)) {
-		for (int i = 7; i < 20; i++) {
+		for (int i = 8; i < 20; i++) {
 			if (!Mix_Playing(i)) {
 				mySfx->channel = i;
 				break;
@@ -251,7 +251,7 @@ void AudioManager::init() {
 
 	selectSound->filename = "../TopShopper/resources/sfx/ffselected.wav";
 	selectSound->sfx = loadSFX(selectSound->filename);
-	selectSound->channel = 7;
+	selectSound->channel = 8;
 
 	pickItemSound->filename = "../TopShopper/resources/sfx/pickItem.wav";
 	pickItemSound->sfx = loadSFX(pickItemSound->filename);
@@ -260,13 +260,14 @@ void AudioManager::init() {
 	dropItemSound->filename = "../TopShopper/resources/sfx/itemDrop.wav";
 	dropItemSound->sfx = loadSFX(dropItemSound->filename);
 	dropItemSound->distance = 0;
-	dropItemSound->channel = 8;
-	dropItemSound->volume = 150;
+	dropItemSound->channel = 9;
+	//changeVolumeSFX(dropItemSound, 150);
+
 
 	turboSound->filename = "../TopShopper/resources/sfx/turbo.wav";
 	turboSound->sfx = loadSFX(turboSound->filename);
 	//turboSound->distance = 200;
-	turboSound->channel = 9;
+	turboSound->channel = 7;
 	changeVolumeSFX(turboSound, 20);
 
 	explosionSound->filename = "../TopShopper/resources/sfx/explosion.wav";
