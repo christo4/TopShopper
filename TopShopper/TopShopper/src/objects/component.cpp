@@ -53,7 +53,7 @@ void MysteryBagScript::onTriggerEnter(physx::PxShape *localShape, physx::PxShape
 		}
 
 		_entity->destroy(); // destroy this mystery bag
-		Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND));
+		Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PAPERBAG_SOUND));
 	}
 }
 
@@ -263,12 +263,33 @@ void PlayerScript::fixedUpdate(double fixedDeltaTime) {
 
 				Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1));
 			}
-			else if (_inputID == -2) {
-				//printf("play bot 2 distance: %f\n", distanceBetween);
+			if (_inputID = -2) {
+				//printf("play bot 2");
 				Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI2), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI2)->volume*(speed / 60));
 				Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI2), (distanceBetween), angle);
 
 				Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI2));
+			}
+			if (_inputID = -3) {
+				//printf("play bot 3");
+				Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI3), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI3)->volume*(speed / 60));
+				Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI3), (distanceBetween), angle);
+
+				Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI3));
+			}
+			if (_inputID = -4) {
+				//printf("play bot 4");
+				Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI4), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI4)->volume*(speed / 60));
+				Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI4), (distanceBetween), angle);
+
+				Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI4));
+			}
+			if (_inputID = -5) {
+				//printf("play bot 5");
+				Broker::getInstance()->getAudioManager()->changeVolumeSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI5), Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI5)->volume*(speed / 60));
+				Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI5), (distanceBetween), angle);
+
+				Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI5));
 			}
 			
 
@@ -330,6 +351,7 @@ void PlayerScript::onCollisionEnter(physx::PxShape *localShape, physx::PxShape *
 	//Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::ROLL_SOUND_AI1));
 	
 	if (otherEntity->getTag() == EntityTypes::OBSTACLE1 || otherEntity->getTag() == EntityTypes::OBSTACLE2 || otherEntity->getTag() == EntityTypes::OBSTACLE3 || otherEntity->getTag() == EntityTypes::OBSTACLE4 || otherEntity->getTag() == EntityTypes::OBSTACLE5 || otherEntity->getTag() == EntityTypes::OBSTACLE6 || otherEntity->getTag() == EntityTypes::OBSTACLE7 || otherEntity->getTag() == EntityTypes::SHOPPING_CART_PLAYER || otherEntity->getTag() == EntityTypes::ROOF) {
+		Broker::getInstance()->getAudioManager()->assignFreeChanel(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND));
 		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND), distanceBetween, angle);
 		Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::HITWALL_SOUND));
 		
@@ -450,6 +472,7 @@ void PlayerScript::pickedUpItem(EntityTypes pickupType) {
 	PxVec3 crossprod = forwardNoYNormalized.cross(myPosNormalized);
 	bool isCCW = crossprod.y <= 0.0f;
 	if (!isCCW) angle = 360 - angle;
+	Broker::getInstance()->getAudioManager()->assignFreeChanel(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND));
 	if(!(_playerType == PlayerTypes::HUMAN))
 		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND), distanceBetween, angle);
 	Broker::getInstance()->getAudioManager()->playSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::PICKITEM_SOUND));
@@ -511,6 +534,8 @@ void PlayerScript::bashed() {
 	PxVec3 crossprod = forwardNoYNormalized.cross(myPosNormalized);
 	bool isCCW = crossprod.y <= 0.0f;
 	if (!isCCW) angle = 360 - angle;
+	Broker::getInstance()->getAudioManager()->assignFreeChanel(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::DROPITEM_SOUND));
+
 	if (!(_playerType == PlayerTypes::HUMAN))
 		Broker::getInstance()->getAudioManager()->changeDistanceSFX(Broker::getInstance()->getAudioManager()->getSoundEffect(SoundEffectTypes::DROPITEM_SOUND), distanceBetween, angle);
 

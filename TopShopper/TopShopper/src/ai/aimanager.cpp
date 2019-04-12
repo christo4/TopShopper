@@ -340,7 +340,7 @@ void AIManager::updateSeconds(double variableDeltaTime) {
 		//_broker->_isEnd = true; // FOR NOW, we pause the game when match is over
 		_broker->_scene = END_SCREEN;
 		// pause channel
-		_broker->getAudioManager()->pauseAllSFX();
+		_broker->getAudioManager()->resetAudio();
 		_broker->getAudioManager()->changeBGM(BGMTypes::END_SCENE);
 	}
 }

@@ -12,12 +12,17 @@ using namespace std;
 AudioManager::SoundEffect* rollingSound_player1 = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* rollingSound_ai1 = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* rollingSound_ai2 = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* rollingSound_ai3 = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* rollingSound_ai4 = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* rollingSound_ai5 = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* hitWallSound = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* dropItemSound = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* pickItemSound = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* turboSound = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* explosionSound = new AudioManager::SoundEffect();
 AudioManager::SoundEffect* tickingSound = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* paperbagSound = new AudioManager::SoundEffect();
+AudioManager::SoundEffect* selectSound = new AudioManager::SoundEffect();
 
 
 AudioManager::AudioManager(Broker *broker)
@@ -39,6 +44,12 @@ AudioManager::SoundEffect* AudioManager::getSoundEffect(SoundEffectTypes sound) 
 		return rollingSound_ai1;
 	case SoundEffectTypes::ROLL_SOUND_AI2:
 		return rollingSound_ai2;
+	case SoundEffectTypes::ROLL_SOUND_AI3:
+		return rollingSound_ai3;
+	case SoundEffectTypes::ROLL_SOUND_AI4:
+		return rollingSound_ai4;
+	case SoundEffectTypes::ROLL_SOUND_AI5:
+		return rollingSound_ai5;
 	case SoundEffectTypes::HITWALL_SOUND:
 		return hitWallSound;
 	case SoundEffectTypes::PICKITEM_SOUND:
@@ -51,6 +62,10 @@ AudioManager::SoundEffect* AudioManager::getSoundEffect(SoundEffectTypes sound) 
 		return explosionSound;
 	case SoundEffectTypes::TICKING_SOUND:
 		return tickingSound;
+	case SoundEffectTypes::PAPERBAG_SOUND:
+		return paperbagSound;
+	case SoundEffectTypes::SELECT_SOUND:
+		return selectSound;
 	default:
 		return nullptr;
 	}
@@ -134,6 +149,17 @@ void AudioManager::changeVolumeSFX(SoundEffect *mySfx, int volume) {
 	Mix_Volume(mySfx->channel, volume);
 }
 
+void AudioManager::assignFreeChanel(SoundEffect *mySfx) {
+	if (Mix_Playing(mySfx->channel)) {
+		for (int i = 7; i < 20; i++) {
+			if (!Mix_Playing(i)) {
+				mySfx->channel = i;
+				break;
+			}
+		}
+	}
+}
+
 void AudioManager::changeDistanceSFX(SoundEffect *mySfx, float distance, float angle) {
 	//mySfx->volume = volume;
 	Mix_SetPosition(mySfx->channel, (Sint16)angle, (Uint8)distance);
@@ -179,7 +205,7 @@ void AudioManager::init() {
 	}
 
 	// allocate sound effect channel  
-	Mix_AllocateChannels(16);
+	Mix_AllocateChannels(20);
 
 	// load sound effect from file
 	//for (int i = 0; i < filenames.size(); i++) {
@@ -197,40 +223,59 @@ void AudioManager::init() {
 
 	rollingSound_ai1->filename = "../TopShopper/resources/sfx/rollCart.wav";
 	rollingSound_ai1->sfx = loadSFX(rollingSound_ai1->filename);
-	rollingSound_ai1->channel = 5;
+	rollingSound_ai1->channel = 1;
 
 	rollingSound_ai2->filename = "../TopShopper/resources/sfx/rollCart.wav";
 	rollingSound_ai2->sfx = loadSFX(rollingSound_ai2->filename);
-	rollingSound_ai2->channel = 6;
-	
+	rollingSound_ai2->channel = 2;
+
+	rollingSound_ai3->filename = "../TopShopper/resources/sfx/rollCart.wav";
+	rollingSound_ai3->sfx = loadSFX(rollingSound_ai3->filename);
+	rollingSound_ai3->channel = 3;
+
+	rollingSound_ai4->filename = "../TopShopper/resources/sfx/rollCart.wav";
+	rollingSound_ai4->sfx = loadSFX(rollingSound_ai4->filename);
+	rollingSound_ai4->channel = 4;
+
+	rollingSound_ai5->filename = "../TopShopper/resources/sfx/rollCart.wav";
+	rollingSound_ai5->sfx = loadSFX(rollingSound_ai5->filename);
+	rollingSound_ai5->channel = 5;
+
+	paperbagSound->filename = "../TopShopper/resources/sfx/paperBag.wav";
+	paperbagSound->sfx = loadSFX(paperbagSound->filename);
+	paperbagSound->channel = 6;
 
 	hitWallSound->filename = "../TopShopper/resources/sfx/cartHitWall.wav";
 	hitWallSound->sfx = loadSFX(hitWallSound->filename);
-	hitWallSound->channel = 1;
+	hitWallSound->channel = 12;
+
+	selectSound->filename = "../TopShopper/resources/sfx/ffselected.wav";
+	selectSound->sfx = loadSFX(selectSound->filename);
+	selectSound->channel = 7;
 
 	pickItemSound->filename = "../TopShopper/resources/sfx/pickItem.wav";
 	pickItemSound->sfx = loadSFX(pickItemSound->filename);
-	pickItemSound->channel = 2;
+	pickItemSound->channel = 13;
 
 	dropItemSound->filename = "../TopShopper/resources/sfx/itemDrop.wav";
 	dropItemSound->sfx = loadSFX(dropItemSound->filename);
 	dropItemSound->distance = 0;
-	dropItemSound->channel = 3;
-	changeVolumeSFX(dropItemSound, 150);
+	dropItemSound->channel = 8;
+	dropItemSound->volume = 150;
 
 	turboSound->filename = "../TopShopper/resources/sfx/turbo.wav";
 	turboSound->sfx = loadSFX(turboSound->filename);
 	//turboSound->distance = 200;
-	turboSound->channel = 4;
+	turboSound->channel = 9;
 	changeVolumeSFX(turboSound, 20);
 
 	explosionSound->filename = "../TopShopper/resources/sfx/explosion.wav";
 	explosionSound->sfx = loadSFX(explosionSound->filename);
-	explosionSound->channel = 7;
+	explosionSound->channel = 10;
 
 	tickingSound->filename = "../TopShopper/resources/sfx/ticking.wav";
 	tickingSound->sfx = loadSFX(tickingSound->filename);
-	tickingSound->channel = 8;
+	tickingSound->channel = 11;
 	tickingSound->loop = 2;
 
 

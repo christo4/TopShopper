@@ -96,6 +96,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 	bool playerControlled = true;
 	if (player1 == nullptr) playerControlled = false;
 	KeyboardAndMouse *kam = getInputManager()->getKeyboardAndMouse();	
+	_audioManager->assignFreeChanel(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 	switch (_scene) {
 	case (MAIN_MENU):
 		if (kam->wKey || (playerControlled && player1->leftStickY > 0.5f)) {
@@ -105,6 +106,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			else {
 				_cursorPositionStart += 1; 
 			}
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			delayX = 0.2;
 		}
 		else if (kam->sKey || (playerControlled && player1->leftStickY < -0.5f)) {
@@ -114,6 +116,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			else {
 				_cursorPositionStart -= 1;
 			}
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			delayX = 0.2;
 		}
 		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
@@ -131,18 +134,21 @@ void Broker::manageScene(double& accumulator, double vartime) {
 				_cursorPositionStart = 3;
 				break;
 			}
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			delayX = 0.0;
 		}
 		break;
 	case(CREDITS):
 		if (kam->spaceKeyJustPressed || (playerControlled && player1->bButtonJustPressed)) {
 			_scene = MAIN_MENU;
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			delayX = 0.0;
 		}
 		break;
 	case(CONTROLS):
 		if (kam->spaceKeyJustPressed || (playerControlled && player1->bButtonJustPressed)) {
 			_scene = MAIN_MENU;
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			delayX = 0.0;
 		}
 		break;
@@ -154,6 +160,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			else {
 				_cursorPositionSetup += 1;
 			}
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			delayX = 0.2;
 		}
 		else if (kam->sKey || (playerControlled && player1->leftStickY < -0.5f)) {
@@ -163,6 +170,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			else {
 				_cursorPositionSetup -= 1;
 			}
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			delayX = 0.2;
 		}
 		if (kam->dKey || (playerControlled && player1->leftStickX > 0.5f)) {
@@ -174,6 +182,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 					_nbPlayers += 1;
 				}
 			}
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			delayX = 0.2;
 		}
 		if (kam->aKey || (playerControlled && player1->leftStickX < -0.5f)) {
@@ -185,12 +194,14 @@ void Broker::manageScene(double& accumulator, double vartime) {
 					_nbPlayers -= 1;
 				}
 			}
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			delayX = 0.2;
 		}
 
 		if ((kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) && _cursorPositionSetup == 0) {
 			_scene = LOADING;
 			_cursorPositionSetup = 2;
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			delayX = 0.0;
 
 			// NOTE: this is where we need to reset the PhysX and AI (should probably display the loading screen image first before calling reset functions)
@@ -201,6 +212,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 		}
 		if ((kam->spaceKeyJustPressed || (playerControlled && player1->bButtonJustPressed))) {
 			_scene = MAIN_MENU;
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			_cursorPositionSetup = 2;
 			delayX = 0.0;
 		}
@@ -210,6 +222,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			_audioManager->changeBGM(BGMTypes::GAME_SCENE);
 			_scene = GAME;
 			accumulator = 0.0; // NOTE: maybe move this above?
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			delayX = 0.0;
 			
 		}
@@ -222,6 +235,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			else {
 				_cursorPositionPause += 1;
 			}
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			delayX = 0.2;
 		}
 		else if (kam->sKey || (playerControlled && player1->leftStickY < -0.5f)) {
@@ -231,10 +245,12 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			else {
 				_cursorPositionPause -= 1;
 			}
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			delayX = 0.2;
 		}
 		if (kam->enterKeyJustPressed || (playerControlled && player1->aButtonJustPressed)) {
 			if (_cursorPositionPause == 1) {
+				_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 				_scene = GAME;
 				_cursorPositionPause = 1;
 				_audioManager->resumeAllSFX();
@@ -244,7 +260,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 				_audioManager->changeBGM(BGMTypes::MENU_SCENE);
 				_scene = MAIN_MENU;
 				_cursorPositionPause = 1;
-
+				_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 				// NOTE: keep in this order...
 				_physicsManager->cleanupScene1();
 				_aiManager->cleanupScene1();
@@ -256,12 +272,14 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			delayX = 0.0;
 			_cursorPositionPause = 1;
 			_audioManager->resumeAllSFX();
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 		}
 		break;
 	case (GAME):  
 		if (kam->pKeyJustPressed || (playerControlled && player1->startButtonJustPressed)) {
 			_scene = PAUSED;
 			delayX = 0.0;
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 			_audioManager->pauseAllSFX();
 		}
 		break;
@@ -270,6 +288,7 @@ void Broker::manageScene(double& accumulator, double vartime) {
 			_audioManager->changeBGM(BGMTypes::MENU_SCENE);
 			_scene = MAIN_MENU;
 			delayX = 0.0;
+			_audioManager->playSFX(_audioManager->getSoundEffect(SoundEffectTypes::SELECT_SOUND));
 
 			// NOTE: keep in this order...
 			_physicsManager->cleanupScene1();

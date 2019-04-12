@@ -17,12 +17,17 @@ enum SoundEffectTypes {
 	ROLL_SOUND_PLAYER1,
 	ROLL_SOUND_AI1,
 	ROLL_SOUND_AI2,
+	ROLL_SOUND_AI3,
+	ROLL_SOUND_AI4,
+	ROLL_SOUND_AI5,
 	HITWALL_SOUND,
 	PICKITEM_SOUND,
 	DROPITEM_SOUND,
 	TURBO_SOUND,
 	EXPLOSION_SOUND,
-	TICKING_SOUND
+	TICKING_SOUND,
+	PAPERBAG_SOUND,
+	SELECT_SOUND
 };
 
 enum BGMTypes {
@@ -69,6 +74,7 @@ public:
 	void pauseAllSFX();
 	void resumeAllSFX();
 	void resetAudio();
+	void assignFreeChanel(SoundEffect *mySfx);
 	void changeVolumeSFX(SoundEffect *mySfx, int volume);
 
 	void changeDistanceSFX(SoundEffect * mySfx, float distance, float angle);
